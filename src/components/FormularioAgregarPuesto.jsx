@@ -5,7 +5,8 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
   const [nombre, setNombre] = useState('')
   const [tipoComida, setTipoComida] = useState('')
   const [descripcion, setDescripcion] = useState('')
-  const [horario, setHorario] = useState('')
+  const [horarioApertura, setHorarioApertura] = useState('')
+  const [horarioCierre, setHorarioCierre] = useState('')
   const [foto, setFoto] = useState(null)
   const [previsualizacion, setPrevisualizacion] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -83,19 +84,20 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       const { latitude, longitude } = position.coords
 
       // Insertar puesto
+      const puestoData = {
+        nombre: nombre.trim(),
+        tipo_comida: tipoComida || null,
+        descripcion: descripcion.trim() || null,
+        horario_apertura: horarioApertura || null,
+        horario_cierre: horarioCierre || null,
+        latitud: latitude,
+        longitud: longitude,
+        activo: true
+      }
+
       const { data: nuevoPuesto, error: insertError } = await supabase
         .from('puestos')
-        .insert([
-          {
-            nombre: nombre.trim(),
-            tipo_comida: tipoComida || null,
-            descripcion: descripcion.trim() || null,
-            horario: horario.trim() || null,
-            latitud: latitude,
-            longitud: longitude,
-            activo: true
-          }
-        ])
+        .insert([puestoData])
         .select()
         .single()
 
@@ -119,7 +121,8 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       setNombre('')
       setTipoComida('')
       setDescripcion('')
-      setHorario('')
+      setHorarioApertura('')
+      setHorarioCierre('')
       setFoto(null)
       setPrevisualizacion(null)
 
@@ -141,6 +144,8 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
           errorMessage = 'La tabla "puestos" no existe en Supabase. Verifica la estructura de la base de datos.'
         } else if (err.message.includes('column') && err.message.includes('does not exist')) {
           errorMessage = 'Error en la estructura de la tabla. Verifica que todas las columnas existan en Supabase.'
+        } else if (err.message.includes('schema cache') || err.message.includes('Could not find')) {
+          errorMessage = 'Error de caché del schema en Supabase. Esto puede pasar si acabas de agregar una columna. Intenta: 1) Esperar unos minutos, 2) Verificar que todas las columnas existan en Supabase, 3) Refrescar la página y volver a intentar.'
         }
         setError(`Error: ${errorMessage}`)
       } else {
@@ -211,17 +216,35 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
 
         {/* Horario */}
         <div>
-          <label htmlFor="horario" className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Horario
           </label>
-          <input
-            type="text"
-            id="horario"
-            value={horario}
-            onChange={(e) => setHorario(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            placeholder="Ej: Lun-Vie 8am-6pm"
-          />
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label htmlFor="horarioApertura" className="block text-xs text-gray-600 mb-1">
+                Apertura
+              </label>
+              <input
+                type="time"
+                id="horarioApertura"
+                value={horarioApertura}
+                onChange={(e) => setHorarioApertura(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label htmlFor="horarioCierre" className="block text-xs text-gray-600 mb-1">
+                Cierre
+              </label>
+              <input
+                type="time"
+                id="horarioCierre"
+                value={horarioCierre}
+                onChange={(e) => setHorarioCierre(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Foto */}
