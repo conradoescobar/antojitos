@@ -99,7 +99,11 @@
     @apply w-full px-4 py-3 bg-noche-800/60 border-2 border-noche-600
            rounded-xl text-crema-100 placeholder-crema-100/40
            transition-all duration-300
-           focus:outline-none focus:border-ambar-500/60 focus:shadow-glow-ambar/20 focus:bg-noche-700/60;
+           focus:outline-none focus:border-ambar-500/60 focus:bg-noche-700/60;
+  }
+
+  .input-dark:focus {
+    box-shadow: 0 0 15px rgba(255, 184, 0, 0.15);
   }
 
   /* Chip/Badge con estilo neon */
