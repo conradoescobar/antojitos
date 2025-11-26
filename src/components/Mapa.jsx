@@ -6,31 +6,66 @@ import 'leaflet/dist/leaflet.css'
 // Coordenadas por defecto (CDMX)
 const CDMX_COORDS = [19.4326, -99.1332]
 
-// Crear un ícono azul personalizado para el marcador del usuario
+// Iconos para tipos de comida
+const tipoIconos = {
+  'Tacos': '🌮',
+  'Tortas': '🥪',
+  'Quesadillas': '🧀',
+  'Tamales': '🫔',
+  'Antojitos': '🌽',
+  'Bebidas': '🥤',
+  'Postres': '🍮'
+}
+
+// Crear un ícono personalizado con efecto glow para el usuario
 const userIcon = new L.Icon({
   iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
-      <circle cx="12" cy="12" r="10" fill="#3B82F6" stroke="white" stroke-width="2"/>
-      <circle cx="12" cy="12" r="4" fill="white"/>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+      <defs>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <circle cx="20" cy="20" r="12" fill="#ADFF00" filter="url(#glow)" opacity="0.3"/>
+      <circle cx="20" cy="20" r="8" fill="#ADFF00" stroke="#0D0D0D" stroke-width="3"/>
+      <circle cx="20" cy="20" r="3" fill="#0D0D0D"/>
     </svg>
   `),
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
-  popupAnchor: [0, -16]
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+  popupAnchor: [0, -20]
 })
 
-// Crear un ícono naranja personalizado para los puestos
+// Crear un ícono ámbar con glow para los puestos
 const puestoIcon = new L.Icon({
   iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
-      <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"
-            fill="#F97316" stroke="white" stroke-width="1.5"/>
-      <circle cx="12" cy="12" r="3" fill="white"/>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" width="40" height="48">
+      <defs>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#FBBF24"/>
+          <stop offset="100%" style="stop-color:#D97706"/>
+        </linearGradient>
+      </defs>
+      <path d="M20 4 L4 12 v16 c0 8 5.5 15.5 13 17.3 L20 46 l3-0.7 c7.5-1.8 13-9.3 13-17.3 V12 L20 4z"
+            fill="url(#grad)" stroke="#0D0D0D" stroke-width="2" filter="url(#glow)"/>
+      <circle cx="20" cy="20" r="6" fill="#0D0D0D"/>
+      <circle cx="20" cy="20" r="3" fill="#FFB800"/>
     </svg>
   `),
-  iconSize: [36, 36],
-  iconAnchor: [18, 36],
-  popupAnchor: [0, -36]
+  iconSize: [40, 48],
+  iconAnchor: [20, 48],
+  popupAnchor: [0, -48]
 })
 
 // Componente para centrar el mapa cuando cambia la ubicación
@@ -51,7 +86,6 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
   const [permissionDenied, setPermissionDenied] = useState(false)
 
   useEffect(() => {
-    // Pedir permiso de geolocalización
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -79,11 +113,19 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
 
   return (
     <div className="relative w-full h-full">
+      {/* Alerta de ubicación denegada con nuevo estilo */}
       {permissionDenied && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 rounded-lg shadow-lg">
-          <p className="text-sm">
-            No se pudo obtener tu ubicación. Mostrando Ciudad de México por defecto.
-          </p>
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] max-w-sm w-[90%]">
+          <div className="flex items-center gap-3 px-4 py-3 bg-ambar-500/20 backdrop-blur-md border border-ambar-500/40 rounded-xl shadow-lg animate-slide-down">
+            <div className="w-8 h-8 bg-ambar-500/30 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 text-ambar-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              </svg>
+            </div>
+            <p className="text-sm text-ambar-200">
+              Mostrando <span className="font-semibold">CDMX</span> por defecto
+            </p>
+          </div>
         </div>
       )}
 
@@ -96,16 +138,17 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
         <MapUpdater center={mapCenter} />
 
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        {/* Marcador del usuario */}
         {userLocation && (
           <Marker position={userLocation} icon={userIcon}>
             <Popup>
-              <div className="text-center">
-                <p className="font-semibold">Tu ubicación</p>
-                <p className="text-sm text-gray-600">
+              <div className="text-center p-2">
+                <p className="font-display font-bold text-crema-50 text-base">Tu ubicación</p>
+                <p className="text-xs text-crema-100/60 mt-1 font-mono">
                   {userLocation[0].toFixed(4)}, {userLocation[1].toFixed(4)}
                 </p>
               </div>
@@ -113,6 +156,7 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
           </Marker>
         )}
 
+        {/* Marcadores de puestos */}
         {puestos.map((puesto) => {
           if (puesto.latitud && puesto.longitud) {
             return (
@@ -122,24 +166,36 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
                 icon={puestoIcon}
               >
                 <Popup>
-                  <div className="min-w-[150px]">
-                    <h3 className="font-bold text-orange-600 mb-1">
-                      {puesto.nombre}
-                    </h3>
-                    {puesto.tipo_comida && (
-                      <p className="text-sm text-gray-600 mb-1">
-                        {puesto.tipo_comida}
-                      </p>
-                    )}
+                  <div className="min-w-[180px] p-1">
+                    {/* Header con icono */}
+                    <div className="flex items-start gap-2 mb-2">
+                      <span className="text-2xl">
+                        {tipoIconos[puesto.tipo_comida] || '🍽️'}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-display font-bold text-crema-50 text-base leading-tight">
+                          {puesto.nombre}
+                        </h3>
+                        {puesto.tipo_comida && (
+                          <span className="inline-block mt-1 px-2 py-0.5 bg-ambar-500/20 text-ambar-400 text-xs font-medium rounded-full">
+                            {puesto.tipo_comida}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Descripción */}
                     {puesto.descripcion && (
-                      <p className="text-xs text-gray-500 mt-2 mb-2">
+                      <p className="text-xs text-crema-100/60 mb-3 line-clamp-2 leading-relaxed">
                         {puesto.descripcion}
                       </p>
                     )}
+
+                    {/* Botón de ver detalles */}
                     {onPuestoClick && (
                       <button
                         onClick={() => onPuestoClick(puesto)}
-                        className="w-full bg-orange-500 text-white text-sm px-3 py-1 rounded hover:bg-orange-600 transition-colors mt-2"
+                        className="w-full bg-gradient-to-r from-ambar-500 to-ambar-600 text-noche-900 text-sm font-semibold px-4 py-2 rounded-lg hover:shadow-glow-ambar transition-all active:scale-95"
                       >
                         Ver detalles
                       </button>
@@ -152,6 +208,18 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
           return null
         })}
       </MapContainer>
+
+      {/* Indicador de cantidad de puestos */}
+      {puestos.length > 0 && (
+        <div className="absolute bottom-4 left-4 z-[1000]">
+          <div className="flex items-center gap-2 px-3 py-2 bg-noche-800/90 backdrop-blur-md border border-noche-600/50 rounded-xl shadow-lg">
+            <div className="w-2 h-2 bg-ambar-400 rounded-full animate-pulse" />
+            <span className="text-sm text-crema-100 font-medium">
+              <span className="text-ambar-400 font-bold">{puestos.length}</span> puestos cerca
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

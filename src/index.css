@@ -7,27 +7,182 @@
     @apply antialiased;
   }
 
+  html {
+    @apply scroll-smooth;
+  }
+
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-noche-950 text-crema-100 font-body;
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Mejorar scrollbars en webkit */
+  /* Tipografía base */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold tracking-tight;
+  }
+
+  /* Selección de texto con colores de marca */
+  ::selection {
+    @apply bg-ambar-500/30 text-crema-50;
+  }
+
+  /* Scrollbar personalizado estilo neon */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-transparent;
+    @apply bg-noche-900;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 rounded-full;
+    @apply bg-ambar-500/40 rounded-full;
+    border: 2px solid transparent;
+    background-clip: padding-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400;
+    @apply bg-ambar-500/60;
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 184, 0, 0.4) #0D0D0D;
+  }
+}
+
+@layer components {
+  /* Tarjeta base con efecto glassmorphism oscuro */
+  .card-dark {
+    @apply bg-noche-800/80 backdrop-blur-xl border border-noche-600/50 rounded-2xl;
+  }
+
+  .card-dark-hover {
+    @apply card-dark transition-all duration-300;
+  }
+
+  .card-dark-hover:hover {
+    @apply bg-noche-700/80 border-ambar-500/30 shadow-card-hover;
+    transform: translateY(-2px);
+  }
+
+  /* Botón primario con glow */
+  .btn-primary {
+    @apply relative overflow-hidden px-6 py-3 font-display font-semibold text-noche-900
+           bg-gradient-to-r from-ambar-400 via-ambar-500 to-ambar-400
+           rounded-xl transition-all duration-300
+           hover:shadow-glow-ambar active:scale-95;
+    background-size: 200% 100%;
+  }
+
+  .btn-primary:hover {
+    background-position: 100% 0;
+  }
+
+  .btn-primary:disabled {
+    @apply opacity-50 cursor-not-allowed shadow-none;
+  }
+
+  /* Botón secundario outline */
+  .btn-secondary {
+    @apply px-6 py-3 font-display font-semibold text-crema-100
+           border-2 border-noche-500 rounded-xl
+           transition-all duration-300
+           hover:border-ambar-500/50 hover:text-ambar-400
+           active:scale-95;
+  }
+
+  /* Input oscuro con glow en focus */
+  .input-dark {
+    @apply w-full px-4 py-3 bg-noche-800/60 border-2 border-noche-600
+           rounded-xl text-crema-100 placeholder-crema-100/40
+           transition-all duration-300
+           focus:outline-none focus:border-ambar-500/60 focus:shadow-glow-ambar/20 focus:bg-noche-700/60;
+  }
+
+  /* Chip/Badge con estilo neon */
+  .chip {
+    @apply px-3 py-1.5 text-sm font-semibold rounded-full
+           transition-all duration-300;
+  }
+
+  .chip-active {
+    @apply bg-ambar-500 text-noche-900 shadow-glow-ambar;
+  }
+
+  .chip-inactive {
+    @apply bg-noche-700/60 text-crema-100/70 border border-noche-500
+           hover:border-ambar-500/40 hover:text-crema-100;
+  }
+
+  /* Tab button estilo */
+  .tab-btn {
+    @apply flex-1 py-4 text-center font-display font-semibold
+           transition-all duration-300 relative;
+  }
+
+  .tab-btn::after {
+    content: '';
+    @apply absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5
+           bg-ambar-500 transition-all duration-300;
+  }
+
+  .tab-btn-active {
+    @apply text-ambar-400;
+  }
+
+  .tab-btn-active::after {
+    @apply w-12;
+    box-shadow: 0 0 10px rgba(255, 184, 0, 0.6);
+  }
+
+  .tab-btn-inactive {
+    @apply text-crema-100/50 hover:text-crema-100/80;
+  }
+
+  /* Efecto de texto con gradiente */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-ambar-400 via-ambar-300 to-lima-400;
+  }
+
+  .text-gradient-rosa {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-rosa-400 to-ambar-400;
+  }
+
+  /* Overlay de ruido sutil */
+  .noise-overlay {
+    @apply pointer-events-none fixed inset-0 z-50 opacity-[0.015];
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+
+  /* Efecto de brillo ambiental */
+  .ambient-glow {
+    @apply absolute -z-10 blur-3xl opacity-20 pointer-events-none;
+  }
+
+  /* Badge de distancia */
+  .distance-badge {
+    @apply inline-flex items-center gap-1.5 px-2 py-1
+           bg-lima-500/20 text-lima-400 text-xs font-semibold
+           rounded-full border border-lima-500/30;
+  }
+
+  /* Badge de tipo de comida */
+  .type-badge {
+    @apply inline-flex items-center px-3 py-1
+           bg-ambar-500/20 text-ambar-400 text-sm font-semibold
+           rounded-full border border-ambar-500/30;
+  }
+
+  /* Estrellas con estilo */
+  .star-filled {
+    @apply text-ambar-400 drop-shadow-[0_0_3px_rgba(255,184,0,0.5)];
+  }
+
+  .star-empty {
+    @apply text-noche-500;
   }
 }
 
@@ -42,62 +197,10 @@
     display: none;
   }
 
-  /* Animaciones personalizadas */
-  @keyframes slide-up {
-    from {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes scale-in {
-    from {
-      transform: scale(0.95);
-      opacity: 0;
-    }
-    to {
-      transform: scale(1);
-      opacity: 1;
-    }
-  }
-
-  .animate-slide-up {
-    animation: slide-up 0.3s ease-out;
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.2s ease-out;
-  }
-
-  .animate-scale-in {
-    animation: scale-in 0.2s ease-out;
-  }
-
-  /* Escala activa para botones */
-  .active\:scale-98:active {
-    transform: scale(0.98);
-  }
-
-  .active\:scale-95:active {
-    transform: scale(0.95);
-  }
-
-  /* Sombras personalizadas */
-  .shadow-3xl {
-    box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
+  /* Touch-friendly tap targets */
+  .tap-target {
+    min-height: 44px;
+    min-width: 44px;
   }
 
   /* Line clamp utilities */
@@ -115,22 +218,110 @@
     overflow: hidden;
   }
 
-  /* Touch-friendly tap targets */
-  .tap-target {
-    min-height: 44px;
-    min-width: 44px;
+  /* Sombras personalizadas extra */
+  .shadow-3xl {
+    box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Efecto de vidrio sutil */
+  .glass {
+    @apply bg-white/5 backdrop-blur-md;
+  }
+
+  .glass-dark {
+    @apply bg-noche-900/60 backdrop-blur-xl;
+  }
+
+  /* Borde con glow */
+  .border-glow {
+    box-shadow: inset 0 0 0 1px rgba(255, 184, 0, 0.2);
+  }
+
+  /* Animación de pulso suave para elementos importantes */
+  .pulse-soft {
+    animation: pulse-soft 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  /* Efecto de aparición escalonada para listas */
+  .stagger-item {
+    animation: stagger-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes stagger-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Active states para móvil */
+  .active\:scale-98:active {
+    transform: scale(0.98);
+  }
+
+  .active\:scale-95:active {
+    transform: scale(0.95);
   }
 }
 
-/* Estilos para Leaflet */
+/* Estilos para Leaflet - tema oscuro */
 .leaflet-container {
-  font-family: inherit;
+  @apply font-body bg-noche-900;
 }
 
 .leaflet-popup-content-wrapper {
-  @apply rounded-xl shadow-lg;
+  @apply bg-noche-800 border border-noche-600 rounded-xl shadow-card;
 }
 
 .leaflet-popup-content {
-  @apply font-sans;
+  @apply font-body text-crema-100 m-0;
+}
+
+.leaflet-popup-tip {
+  @apply bg-noche-800;
+}
+
+.leaflet-popup-close-button {
+  @apply text-crema-100/60 hover:text-crema-100;
+}
+
+/* Control de zoom con tema oscuro */
+.leaflet-control-zoom {
+  @apply border-none overflow-hidden;
+}
+
+.leaflet-control-zoom a {
+  @apply bg-noche-800 text-crema-100 border-noche-600
+         hover:bg-noche-700 hover:text-ambar-400 transition-colors;
+}
+
+.leaflet-control-zoom-in {
+  @apply rounded-t-lg;
+}
+
+.leaflet-control-zoom-out {
+  @apply rounded-b-lg border-t border-noche-600;
+}
+
+/* Atribución de mapa más sutil */
+.leaflet-control-attribution {
+  @apply bg-noche-900/80 text-crema-100/40 text-xs;
+}
+
+.leaflet-control-attribution a {
+  @apply text-ambar-500/60 hover:text-ambar-400;
+}
+
+/* Filtro oscuro sutil para el mapa */
+.leaflet-tile-pane {
+  filter: brightness(0.7) saturate(0.8) contrast(1.1);
 }

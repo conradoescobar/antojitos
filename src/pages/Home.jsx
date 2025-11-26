@@ -11,7 +11,7 @@ export default function Home() {
   const [mapCenter, setMapCenter] = useState(null)
   const [filtroTipo, setFiltroTipo] = useState('Todos')
   const [busqueda, setBusqueda] = useState('')
-  const [vistaActiva, setVistaActiva] = useState('mapa') // 'mapa' o 'lista'
+  const [vistaActiva, setVistaActiva] = useState('mapa')
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
 
   const handlePuestoClick = (puesto) => {
@@ -23,7 +23,7 @@ export default function Home() {
     setMostrarFormulario(false)
   }
 
-  // Filtrar puestos para el mapa (por tipo y búsqueda)
+  // Filtrar puestos para el mapa
   let puestosFiltrados = puestos
 
   if (filtroTipo !== 'Todos') {
@@ -40,32 +40,51 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Header Superior */}
-      <header className="bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg z-20">
-        <div className="px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <span className="text-2xl">🌮</span>
+    <div className="h-screen flex flex-col bg-noche-950 relative overflow-hidden">
+      {/* Efectos de luz ambiental */}
+      <div className="ambient-glow w-96 h-96 bg-ambar-500 -top-48 -left-48 rounded-full" />
+      <div className="ambient-glow w-64 h-64 bg-rosa-500 -bottom-32 -right-32 rounded-full" />
+
+      {/* Header con glassmorphism */}
+      <header className="relative z-20">
+        {/* Top bar */}
+        <div className="glass-dark border-b border-noche-700/50">
+          <div className="px-5 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {/* Logo con efecto */}
+                <div className="relative">
+                  <div className="w-12 h-12 bg-gradient-to-br from-ambar-400 to-ambar-600 rounded-xl flex items-center justify-center shadow-glow-ambar">
+                    <span className="text-2xl">🌮</span>
+                  </div>
+                  <div className="absolute -inset-1 bg-ambar-500/20 rounded-xl blur-md -z-10" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-display font-bold text-crema-50">
+                    Antojitos<span className="text-gradient"> Cerca</span>
+                  </h1>
+                  <p className="text-xs text-crema-100/50 font-medium tracking-wide">
+                    Comida callejera a tu alcance
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-xl font-bold">Antojitos Cerca</h1>
-                <p className="text-xs text-orange-100">Encuentra los mejores puestos</p>
-              </div>
+
+              {/* Indicador de ubicación */}
+              {userLocation && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-lima-500/10 border border-lima-500/30 rounded-full">
+                  <div className="w-2 h-2 bg-lima-400 rounded-full animate-pulse" />
+                  <span className="text-xs text-lima-400 font-medium">GPS activo</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Tabs de navegación */}
-        <div className="flex border-t border-orange-400">
+        <div className="glass-dark flex border-b border-noche-700/50">
           <button
             onClick={() => setVistaActiva('mapa')}
-            className={`flex-1 py-3 text-center font-medium transition-all ${
-              vistaActiva === 'mapa'
-                ? 'bg-white text-orange-600 shadow-inner'
-                : 'text-white hover:bg-orange-400'
-            }`}
+            className={`tab-btn ${vistaActiva === 'mapa' ? 'tab-btn-active' : 'tab-btn-inactive'}`}
           >
             <div className="flex items-center justify-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,11 +95,7 @@ export default function Home() {
           </button>
           <button
             onClick={() => setVistaActiva('lista')}
-            className={`flex-1 py-3 text-center font-medium transition-all ${
-              vistaActiva === 'lista'
-                ? 'bg-white text-orange-600 shadow-inner'
-                : 'text-white hover:bg-orange-400'
-            }`}
+            className={`tab-btn ${vistaActiva === 'lista' ? 'tab-btn-active' : 'tab-btn-inactive'}`}
           >
             <div className="flex items-center justify-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,7 +110,11 @@ export default function Home() {
       {/* Contenido Principal */}
       <div className="flex-1 overflow-hidden relative">
         {/* Vista de Mapa */}
-        <div className={`absolute inset-0 transition-opacity duration-300 ${vistaActiva === 'mapa' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+        <div className={`absolute inset-0 transition-all duration-500 ${
+          vistaActiva === 'mapa'
+            ? 'opacity-100 z-10 translate-x-0'
+            : 'opacity-0 z-0 pointer-events-none -translate-x-4'
+        }`}>
           <Mapa
             userLocation={userLocation}
             onUserLocationChange={setUserLocation}
@@ -106,7 +125,11 @@ export default function Home() {
         </div>
 
         {/* Vista de Lista */}
-        <div className={`absolute inset-0 transition-opacity duration-300 ${vistaActiva === 'lista' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+        <div className={`absolute inset-0 transition-all duration-500 ${
+          vistaActiva === 'lista'
+            ? 'opacity-100 z-10 translate-x-0'
+            : 'opacity-0 z-0 pointer-events-none translate-x-4'
+        }`}>
           <ListaPuestos
             userLocation={userLocation}
             onPuestoClick={handlePuestoClick}
@@ -120,33 +143,52 @@ export default function Home() {
         </div>
       </div>
 
-      {/* FAB - Botón flotante para agregar */}
+      {/* FAB - Botón flotante con efecto glow */}
       <button
         onClick={() => setMostrarFormulario(true)}
-        className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-full shadow-2xl hover:shadow-3xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center z-30"
+        className="fixed bottom-6 right-6 group z-30"
         aria-label="Agregar puesto"
       >
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-        </svg>
+        {/* Glow effect */}
+        <div className="absolute inset-0 bg-ambar-500 rounded-full blur-xl opacity-40 group-hover:opacity-60 transition-opacity" />
+
+        {/* Button */}
+        <div className="relative w-16 h-16 bg-gradient-to-br from-ambar-400 to-ambar-600 rounded-full shadow-glow-ambar flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-active:scale-95">
+          <svg className="w-7 h-7 text-noche-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+          </svg>
+        </div>
       </button>
 
       {/* Modal de Formulario */}
       {mostrarFormulario && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-end sm:items-center justify-center">
-          <div className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto animate-slide-up">
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between rounded-t-3xl sm:rounded-t-2xl">
-              <h2 className="text-xl font-bold text-gray-900">Agregar Puesto</h2>
+        <div
+          className="fixed inset-0 z-40 flex items-end sm:items-center justify-center animate-fade-in"
+          onClick={(e) => e.target === e.currentTarget && setMostrarFormulario(false)}
+        >
+          {/* Overlay con blur */}
+          <div className="absolute inset-0 bg-noche-950/80 backdrop-blur-sm" />
+
+          {/* Modal content */}
+          <div className="relative w-full max-w-lg bg-noche-800 border border-noche-600/50 rounded-t-3xl sm:rounded-2xl shadow-3xl max-h-[90vh] overflow-hidden animate-slide-up">
+            {/* Header del modal */}
+            <div className="sticky top-0 glass-dark border-b border-noche-600/50 px-6 py-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-display font-bold text-crema-50">Agregar Puesto</h2>
+                <p className="text-sm text-crema-100/50">Comparte un nuevo antojito</p>
+              </div>
               <button
                 onClick={() => setMostrarFormulario(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-noche-600/50 transition-colors text-crema-100/60 hover:text-crema-100"
               >
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="p-6">
+
+            {/* Formulario */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
               <FormularioAgregarPuesto
                 onPuestoAgregado={handlePuestoAgregado}
                 onCancelar={() => setMostrarFormulario(false)}
@@ -155,6 +197,9 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Noise overlay sutil */}
+      <div className="noise-overlay" />
     </div>
   )
 }
