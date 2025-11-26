@@ -111,118 +111,124 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
   }
 
   return (
-    <div className="h-full bg-white overflow-y-auto">
-      <div className="sticky top-0 bg-white shadow-md z-10">
-        {/* Header */}
-        <div className="bg-orange-500 text-white px-4 py-3">
-          <h2 className="text-lg font-bold">Puestos Cercanos</h2>
-          <p className="text-sm opacity-90">
-            {puestosConDistancia.length} {puestosConDistancia.length === 1 ? 'puesto' : 'puestos'}
-            {filtroTipo !== 'Todos' && ` de ${filtroTipo}`}
-          </p>
-        </div>
-
-        {/* Barra de búsqueda */}
-        <div className="px-4 pt-3 pb-2">
-          <div className="relative">
-            <input
-              type="text"
-              value={busqueda || ''}
-              onChange={(e) => onBusquedaChange && onBusquedaChange(e.target.value)}
-              placeholder="Buscar por nombre..."
-              className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            />
-            <svg
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+    <div className="h-full bg-gray-50 overflow-y-auto">
+      {/* Barra de búsqueda flotante */}
+      <div className="sticky top-0 bg-gradient-to-b from-gray-50 to-transparent z-10 px-4 pt-4 pb-2">
+        <div className="relative">
+          <input
+            type="text"
+            value={busqueda || ''}
+            onChange={(e) => onBusquedaChange && onBusquedaChange(e.target.value)}
+            placeholder="Buscar puestos..."
+            className="w-full px-4 py-3 pl-12 pr-12 bg-white border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all shadow-sm"
+          />
+          <svg
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          {busqueda && (
+            <button
+              onClick={() => onBusquedaChange && onBusquedaChange('')}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            {busqueda && (
-              <button
-                onClick={() => onBusquedaChange && onBusquedaChange('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Chips de filtro */}
-        <div className="px-4 pb-3 overflow-x-auto">
-          <div className="flex gap-2">
-            {tiposDisponibles.map((tipo) => (
-              <button
-                key={tipo}
-                onClick={() => onFiltroChange && onFiltroChange(tipo)}
-                className={`px-4 py-2 rounded-full font-medium text-sm whitespace-nowrap transition-colors ${
-                  filtroTipo === tipo
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {tipo}
-              </button>
-            ))}
-          </div>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="divide-y divide-gray-200">
+      {/* Chips de filtro */}
+      <div className="px-4 pb-3 sticky top-[72px] bg-gray-50 z-10">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {tiposDisponibles.map((tipo) => (
+            <button
+              key={tipo}
+              onClick={() => onFiltroChange && onFiltroChange(tipo)}
+              className={`px-4 py-2 rounded-full font-semibold text-sm whitespace-nowrap transition-all duration-200 ${
+                filtroTipo === tipo
+                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md scale-105'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              {tipo}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Contador de resultados */}
+      <div className="px-4 pb-3">
+        <p className="text-sm text-gray-600 font-medium">
+          {puestosConDistancia.length} {puestosConDistancia.length === 1 ? 'puesto encontrado' : 'puestos encontrados'}
+          {filtroTipo !== 'Todos' && ` · ${filtroTipo}`}
+        </p>
+      </div>
+
+      {/* Tarjetas de puestos */}
+      <div className="px-4 pb-4 space-y-3">
         {puestosConDistancia.map((puesto) => (
           <div
             key={puesto.id}
             onClick={() => onPuestoClick(puesto)}
-            className="p-4 hover:bg-orange-50 cursor-pointer transition-colors duration-150"
+            className="bg-white rounded-2xl shadow-sm hover:shadow-xl active:scale-98 cursor-pointer transition-all duration-200 overflow-hidden border border-gray-100"
           >
-            <div className="flex gap-3">
+            <div className="flex gap-4 p-4">
               {/* Miniatura de foto */}
-              {puesto.foto_url ? (
-                <img
-                  src={puesto.foto_url}
-                  alt={puesto.nombre}
-                  className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                />
-              ) : (
-                <div className="w-20 h-20 bg-gray-200 rounded-lg flex-shrink-0 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-              )}
+              <div className="flex-shrink-0">
+                {puesto.foto_url ? (
+                  <img
+                    src={puesto.foto_url}
+                    alt={puesto.nombre}
+                    className="w-24 h-24 object-cover rounded-xl"
+                  />
+                ) : (
+                  <div className="w-24 h-24 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center">
+                    <svg className="w-10 h-10 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                )}
+              </div>
 
+              {/* Información */}
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-gray-900 mb-1 truncate">
+                <h3 className="font-bold text-gray-900 mb-1 text-lg truncate">
                   {puesto.nombre}
                 </h3>
-                <p className="text-sm text-gray-600 mb-1">
-                  {puesto.tipo_comida || 'Comida variada'}
-                </p>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
+                    {puesto.tipo_comida || 'Comida'}
+                  </span>
+                  {puesto.distancia !== null && (
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-600">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {puesto.distancia < 1
+                        ? `${(puesto.distancia * 1000).toFixed(0)}m`
+                        : `${puesto.distancia.toFixed(1)}km`}
+                    </span>
+                  )}
+                </div>
                 {puesto.descripcion && (
-                  <p className="text-xs text-gray-500 line-clamp-2">
+                  <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
                     {puesto.descripcion}
                   </p>
                 )}
               </div>
 
-              <div className="flex-shrink-0 text-right">
-                {puesto.distancia !== null ? (
-                  <>
-                    <div className="text-lg font-bold text-orange-600">
-                      {puesto.distancia < 1
-                        ? `${(puesto.distancia * 1000).toFixed(0)}m`
-                        : `${puesto.distancia.toFixed(1)}km`}
-                    </div>
-                    <div className="text-xs text-gray-500">distancia</div>
-                  </>
-                ) : (
-                  <div className="text-sm text-gray-400">-</div>
-                )}
+              {/* Flecha indicadora */}
+              <div className="flex-shrink-0 flex items-center">
+                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </div>
             </div>
           </div>
