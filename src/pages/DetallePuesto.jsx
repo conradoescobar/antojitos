@@ -76,6 +76,30 @@ export default function DetallePuesto() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [mostrarModalReporte, setMostrarModalReporte] = useState(false)
+  const [isGuardado, setIsGuardado] = useState(false)
+
+  // Verificar si el puesto está guardado
+  useEffect(() => {
+    const saved = localStorage.getItem('antojitos_guardados')
+    if (saved) {
+      const guardados = JSON.parse(saved)
+      setIsGuardado(guardados.includes(id))
+    }
+  }, [id])
+
+  const toggleGuardado = () => {
+    const saved = localStorage.getItem('antojitos_guardados')
+    let guardados = saved ? JSON.parse(saved) : []
+
+    if (isGuardado) {
+      guardados = guardados.filter(gid => gid !== id)
+    } else {
+      guardados.push(id)
+    }
+
+    localStorage.setItem('antojitos_guardados', JSON.stringify(guardados))
+    setIsGuardado(!isGuardado)
+  }
 
   const fetchResenas = async () => {
     try {
@@ -163,8 +187,8 @@ export default function DetallePuesto() {
       <div className="ambient-glow w-96 h-96 bg-ambar-500 -top-48 -right-48 rounded-full" />
 
       {/* Header flotante con glassmorphism */}
-      <div className="sticky top-0 z-50 glass-dark border-b border-noche-700/50">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
+      <div className="sticky top-0 z-50 glass-dark border-b border-noche-700/50 safe-area-top">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
           <button
             onClick={() => navigate('/')}
             className="w-10 h-10 flex items-center justify-center rounded-full bg-noche-700/50 hover:bg-noche-600/50 transition-colors text-crema-100 active:scale-95"
@@ -176,6 +200,23 @@ export default function DetallePuesto() {
           <h1 className="text-lg font-display font-bold text-crema-50 truncate flex-1">
             {puesto.nombre}
           </h1>
+          <button
+            onClick={toggleGuardado}
+            className={`w-10 h-10 flex items-center justify-center rounded-full transition-all active:scale-95 ${
+              isGuardado
+                ? 'bg-ambar-500/20 text-ambar-400'
+                : 'bg-noche-700/50 hover:bg-noche-600/50 text-crema-100/60 hover:text-crema-100'
+            }`}
+          >
+            <svg
+              className="w-5 h-5"
+              fill={isGuardado ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+          </button>
           <span className="text-2xl">{tipoIconos[puesto.tipo_comida] || '🍽️'}</span>
         </div>
       </div>
