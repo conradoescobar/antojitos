@@ -59,6 +59,14 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       return
     }
 
+    // Verificar variables de entorno
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+    if (!supabaseUrl || !supabaseAnonKey) {
+      setError('Error de configuración: Las variables de entorno de Supabase no están configuradas. Verifica la configuración en Vercel.')
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
@@ -122,10 +130,21 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       console.error('Error agregando puesto:', err)
       if (err.code === 1) {
         setError('No se pudo obtener tu ubicación. Por favor permite el acceso a tu ubicación.')
-      } else if (err.message.includes('fotos-puestos')) {
+      } else if (err.message && err.message.includes('fotos-puestos')) {
         setError('Error subiendo la foto. Asegúrate de que el bucket "fotos-puestos" esté configurado en Supabase.')
+      } else if (err.message) {
+        // Mostrar el mensaje de error específico de Supabase
+        let errorMessage = err.message
+        if (err.message.includes('permission denied') || err.message.includes('new row violates row-level security')) {
+          errorMessage = 'Error de permisos. Verifica las políticas RLS en Supabase para la tabla "puestos".'
+        } else if (err.message.includes('relation') && err.message.includes('does not exist')) {
+          errorMessage = 'La tabla "puestos" no existe en Supabase. Verifica la estructura de la base de datos.'
+        } else if (err.message.includes('column') && err.message.includes('does not exist')) {
+          errorMessage = 'Error en la estructura de la tabla. Verifica que todas las columnas existan en Supabase.'
+        }
+        setError(`Error: ${errorMessage}`)
       } else {
-        setError('Error al agregar el puesto. Intenta de nuevo.')
+        setError('Error al agregar el puesto. Intenta de nuevo. Revisa la consola para más detalles.')
       }
     } finally {
       setLoading(false)
