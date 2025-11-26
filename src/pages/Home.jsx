@@ -8,11 +8,17 @@ export default function Home() {
   const [userLocation, setUserLocation] = useState(null)
   const [puestos, setPuestos] = useState([])
   const [mapCenter, setMapCenter] = useState(null)
+  const [filtroTipo, setFiltroTipo] = useState('Todos')
 
   const handlePuestoClick = (puesto) => {
     // Navegar a la página de detalle
     navigate(`/puesto/${puesto.id}`)
   }
+
+  // Filtrar puestos para el mapa
+  const puestosFiltrados = filtroTipo === 'Todos'
+    ? puestos
+    : puestos.filter(p => p.tipo_comida === filtroTipo)
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -21,7 +27,7 @@ export default function Home() {
         <Mapa
           userLocation={userLocation}
           onUserLocationChange={setUserLocation}
-          puestos={puestos}
+          puestos={puestosFiltrados}
           mapCenter={mapCenter}
           onPuestoClick={handlePuestoClick}
         />
@@ -34,6 +40,8 @@ export default function Home() {
           onPuestoClick={handlePuestoClick}
           puestos={puestos}
           setPuestos={setPuestos}
+          filtroTipo={filtroTipo}
+          onFiltroChange={setFiltroTipo}
         />
       </div>
     </div>

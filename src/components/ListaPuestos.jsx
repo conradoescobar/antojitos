@@ -15,9 +15,11 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
   return distancia
 }
 
-export default function ListaPuestos({ userLocation, onPuestoClick, puestos, setPuestos }) {
+export default function ListaPuestos({ userLocation, onPuestoClick, puestos, setPuestos, filtroTipo, onFiltroChange }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  const tiposDisponibles = ['Todos', 'Tacos', 'Tortas', 'Quesadillas', 'Tamales', 'Antojitos', 'Bebidas', 'Postres']
 
   useEffect(() => {
     async function fetchPuestos() {
@@ -42,8 +44,13 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
     fetchPuestos()
   }, [setPuestos])
 
+  // Filtrar por tipo si no es "Todos"
+  const puestosFiltrados = filtroTipo === 'Todos'
+    ? puestos
+    : puestos.filter(p => p.tipo_comida === filtroTipo)
+
   // Calcular distancias y ordenar por cercanía
-  const puestosConDistancia = puestos.map(puesto => {
+  const puestosConDistancia = puestosFiltrados.map(puesto => {
     if (userLocation && puesto.latitud && puesto.longitud) {
       const distancia = calcularDistancia(
         userLocation[0],
@@ -92,9 +99,34 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
 
   return (
     <div className="h-full bg-white overflow-y-auto">
-      <div className="sticky top-0 bg-orange-500 text-white px-4 py-3 shadow-md z-10">
-        <h2 className="text-lg font-bold">Puestos Cercanos</h2>
-        <p className="text-sm opacity-90">{puestos.length} puestos disponibles</p>
+      <div className="sticky top-0 bg-white shadow-md z-10">
+        {/* Header */}
+        <div className="bg-orange-500 text-white px-4 py-3">
+          <h2 className="text-lg font-bold">Puestos Cercanos</h2>
+          <p className="text-sm opacity-90">
+            {puestosConDistancia.length} {puestosConDistancia.length === 1 ? 'puesto' : 'puestos'}
+            {filtroTipo !== 'Todos' && ` de ${filtroTipo}`}
+          </p>
+        </div>
+
+        {/* Chips de filtro */}
+        <div className="px-4 py-3 overflow-x-auto">
+          <div className="flex gap-2">
+            {tiposDisponibles.map((tipo) => (
+              <button
+                key={tipo}
+                onClick={() => onFiltroChange && onFiltroChange(tipo)}
+                className={`px-4 py-2 rounded-full font-medium text-sm whitespace-nowrap transition-colors ${
+                  filtroTipo === tipo
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {tipo}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="divide-y divide-gray-200">
