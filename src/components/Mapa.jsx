@@ -46,7 +46,7 @@ function MapUpdater({ center }) {
   return null
 }
 
-export default function Mapa({ userLocation, onUserLocationChange, puestos, mapCenter }) {
+export default function Mapa({ userLocation, onUserLocationChange, puestos, mapCenter, onPuestoClick }) {
   const [initialCenter, setInitialCenter] = useState(CDMX_COORDS)
   const [permissionDenied, setPermissionDenied] = useState(false)
 
@@ -132,9 +132,17 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
                       </p>
                     )}
                     {puesto.descripcion && (
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-gray-500 mt-2 mb-2">
                         {puesto.descripcion}
                       </p>
+                    )}
+                    {onPuestoClick && (
+                      <button
+                        onClick={() => onPuestoClick(puesto)}
+                        className="w-full bg-orange-500 text-white text-sm px-3 py-1 rounded hover:bg-orange-600 transition-colors mt-2"
+                      >
+                        Ver detalles
+                      </button>
                     )}
                   </div>
                 </Popup>
