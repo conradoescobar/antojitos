@@ -8,34 +8,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
     <!-- PWA y tema -->
-    <meta name="theme-color" content="#0A0A0A" />
+    <meta name="theme-color" content="#FFFFFF" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Antojitos" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="format-detection" content="telephone=no" />
 
     <meta name="description" content="Encuentra los mejores puestos de antojitos cerca de ti. Tacos, tortas, quesadillas y más comida callejera mexicana." />
 
-    <!-- Fuentes distintivas de Google Fonts -->
+    <!-- Inter Font - Tipografía moderna -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <title>Antojitos</title>
 
     <style>
-      /* Prevenir FOUC y configurar app fullscreen */
+      /* Prevenir FOUC */
       html, body, #root {
         height: 100%;
         margin: 0;
         padding: 0;
         overflow: hidden;
-        background-color: #0A0A0A;
+        background-color: #FAFAFA;
         overscroll-behavior: none;
       }
 
-      /* Safe areas para notch y home indicator */
+      /* Safe areas para notch */
       :root {
         --sat: env(safe-area-inset-top);
         --sar: env(safe-area-inset-right);
@@ -43,9 +43,11 @@
         --sal: env(safe-area-inset-left);
       }
 
-      /* Deshabilitar pull-to-refresh */
       body {
         overscroll-behavior-y: contain;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
     </style>
   </head>

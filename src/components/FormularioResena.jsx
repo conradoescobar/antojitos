@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { Card, Button } from './ui'
 
 function EstrellaClickeable({ filled, onHover, onClick }) {
   return (
@@ -7,13 +8,13 @@ function EstrellaClickeable({ filled, onHover, onClick }) {
       type="button"
       onMouseEnter={onHover}
       onClick={onClick}
-      className="focus:outline-none transition-all duration-200 hover:scale-125 active:scale-110"
+      className="focus:outline-none transition-all duration-200 hover:scale-110 active:scale-95"
     >
       <svg
-        className={`w-9 h-9 transition-all duration-200 ${
+        className={`w-8 h-8 transition-all duration-200 ${
           filled
-            ? 'text-ambar-400 drop-shadow-[0_0_8px_rgba(255,184,0,0.6)]'
-            : 'text-noche-500 hover:text-noche-400'
+            ? 'star-filled'
+            : 'text-gray-300 hover:text-gray-400'
         }`}
         fill={filled ? 'currentColor' : 'none'}
         stroke="currentColor"
@@ -76,20 +77,18 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
   }
 
   const displayEstrellas = hoverEstrellas || estrellas
-
-  // Labels para las estrellas
   const starLabels = ['', 'Malo', 'Regular', 'Bueno', 'Muy bueno', 'Excelente']
 
   return (
-    <div className="card-dark p-5">
-      <h3 className="font-display font-bold text-crema-50 text-lg mb-4">
+    <Card>
+      <h3 className="font-semibold text-gray-900 mb-4">
         Deja tu reseña
       </h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Selector de estrellas */}
         <div>
-          <label className="block text-sm font-medium text-crema-100/70 mb-3">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
             Calificación
           </label>
           <div className="flex flex-col items-center">
@@ -106,9 +105,8 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
                 />
               ))}
             </div>
-            {/* Label de la calificación */}
             <p className={`text-sm font-medium mt-2 h-5 transition-all duration-200 ${
-              displayEstrellas > 0 ? 'text-ambar-400' : 'text-crema-100/30'
+              displayEstrellas > 0 ? 'text-warm-600' : 'text-gray-400'
             }`}>
               {displayEstrellas > 0 ? starLabels[displayEstrellas] : 'Toca para calificar'}
             </p>
@@ -116,8 +114,8 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
         </div>
 
         {/* Campo de comentario */}
-        <div>
-          <label htmlFor="comentario" className="block text-sm font-medium text-crema-100/70 mb-2">
+        <div className="space-y-1.5">
+          <label htmlFor="comentario" className="block text-sm font-medium text-gray-700">
             Comentario (opcional)
           </label>
           <textarea
@@ -125,55 +123,47 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
             value={comentario}
             onChange={(e) => setComentario(e.target.value)}
             rows={3}
-            className="input-dark resize-none"
+            className="w-full px-3 py-2.5 text-sm bg-white text-gray-900 placeholder-gray-400 border border-gray-200 rounded-xl resize-none transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:border-accent-500 focus:ring-accent-500/20 hover:border-gray-300"
             placeholder="Cuéntanos sobre tu experiencia..."
             maxLength={500}
           />
-          <p className="text-xs text-crema-100/40 mt-1 text-right">
+          <p className="text-xs text-gray-400 text-right">
             {comentario.length}/500
           </p>
         </div>
 
         {/* Mensajes de error/éxito */}
         {error && (
-          <div className="flex items-center gap-2 p-3 bg-rosa-500/10 border border-rosa-500/30 rounded-xl">
-            <svg className="w-5 h-5 text-rosa-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <div className="flex items-center gap-3 p-3 bg-error-50 border border-error-100 rounded-xl">
+            <svg className="w-5 h-5 text-error-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
-            <p className="text-sm text-rosa-400">{error}</p>
+            <p className="text-sm text-error-600">{error}</p>
           </div>
         )}
 
         {exito && (
-          <div className="flex items-center gap-2 p-3 bg-lima-500/10 border border-lima-500/30 rounded-xl animate-fade-in">
-            <svg className="w-5 h-5 text-lima-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          <div className="flex items-center gap-3 p-3 bg-success-50 border border-success-100 rounded-xl animate-fade-in">
+            <svg className="w-5 h-5 text-success-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-sm text-lima-400">¡Reseña enviada con éxito!</p>
+            <p className="text-sm text-success-600">¡Reseña enviada con éxito!</p>
           </div>
         )}
 
         {/* Botón de envío */}
-        <button
+        <Button
           type="submit"
-          disabled={loading || estrellas === 0}
-          className="w-full btn-primary flex items-center justify-center gap-2"
+          loading={loading}
+          disabled={estrellas === 0}
+          fullWidth
         >
-          {loading ? (
-            <>
-              <div className="w-5 h-5 border-2 border-noche-900/30 border-t-noche-900 rounded-full animate-spin" />
-              Enviando...
-            </>
-          ) : (
-            <>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-              </svg>
-              Enviar reseña
-            </>
-          )}
-        </button>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+          </svg>
+          Enviar reseña
+        </Button>
       </form>
-    </div>
+    </Card>
   )
 }
