@@ -272,15 +272,16 @@ export default function DetallePuesto() {
             <div className="h-56">
               <MapContainer
                 center={[puesto.latitud, puesto.longitud]}
-                zoom={16}
+                zoom={17}
                 className="w-full h-full"
                 zoomControl={false}
+                attributionControl={false}
                 dragging={false}
                 scrollWheelZoom={false}
               >
                 <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  maxZoom={20}
                 />
                 <Marker position={[puesto.latitud, puesto.longitud]} icon={puestoIcon} />
               </MapContainer>
