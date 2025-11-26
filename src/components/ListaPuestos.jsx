@@ -15,7 +15,7 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
   return distancia
 }
 
-export default function ListaPuestos({ userLocation, onPuestoClick, puestos, setPuestos, filtroTipo, onFiltroChange }) {
+export default function ListaPuestos({ userLocation, onPuestoClick, puestos, setPuestos, filtroTipo, onFiltroChange, busqueda, onBusquedaChange }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -44,10 +44,23 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
     fetchPuestos()
   }, [setPuestos])
 
+  // Filtrar por tipo y búsqueda
+  let puestosFiltrados = puestos
+
   // Filtrar por tipo si no es "Todos"
-  const puestosFiltrados = filtroTipo === 'Todos'
-    ? puestos
-    : puestos.filter(p => p.tipo_comida === filtroTipo)
+  if (filtroTipo !== 'Todos') {
+    puestosFiltrados = puestosFiltrados.filter(p => p.tipo_comida === filtroTipo)
+  }
+
+  // Filtrar por búsqueda
+  if (busqueda && busqueda.trim()) {
+    const busquedaLower = busqueda.toLowerCase().trim()
+    puestosFiltrados = puestosFiltrados.filter(p =>
+      p.nombre.toLowerCase().includes(busquedaLower) ||
+      (p.tipo_comida && p.tipo_comida.toLowerCase().includes(busquedaLower)) ||
+      (p.descripcion && p.descripcion.toLowerCase().includes(busquedaLower))
+    )
+  }
 
   // Calcular distancias y ordenar por cercanía
   const puestosConDistancia = puestosFiltrados.map(puesto => {
@@ -109,8 +122,39 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
           </p>
         </div>
 
+        {/* Barra de búsqueda */}
+        <div className="px-4 pt-3 pb-2">
+          <div className="relative">
+            <input
+              type="text"
+              value={busqueda || ''}
+              onChange={(e) => onBusquedaChange && onBusquedaChange(e.target.value)}
+              placeholder="Buscar por nombre..."
+              className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            />
+            <svg
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            {busqueda && (
+              <button
+                onClick={() => onBusquedaChange && onBusquedaChange('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Chips de filtro */}
-        <div className="px-4 py-3 overflow-x-auto">
+        <div className="px-4 pb-3 overflow-x-auto">
           <div className="flex gap-2">
             {tiposDisponibles.map((tipo) => (
               <button

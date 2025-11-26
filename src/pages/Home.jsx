@@ -9,16 +9,30 @@ export default function Home() {
   const [puestos, setPuestos] = useState([])
   const [mapCenter, setMapCenter] = useState(null)
   const [filtroTipo, setFiltroTipo] = useState('Todos')
+  const [busqueda, setBusqueda] = useState('')
 
   const handlePuestoClick = (puesto) => {
     // Navegar a la página de detalle
     navigate(`/puesto/${puesto.id}`)
   }
 
-  // Filtrar puestos para el mapa
-  const puestosFiltrados = filtroTipo === 'Todos'
-    ? puestos
-    : puestos.filter(p => p.tipo_comida === filtroTipo)
+  // Filtrar puestos para el mapa (por tipo y búsqueda)
+  let puestosFiltrados = puestos
+
+  // Filtrar por tipo
+  if (filtroTipo !== 'Todos') {
+    puestosFiltrados = puestosFiltrados.filter(p => p.tipo_comida === filtroTipo)
+  }
+
+  // Filtrar por búsqueda
+  if (busqueda && busqueda.trim()) {
+    const busquedaLower = busqueda.toLowerCase().trim()
+    puestosFiltrados = puestosFiltrados.filter(p =>
+      p.nombre.toLowerCase().includes(busquedaLower) ||
+      (p.tipo_comida && p.tipo_comida.toLowerCase().includes(busquedaLower)) ||
+      (p.descripcion && p.descripcion.toLowerCase().includes(busquedaLower))
+    )
+  }
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -42,6 +56,8 @@ export default function Home() {
           setPuestos={setPuestos}
           filtroTipo={filtroTipo}
           onFiltroChange={setFiltroTipo}
+          busqueda={busqueda}
+          onBusquedaChange={setBusqueda}
         />
       </div>
     </div>
