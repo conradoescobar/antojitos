@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Mapa from '../components/Mapa'
 import FormularioAgregarPuesto from '../components/FormularioAgregarPuesto'
@@ -6,7 +6,6 @@ import BottomNav from '../components/BottomNav'
 import VistaGuardados from '../components/VistaGuardados'
 import VistaMejores from '../components/VistaMejores'
 import { supabase } from '../lib/supabase'
-import { useEffect } from 'react'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -35,6 +34,13 @@ export default function Home() {
     fetchPuestos()
   }, [])
 
+  // Centrar mapa en ubicación del usuario cuando se obtiene
+  useEffect(() => {
+    if (userLocation && !mapCenter) {
+      setMapCenter(userLocation)
+    }
+  }, [userLocation, mapCenter])
+
   const handlePuestoClick = (puesto) => {
     navigate(`/puesto/${puesto.id}`)
   }
@@ -49,6 +55,40 @@ export default function Home() {
       {/* Efectos de luz ambiental */}
       <div className="ambient-glow w-96 h-96 bg-ambar-500 -top-48 -left-48 rounded-full" />
       <div className="ambient-glow w-64 h-64 bg-rosa-500 -bottom-32 -right-32 rounded-full" />
+
+      {/* Header - solo visible en mapa */}
+      {activeTab === 'mapa' && (
+        <header className="relative z-20 glass-dark border-b border-noche-700/50 safe-area-top">
+          <div className="px-5 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-ambar-400 to-ambar-600 rounded-xl flex items-center justify-center shadow-glow-ambar">
+                <span className="text-xl">🌮</span>
+              </div>
+              <div>
+                <h1 className="text-lg font-display font-bold text-crema-50">
+                  Antojitos
+                </h1>
+                <p className="text-xs text-crema-100/50">
+                  {puestos.length} puestos cerca de ti
+                </p>
+              </div>
+            </div>
+
+            {/* Indicador de ubicación */}
+            {userLocation ? (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-lima-500/10 border border-lima-500/30 rounded-full">
+                <div className="w-2 h-2 bg-lima-400 rounded-full animate-pulse" />
+                <span className="text-xs text-lima-400 font-medium">GPS</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-noche-700/50 border border-noche-600/50 rounded-full">
+                <div className="w-2 h-2 bg-crema-100/30 rounded-full" />
+                <span className="text-xs text-crema-100/50 font-medium">Buscando...</span>
+              </div>
+            )}
+          </div>
+        </header>
+      )}
 
       {/* Contenido Principal */}
       <div className="flex-1 overflow-hidden relative">

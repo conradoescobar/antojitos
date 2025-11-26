@@ -162,21 +162,6 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
 
   return (
     <div className="relative w-full h-full bg-noche-900">
-      {/* Alerta de ubicación denegada */}
-      {permissionDenied && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] max-w-sm w-[90%]">
-          <div className="flex items-center gap-3 px-4 py-3 bg-noche-800/95 backdrop-blur-md border border-noche-600/50 rounded-xl shadow-lg animate-slide-down">
-            <div className="w-8 h-8 bg-ambar-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 text-ambar-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              </svg>
-            </div>
-            <p className="text-sm text-crema-100/80">
-              Mostrando <span className="font-semibold text-ambar-400">CDMX</span>
-            </p>
-          </div>
-        </div>
-      )}
 
       <MapContainer
         center={initialCenter}
