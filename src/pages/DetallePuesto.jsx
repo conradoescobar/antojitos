@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer, Marker } from 'react-leaflet'
 import L from 'leaflet'
 import { supabase } from '../lib/supabase'
+import FormularioResena from '../components/FormularioResena'
 import 'leaflet/dist/leaflet.css'
 
 // Ícono naranja para el mapa pequeño
@@ -56,6 +57,21 @@ export default function DetallePuesto() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const fetchResenas = async () => {
+    try {
+      const { data: resenasData, error: resenasError } = await supabase
+        .from('resenas')
+        .select('*')
+        .eq('puesto_id', id)
+        .order('created_at', { ascending: false })
+
+      if (resenasError) throw resenasError
+      setResenas(resenasData || [])
+    } catch (err) {
+      console.error('Error cargando reseñas:', err)
+    }
+  }
+
   useEffect(() => {
     async function fetchPuestoYResenas() {
       try {
@@ -72,14 +88,7 @@ export default function DetallePuesto() {
         setPuesto(puestoData)
 
         // Fetch reseñas
-        const { data: resenasData, error: resenasError } = await supabase
-          .from('resenas')
-          .select('*')
-          .eq('puesto_id', id)
-          .order('created_at', { ascending: false })
-
-        if (resenasError) throw resenasError
-        setResenas(resenasData || [])
+        await fetchResenas()
       } catch (err) {
         console.error('Error cargando puesto:', err)
         setError(err.message)
@@ -204,6 +213,9 @@ export default function DetallePuesto() {
             </div>
           </div>
         )}
+
+        {/* Formulario de reseña */}
+        <FormularioResena puestoId={id} onResenaEnviada={fetchResenas} />
 
         {/* Reseñas */}
         <div className="bg-white rounded-lg shadow">
