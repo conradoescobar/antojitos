@@ -184,7 +184,7 @@ export default function DetallePuesto() {
     : 0
 
   return (
-    <div className="min-h-screen pb-8" style={{ background: 'var(--bg-main)' }}>
+    <div className="min-h-screen pb-8 overflow-y-auto" style={{ background: 'var(--bg-main)', height: '100dvh' }}>
       {/* Header fijo */}
       <header
         className="sticky top-0 z-50"

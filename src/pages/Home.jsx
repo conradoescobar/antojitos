@@ -77,7 +77,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col overflow-hidden" style={{ background: 'var(--bg-main)', height: '100dvh' }}>
+    <div className="flex flex-col" style={{ background: 'var(--bg-main)', height: '100dvh', overflow: 'hidden' }}>
       {/* Contenido Principal */}
       <div className="flex-1 overflow-hidden relative">
         {/* Vista Explorar (Mapa) */}
