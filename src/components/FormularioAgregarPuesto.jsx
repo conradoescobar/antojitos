@@ -71,6 +71,9 @@ function MapCenterer({ center }) {
   return null
 }
 
+// Coordenadas por defecto (CDMX)
+const CDMX_COORDS = [19.4326, -99.1332]
+
 export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, userLocation }) {
   const [nombre, setNombre] = useState('')
   const [tipoComida, setTipoComida] = useState('')
@@ -85,13 +88,17 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, 
   const [error, setError] = useState(null)
   const [ubicacionSeleccionada, setUbicacionSeleccionada] = useState(null)
   const [mostrarMapa, setMostrarMapa] = useState(false)
+  const [mapCenter, setMapCenter] = useState(CDMX_COORDS)
 
   const tipos = ['Tacos', 'Tortas', 'Quesadillas', 'Tamales', 'Antojitos', 'Bebidas', 'Postres', 'Otro']
 
-  // Inicializar ubicación con la del usuario
+  // Inicializar ubicación con la del usuario o usar CDMX por defecto
   useEffect(() => {
-    if (userLocation && !ubicacionSeleccionada) {
-      setUbicacionSeleccionada(userLocation)
+    if (userLocation) {
+      setMapCenter(userLocation)
+      if (!ubicacionSeleccionada) {
+        setUbicacionSeleccionada(userLocation)
+      }
     }
   }, [userLocation])
 
@@ -452,7 +459,7 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, 
           <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
             <div className="h-64 relative">
               <MapContainer
-                center={ubicacionSeleccionada || userLocation || [19.4326, -99.1332]}
+                center={mapCenter}
                 zoom={16}
                 className="w-full h-full"
                 zoomControl={true}
@@ -465,7 +472,7 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, 
                   position={ubicacionSeleccionada}
                   onPositionChange={setUbicacionSeleccionada}
                 />
-                <MapCenterer center={ubicacionSeleccionada || userLocation} />
+                <MapCenterer center={ubicacionSeleccionada || mapCenter} />
               </MapContainer>
             </div>
             <div className="p-3 flex items-center justify-between" style={{ background: 'var(--bg-secondary)' }}>
