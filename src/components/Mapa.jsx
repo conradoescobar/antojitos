@@ -19,41 +19,38 @@ const tipoEmojis = {
 }
 
 // Ícono azul pulsante para el usuario
+const userIconSvg = `
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+    <circle cx="20" cy="20" r="18" fill="#3B82F6" stroke="white" stroke-width="3" opacity="0.3"/>
+    <circle cx="20" cy="20" r="10" fill="#3B82F6" stroke="white" stroke-width="3"/>
+    <circle cx="20" cy="20" r="4" fill="white"/>
+  </svg>
+`
+
 const userIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
-      <circle cx="20" cy="20" r="18" fill="#3B82F6" stroke="white" stroke-width="3" opacity="0.3">
-        <animate attributeName="r" values="12;18;12" dur="2s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="0.5;0.2;0.5" dur="2s" repeatCount="indefinite"/>
-      </circle>
-      <circle cx="20" cy="20" r="10" fill="#3B82F6" stroke="white" stroke-width="3"/>
-      <circle cx="20" cy="20" r="4" fill="white"/>
-    </svg>
-  `),
+  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(userIconSvg),
   iconSize: [40, 40],
   iconAnchor: [20, 20],
   popupAnchor: [0, -20]
 })
 
 // Ícono personalizado para puestos con gradiente
+const puestoIconSvg = `
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 54" width="44" height="54">
+    <defs>
+      <linearGradient id="pinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#E63946"/>
+        <stop offset="100%" style="stop-color:#FFB703"/>
+      </linearGradient>
+    </defs>
+    <path d="M22 2C10 2 1 11 1 22c0 16 21 30 21 30s21-14 21-30C43 11 34 2 22 2z" fill="url(#pinGrad)"/>
+    <circle cx="22" cy="18" r="8" fill="white"/>
+    <circle cx="22" cy="18" r="4" fill="#E63946"/>
+  </svg>
+`
+
 const puestoIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 54" width="44" height="54">
-      <defs>
-        <linearGradient id="pinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#E63946"/>
-          <stop offset="100%" style="stop-color:#FFB703"/>
-        </linearGradient>
-        <filter id="pinShadow" x="-30%" y="-30%" width="160%" height="160%">
-          <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#E63946" flood-opacity="0.4"/>
-        </filter>
-      </defs>
-      <path d="M22 2C10 2 1 11 1 22c0 16 21 30 21 30s21-14 21-30C43 11 34 2 22 2z"
-            fill="url(#pinGrad)" filter="url(#pinShadow)"/>
-      <circle cx="22" cy="20" r="9" fill="white"/>
-      <text x="22" y="24" text-anchor="middle" font-size="12">🌮</text>
-    </svg>
-  `),
+  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(puestoIconSvg),
   iconSize: [44, 54],
   iconAnchor: [22, 54],
   popupAnchor: [0, -54]
