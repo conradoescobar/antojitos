@@ -569,3 +569,12 @@ textarea.input-field {
 .active\:scale-95:active {
   transform: scale(0.95);
 }
+
+/* Safe area para dispositivos con notch */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 8px);
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}

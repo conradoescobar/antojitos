@@ -4,30 +4,32 @@ import Mapa from '../components/Mapa'
 import ListaPuestos from '../components/ListaPuestos'
 import FormularioAgregarPuesto from '../components/FormularioAgregarPuesto'
 
-// Iconos SVG inline
-const MapIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-    <line x1="8" y1="2" x2="8" y2="18" />
-    <line x1="16" y1="6" x2="16" y2="22" />
+// Iconos de navegación
+const ExplorarIcon = ({ active }) => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={active ? 0 : 2} strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="10" r="3" />
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
   </svg>
 )
 
-const ListIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="8" y1="6" x2="21" y2="6" />
-    <line x1="8" y1="12" x2="21" y2="12" />
-    <line x1="8" y1="18" x2="21" y2="18" />
-    <line x1="3" y1="6" x2="3.01" y2="6" />
-    <line x1="3" y1="12" x2="3.01" y2="12" />
-    <line x1="3" y1="18" x2="3.01" y2="18" />
+const BuscarIcon = ({ active }) => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
   </svg>
 )
 
-const PlusIcon = () => (
+const AgregarIcon = () => (
   <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <line x1="12" y1="5" x2="12" y2="19" />
     <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+)
+
+const PerfilIcon = ({ active }) => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={active ? 0 : 2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
   </svg>
 )
 
@@ -45,8 +47,8 @@ export default function Home() {
   const [mapCenter, setMapCenter] = useState(null)
   const [filtroTipo, setFiltroTipo] = useState('Todos')
   const [busqueda, setBusqueda] = useState('')
-  const [vistaActiva, setVistaActiva] = useState('mapa')
-  const [mostrarFormulario, setMostrarFormulario] = useState(false)
+  const [tabActiva, setTabActiva] = useState('explorar') // 'explorar', 'buscar', 'agregar', 'perfil'
+  const [mostrarModalAgregar, setMostrarModalAgregar] = useState(false)
 
   const handlePuestoClick = (puesto) => {
     navigate(`/puesto/${puesto.id}`)
@@ -54,7 +56,8 @@ export default function Home() {
 
   const handlePuestoAgregado = (nuevoPuesto) => {
     setPuestos([...puestos, nuevoPuesto])
-    setMostrarFormulario(false)
+    setMostrarModalAgregar(false)
+    setTabActiva('explorar')
   }
 
   // Filtrar puestos
@@ -73,91 +76,24 @@ export default function Home() {
     )
   }
 
+  const handleTabClick = (tab) => {
+    if (tab === 'agregar') {
+      setMostrarModalAgregar(true)
+    } else {
+      setTabActiva(tab)
+    }
+  }
+
   return (
     <div className="h-screen flex flex-col" style={{ background: 'var(--bg-deep)' }}>
-      {/* Header */}
-      <header className="relative z-20 animate-slide-down">
-        {/* Fondo con gradiente sutil */}
-        <div
-          className="absolute inset-0 opacity-80"
-          style={{
-            background: 'linear-gradient(180deg, var(--bg-card) 0%, transparent 100%)'
-          }}
-        />
-
-        <div className="relative px-5 pt-6 pb-4">
-          {/* Logo y título */}
-          <div className="flex items-center gap-4 mb-5">
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center animate-float"
-              style={{
-                background: 'var(--gradient-fire)',
-                boxShadow: '0 8px 32px rgba(245, 158, 11, 0.3)'
-              }}
-            >
-              <span className="text-3xl">🌮</span>
-            </div>
-            <div>
-              <h1 className="font-display text-2xl font-bold text-gradient-fire">
-                Antojitos
-              </h1>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                Encuentra sabor cerca de ti
-              </p>
-            </div>
-          </div>
-
-          {/* Tabs de navegación */}
-          <div
-            className="flex rounded-2xl p-1.5"
-            style={{ background: 'var(--bg-elevated)' }}
-          >
-            <button
-              onClick={() => setVistaActiva('mapa')}
-              className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${
-                vistaActiva === 'mapa'
-                  ? 'text-white shadow-lg'
-                  : ''
-              }`}
-              style={vistaActiva === 'mapa' ? {
-                background: 'var(--gradient-fire)',
-                boxShadow: '0 4px 20px rgba(245, 158, 11, 0.3)'
-              } : {
-                color: 'var(--text-secondary)'
-              }}
-            >
-              <MapIcon />
-              Mapa
-            </button>
-            <button
-              onClick={() => setVistaActiva('lista')}
-              className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${
-                vistaActiva === 'lista'
-                  ? 'text-white shadow-lg'
-                  : ''
-              }`}
-              style={vistaActiva === 'lista' ? {
-                background: 'var(--gradient-fire)',
-                boxShadow: '0 4px 20px rgba(245, 158, 11, 0.3)'
-              } : {
-                color: 'var(--text-secondary)'
-              }}
-            >
-              <ListIcon />
-              Explorar
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Contenido Principal */}
+      {/* Contenido Principal - ocupa todo menos la navbar */}
       <div className="flex-1 overflow-hidden relative">
-        {/* Vista de Mapa */}
+        {/* Vista Explorar (Mapa) */}
         <div
-          className={`absolute inset-0 transition-all duration-500 ${
-            vistaActiva === 'mapa'
-              ? 'opacity-100 z-10 scale-100'
-              : 'opacity-0 z-0 scale-95 pointer-events-none'
+          className={`absolute inset-0 transition-all duration-400 ${
+            tabActiva === 'explorar'
+              ? 'opacity-100 z-10'
+              : 'opacity-0 z-0 pointer-events-none'
           }`}
         >
           <Mapa
@@ -169,12 +105,12 @@ export default function Home() {
           />
         </div>
 
-        {/* Vista de Lista */}
+        {/* Vista Buscar (Lista) */}
         <div
-          className={`absolute inset-0 transition-all duration-500 ${
-            vistaActiva === 'lista'
-              ? 'opacity-100 z-10 scale-100'
-              : 'opacity-0 z-0 scale-95 pointer-events-none'
+          className={`absolute inset-0 transition-all duration-400 ${
+            tabActiva === 'buscar'
+              ? 'opacity-100 z-10'
+              : 'opacity-0 z-0 pointer-events-none'
           }`}
         >
           <ListaPuestos
@@ -188,28 +124,165 @@ export default function Home() {
             onBusquedaChange={setBusqueda}
           />
         </div>
+
+        {/* Vista Perfil */}
+        <div
+          className={`absolute inset-0 transition-all duration-400 ${
+            tabActiva === 'perfil'
+              ? 'opacity-100 z-10'
+              : 'opacity-0 z-0 pointer-events-none'
+          }`}
+        >
+          <div className="h-full overflow-y-auto p-5" style={{ background: 'var(--bg-deep)' }}>
+            {/* Header Perfil */}
+            <div className="text-center pt-8 pb-6">
+              <div
+                className="w-24 h-24 rounded-3xl mx-auto mb-4 flex items-center justify-center"
+                style={{ background: 'var(--gradient-fire)' }}
+              >
+                <span className="text-4xl">👤</span>
+              </div>
+              <h1 className="text-2xl font-bold font-display text-gradient-fire">
+                Mi Perfil
+              </h1>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+                Amante de los antojitos
+              </p>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {[
+                { label: 'Favoritos', value: '0', icon: '❤️' },
+                { label: 'Reseñas', value: '0', icon: '⭐' },
+                { label: 'Agregados', value: '0', icon: '📍' }
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-2xl p-4 text-center"
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
+                >
+                  <span className="text-2xl block mb-1">{stat.icon}</span>
+                  <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{stat.value}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Opciones */}
+            <div
+              className="rounded-2xl overflow-hidden"
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
+            >
+              {[
+                { label: 'Mis favoritos', icon: '❤️', badge: null },
+                { label: 'Mis reseñas', icon: '⭐', badge: null },
+                { label: 'Puestos agregados', icon: '📍', badge: null },
+                { label: 'Configuración', icon: '⚙️', badge: null }
+              ].map((item, index) => (
+                <button
+                  key={item.label}
+                  className="w-full flex items-center gap-4 p-4 text-left transition-colors hover:bg-[var(--bg-elevated)]"
+                  style={{ borderBottom: index < 3 ? '1px solid var(--border-subtle)' : 'none' }}
+                >
+                  <span className="text-xl">{item.icon}</span>
+                  <span className="flex-1 font-medium" style={{ color: 'var(--text-primary)' }}>
+                    {item.label}
+                  </span>
+                  <svg className="w-5 h-5" style={{ color: 'var(--text-muted)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </button>
+              ))}
+            </div>
+
+            {/* Mensaje de próximamente */}
+            <div
+              className="mt-6 p-4 rounded-2xl text-center"
+              style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)' }}
+            >
+              <p className="text-sm" style={{ color: 'var(--accent-amber)' }}>
+                🚧 Funcionalidades próximamente
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* FAB - Botón flotante para agregar */}
-      <button
-        onClick={() => setMostrarFormulario(true)}
-        className="fixed bottom-8 right-6 w-16 h-16 rounded-2xl flex items-center justify-center z-30 transition-all duration-300 hover:scale-110 active:scale-95 animate-pulse-glow"
-        style={{
-          background: 'var(--gradient-fire)',
-          boxShadow: '0 8px 32px rgba(245, 158, 11, 0.4)'
-        }}
-        aria-label="Agregar puesto"
+      {/* Bottom Navigation Bar */}
+      <nav
+        className="flex-shrink-0 glass-heavy safe-area-bottom"
+        style={{ borderTop: '1px solid var(--border-subtle)' }}
       >
-        <PlusIcon />
-      </button>
+        <div className="flex items-end justify-around px-2 pt-2 pb-2">
+          {/* Explorar */}
+          <button
+            onClick={() => handleTabClick('explorar')}
+            className="flex flex-col items-center gap-1 py-2 px-4 transition-all"
+            style={{ color: tabActiva === 'explorar' ? 'var(--accent-amber)' : 'var(--text-muted)' }}
+          >
+            <ExplorarIcon active={tabActiva === 'explorar'} />
+            <span className={`text-xs font-medium ${tabActiva === 'explorar' ? 'font-semibold' : ''}`}>
+              Explorar
+            </span>
+          </button>
 
-      {/* Modal de Formulario */}
-      {mostrarFormulario && (
+          {/* Buscar */}
+          <button
+            onClick={() => handleTabClick('buscar')}
+            className="flex flex-col items-center gap-1 py-2 px-4 transition-all"
+            style={{ color: tabActiva === 'buscar' ? 'var(--accent-amber)' : 'var(--text-muted)' }}
+          >
+            <BuscarIcon active={tabActiva === 'buscar'} />
+            <span className={`text-xs font-medium ${tabActiva === 'buscar' ? 'font-semibold' : ''}`}>
+              Buscar
+            </span>
+          </button>
+
+          {/* Agregar (botón central destacado) */}
+          <button
+            onClick={() => handleTabClick('agregar')}
+            className="flex flex-col items-center -mt-5 transition-all hover:scale-105 active:scale-95"
+          >
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+              style={{
+                background: 'var(--gradient-fire)',
+                boxShadow: '0 4px 20px rgba(245, 158, 11, 0.4)',
+                color: 'white'
+              }}
+            >
+              <AgregarIcon />
+            </div>
+            <span
+              className="text-xs font-medium mt-1"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              Agregar
+            </span>
+          </button>
+
+          {/* Perfil */}
+          <button
+            onClick={() => handleTabClick('perfil')}
+            className="flex flex-col items-center gap-1 py-2 px-4 transition-all"
+            style={{ color: tabActiva === 'perfil' ? 'var(--accent-amber)' : 'var(--text-muted)' }}
+          >
+            <PerfilIcon active={tabActiva === 'perfil'} />
+            <span className={`text-xs font-medium ${tabActiva === 'perfil' ? 'font-semibold' : ''}`}>
+              Perfil
+            </span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Modal de Agregar Puesto */}
+      {mostrarModalAgregar && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center animate-fade-in"
-          style={{ background: 'rgba(13, 11, 14, 0.8)' }}
+          style={{ background: 'rgba(13, 11, 14, 0.85)' }}
           onClick={(e) => {
-            if (e.target === e.currentTarget) setMostrarFormulario(false)
+            if (e.target === e.currentTarget) setMostrarModalAgregar(false)
           }}
         >
           <div
@@ -236,7 +309,7 @@ export default function Home() {
                 </p>
               </div>
               <button
-                onClick={() => setMostrarFormulario(false)}
+                onClick={() => setMostrarModalAgregar(false)}
                 className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
                 style={{
                   background: 'var(--bg-elevated)',
@@ -252,7 +325,7 @@ export default function Home() {
               <div className="p-6">
                 <FormularioAgregarPuesto
                   onPuestoAgregado={handlePuestoAgregado}
-                  onCancelar={() => setMostrarFormulario(false)}
+                  onCancelar={() => setMostrarModalAgregar(false)}
                 />
               </div>
             </div>
