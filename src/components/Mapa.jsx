@@ -39,7 +39,7 @@ const puestoIcon = new L.Icon({
 })
 
 // Componente para centrar el mapa
-function MapUpdater({ center }) {
+function MapUpdater({ center, userLocation }) {
   const map = useMap()
 
   useEffect(() => {
@@ -47,6 +47,13 @@ function MapUpdater({ center }) {
       map.setView(center, 15, { animate: true, duration: 0.5 })
     }
   }, [center, map])
+
+  // Centrar en ubicación del usuario al cargar
+  useEffect(() => {
+    if (userLocation) {
+      map.setView(userLocation, 15, { animate: true, duration: 0.8 })
+    }
+  }, [userLocation, map])
 
   return null
 }
@@ -123,7 +130,7 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
         className="w-full h-full"
         zoomControl={true}
       >
-        <MapUpdater center={mapCenter} />
+        <MapUpdater center={mapCenter} userLocation={userLocation} />
 
         {/* Mapa claro de CARTO */}
         <TileLayer
