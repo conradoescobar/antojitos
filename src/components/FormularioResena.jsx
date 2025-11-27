@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
 
 // Categorías de puntuación
 const CATEGORIAS = [
@@ -68,6 +69,7 @@ const CloseIcon = () => (
 )
 
 export default function FormularioResena({ puestoId, onResenaEnviada }) {
+  const { user } = useAuth()
   const [puntuaciones, setPuntuaciones] = useState({
     sabor: 0,
     precio: 0,
@@ -158,7 +160,8 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
         precio: puntuaciones.precio || null,
         higiene: puntuaciones.higiene || null,
         cantidad: puntuaciones.cantidad || null,
-        atencion: puntuaciones.atencion || null
+        atencion: puntuaciones.atencion || null,
+        user_id: user?.id || null
       }
 
       // Insertar reseña
