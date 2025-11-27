@@ -6,40 +6,66 @@ import 'leaflet/dist/leaflet.css'
 // Coordenadas por defecto (CDMX)
 const CDMX_COORDS = [19.4326, -99.1332]
 
-// Crear un ícono azul personalizado para el marcador del usuario
+// Emojis para tipos de comida
+const tipoEmojis = {
+  'Tacos': '🌮',
+  'Tortas': '🥪',
+  'Quesadillas': '🧀',
+  'Tamales': '🫔',
+  'Antojitos': '🌶️',
+  'Bebidas': '🥤',
+  'Postres': '🍮',
+  'Otro': '🍽️'
+}
+
+// Ícono azul pulsante para el usuario
 const userIcon = new L.Icon({
   iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
-      <circle cx="12" cy="12" r="10" fill="#3B82F6" stroke="white" stroke-width="2"/>
-      <circle cx="12" cy="12" r="4" fill="white"/>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+      <circle cx="20" cy="20" r="18" fill="#3B82F6" stroke="white" stroke-width="3" opacity="0.3">
+        <animate attributeName="r" values="12;18;12" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0.2;0.5" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="20" cy="20" r="10" fill="#3B82F6" stroke="white" stroke-width="3"/>
+      <circle cx="20" cy="20" r="4" fill="white"/>
     </svg>
   `),
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
-  popupAnchor: [0, -16]
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+  popupAnchor: [0, -20]
 })
 
-// Crear un ícono naranja personalizado para los puestos
+// Ícono personalizado para puestos con gradiente
 const puestoIcon = new L.Icon({
   iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
-      <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"
-            fill="#F97316" stroke="white" stroke-width="1.5"/>
-      <circle cx="12" cy="12" r="3" fill="white"/>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 54" width="44" height="54">
+      <defs>
+        <linearGradient id="pinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#E63946"/>
+          <stop offset="100%" style="stop-color:#FFB703"/>
+        </linearGradient>
+        <filter id="pinShadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#E63946" flood-opacity="0.4"/>
+        </filter>
+      </defs>
+      <path d="M22 2C10 2 1 11 1 22c0 16 21 30 21 30s21-14 21-30C43 11 34 2 22 2z"
+            fill="url(#pinGrad)" filter="url(#pinShadow)"/>
+      <circle cx="22" cy="20" r="9" fill="white"/>
+      <text x="22" y="24" text-anchor="middle" font-size="12">🌮</text>
     </svg>
   `),
-  iconSize: [36, 36],
-  iconAnchor: [18, 36],
-  popupAnchor: [0, -36]
+  iconSize: [44, 54],
+  iconAnchor: [22, 54],
+  popupAnchor: [0, -54]
 })
 
-// Componente para centrar el mapa cuando cambia la ubicación
+// Componente para centrar el mapa
 function MapUpdater({ center }) {
   const map = useMap()
 
   useEffect(() => {
     if (center) {
-      map.setView(center, 15)
+      map.flyTo(center, 16, { duration: 1 })
     }
   }, [center, map])
 
@@ -49,9 +75,9 @@ function MapUpdater({ center }) {
 export default function Mapa({ userLocation, onUserLocationChange, puestos, mapCenter, onPuestoClick }) {
   const [initialCenter, setInitialCenter] = useState(CDMX_COORDS)
   const [permissionDenied, setPermissionDenied] = useState(false)
+  const [isLocating, setIsLocating] = useState(true)
 
   useEffect(() => {
-    // Pedir permiso de geolocalización
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -59,11 +85,13 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
           const location = [latitude, longitude]
           onUserLocationChange(location)
           setInitialCenter(location)
+          setIsLocating(false)
         },
         (error) => {
           console.error('Error obteniendo ubicación:', error)
           setPermissionDenied(true)
           setInitialCenter(CDMX_COORDS)
+          setIsLocating(false)
         },
         {
           enableHighAccuracy: true,
@@ -74,38 +102,67 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
     } else {
       setPermissionDenied(true)
       setInitialCenter(CDMX_COORDS)
+      setIsLocating(false)
     }
   }, [onUserLocationChange])
 
   return (
     <div className="relative w-full h-full">
+      {/* Mensaje de ubicación denegada */}
       {permissionDenied && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 rounded-lg shadow-lg">
-          <p className="text-sm">
-            No se pudo obtener tu ubicación. Mostrando Ciudad de México por defecto.
-          </p>
+        <div className="absolute top-4 left-4 right-4 z-[1000] glass-card rounded-2xl px-4 py-3 shadow-lg animate-slide-down">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center flex-shrink-0">
+              <span className="text-xl">📍</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[var(--color-carbon)]">
+                Ubicación no disponible
+              </p>
+              <p className="text-xs text-gray-500">
+                Mostrando Ciudad de México
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Indicador de carga */}
+      {isLocating && (
+        <div className="absolute top-4 left-4 right-4 z-[1000] glass-card rounded-2xl px-4 py-3 shadow-lg animate-fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[var(--color-carbon)]">
+                Buscando tu ubicación...
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
       <MapContainer
         center={initialCenter}
-        zoom={13}
+        zoom={14}
         className="w-full h-full"
         zoomControl={true}
       >
         <MapUpdater center={mapCenter} />
 
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        {/* Marcador del usuario */}
         {userLocation && (
           <Marker position={userLocation} icon={userIcon}>
             <Popup>
-              <div className="text-center">
-                <p className="font-semibold">Tu ubicación</p>
-                <p className="text-sm text-gray-600">
+              <div className="text-center p-2">
+                <p className="font-bold text-[var(--color-carbon)]">Tu ubicación</p>
+                <p className="text-xs text-gray-500 mt-1">
                   {userLocation[0].toFixed(4)}, {userLocation[1].toFixed(4)}
                 </p>
               </div>
@@ -113,6 +170,7 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
           </Marker>
         )}
 
+        {/* Marcadores de puestos */}
         {puestos.map((puesto) => {
           if (puesto.latitud && puesto.longitud) {
             return (
@@ -122,26 +180,52 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
                 icon={puestoIcon}
               >
                 <Popup>
-                  <div className="min-w-[150px]">
-                    <h3 className="font-bold text-orange-600 mb-1">
+                  <div className="min-w-[200px] max-w-[260px] p-3">
+                    {/* Header con foto o emoji */}
+                    {puesto.foto_url ? (
+                      <img
+                        src={puesto.foto_url}
+                        alt={puesto.nombre}
+                        className="w-full h-28 object-cover rounded-xl mb-3"
+                      />
+                    ) : (
+                      <div className="w-full h-20 rounded-xl bg-gradient-to-br from-[var(--color-mango-light)] to-[var(--color-mango)] flex items-center justify-center mb-3">
+                        <span className="text-4xl">
+                          {tipoEmojis[puesto.tipo_comida] || '🍽️'}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Nombre */}
+                    <h3 className="font-bold text-lg text-[var(--color-carbon)] mb-1">
                       {puesto.nombre}
                     </h3>
+
+                    {/* Tipo de comida */}
                     {puesto.tipo_comida && (
-                      <p className="text-sm text-gray-600 mb-1">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-gradient-to-r from-[var(--color-mango-light)] to-[var(--color-mango)] text-xs font-semibold text-[var(--color-carbon)] mb-2">
+                        <span>{tipoEmojis[puesto.tipo_comida]}</span>
                         {puesto.tipo_comida}
-                      </p>
+                      </span>
                     )}
+
+                    {/* Descripción */}
                     {puesto.descripcion && (
-                      <p className="text-xs text-gray-500 mt-2 mb-2">
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                         {puesto.descripcion}
                       </p>
                     )}
+
+                    {/* Botón ver detalles */}
                     {onPuestoClick && (
                       <button
                         onClick={() => onPuestoClick(puesto)}
-                        className="w-full bg-orange-500 text-white text-sm px-3 py-1 rounded hover:bg-orange-600 transition-colors mt-2"
+                        className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                        style={{
+                          background: 'linear-gradient(135deg, var(--color-salsa) 0%, var(--color-mango) 100%)'
+                        }}
                       >
-                        Ver detalles
+                        Ver detalles →
                       </button>
                     )}
                   </div>
@@ -152,6 +236,23 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
           return null
         })}
       </MapContainer>
+
+      {/* Contador de puestos flotante */}
+      {puestos.length > 0 && (
+        <div className="absolute bottom-6 left-6 z-[1000] glass-card rounded-2xl px-4 py-3 shadow-lg animate-scale-in">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-salsa)] to-[var(--color-mango)] flex items-center justify-center">
+              <span className="text-lg">🌮</span>
+            </div>
+            <div>
+              <p className="text-xl font-bold text-[var(--color-carbon)]">{puestos.length}</p>
+              <p className="text-xs text-gray-500">
+                {puestos.length === 1 ? 'puesto cercano' : 'puestos cercanos'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
