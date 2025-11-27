@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
 import 'leaflet/dist/leaflet.css'
 
 // Icono del marcador
@@ -75,6 +76,7 @@ function MapCenterer({ center }) {
 const CDMX_COORDS = [19.4326, -99.1332]
 
 export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, userLocation }) {
+  const { user } = useAuth()
   const [nombre, setNombre] = useState('')
   const [tipoComida, setTipoComida] = useState('')
   const [descripcion, setDescripcion] = useState('')
@@ -175,7 +177,8 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, 
         horario_cierre: horarioCierre || null,
         latitud: ubicacionSeleccionada[0],
         longitud: ubicacionSeleccionada[1],
-        activo: true
+        activo: true,
+        user_id: user?.id || null
       }
 
       const { data: nuevoPuesto, error: insertError } = await supabase
