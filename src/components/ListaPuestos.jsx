@@ -45,6 +45,12 @@ export default function ListaPuestos({
 
   useEffect(() => {
     async function fetchPuestos() {
+      if (!supabase) {
+        setError('Supabase no está configurado. Verifica las variables de entorno.')
+        setLoading(false)
+        return
+      }
+
       try {
         setLoading(true)
         const { data, error } = await supabase

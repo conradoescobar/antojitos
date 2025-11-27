@@ -70,9 +70,7 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       return
     }
 
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabase) {
       setError('Error de configuración: Las variables de entorno de Supabase no están configuradas.')
       return
     }
