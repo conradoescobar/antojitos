@@ -132,10 +132,11 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
       >
         <MapUpdater center={mapCenter} userLocation={userLocation} />
 
-        {/* Mapa claro de CARTO */}
+        {/* Mapa OpenStreetMap - mejor soporte de zoom */}
         <TileLayer
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          maxZoom={19}
         />
 
         {/* Marcador del usuario */}
