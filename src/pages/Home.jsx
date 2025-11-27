@@ -11,7 +11,7 @@ export default function Home() {
   const [mapCenter, setMapCenter] = useState(null)
   const [filtroTipo, setFiltroTipo] = useState('Todos')
   const [busqueda, setBusqueda] = useState('')
-  const [vistaActiva, setVistaActiva] = useState('mapa') // 'mapa' o 'lista'
+  const [vistaActiva, setVistaActiva] = useState('mapa')
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
 
   const handlePuestoClick = (puesto) => {
@@ -23,7 +23,7 @@ export default function Home() {
     setMostrarFormulario(false)
   }
 
-  // Filtrar puestos para el mapa (por tipo y búsqueda)
+  // Filtrar puestos
   let puestosFiltrados = puestos
 
   if (filtroTipo !== 'Todos') {
@@ -40,73 +40,107 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Header Superior */}
-      <header className="bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg z-20">
-        <div className="px-4 py-4">
+    <div className="h-screen flex flex-col overflow-hidden">
+      {/* Header con diseño mexicano moderno */}
+      <header className="relative z-20 glass-card border-b-0 rounded-b-[2rem] overflow-hidden">
+        {/* Decorative background pattern */}
+        <div className="absolute inset-0 pattern-dots opacity-50" />
+        
+        <div className="relative px-5 pt-6 pb-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <span className="text-2xl">🌮</span>
+            {/* Logo y título */}
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--color-salsa)] to-[var(--color-mango)] flex items-center justify-center shadow-lg animate-float">
+                  <span className="text-3xl">🌮</span>
+                </div>
+                {/* Glow effect */}
+                <div className="absolute inset-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--color-salsa)] to-[var(--color-mango)] blur-xl opacity-40 -z-10" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">Antojitos Cerca</h1>
-                <p className="text-xs text-orange-100">Encuentra los mejores puestos</p>
+                <h1 className="font-display text-2xl font-bold gradient-text">
+                  Antojitos Cerca
+                </h1>
+                <p className="text-sm text-gray-500 font-medium tracking-wide">
+                  🔥 Encuentra tu antojo
+                </p>
               </div>
+            </div>
+
+            {/* Stats badge */}
+            <div className="glass-card px-4 py-2 rounded-2xl">
+              <p className="text-xs text-gray-500 font-medium">Puestos</p>
+              <p className="text-xl font-bold text-[var(--color-carbon)]">{puestos.length}</p>
             </div>
           </div>
         </div>
 
-        {/* Tabs de navegación */}
-        <div className="flex border-t border-orange-400">
+        {/* Navigation tabs con diseño moderno */}
+        <div className="relative flex mx-4 mb-4 p-1.5 rounded-2xl bg-white/60 backdrop-blur-sm shadow-inner">
           <button
             onClick={() => setVistaActiva('mapa')}
-            className={`flex-1 py-3 text-center font-medium transition-all ${
+            className={`nav-tab rounded-xl transition-all duration-300 ${
               vistaActiva === 'mapa'
-                ? 'bg-white text-orange-600 shadow-inner'
-                : 'text-white hover:bg-orange-400'
+                ? 'bg-gradient-to-r from-[var(--color-salsa)] to-[var(--color-mango)] text-white shadow-lg'
+                : 'text-gray-600 hover:text-[var(--color-salsa)]'
             }`}
           >
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2 py-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
               </svg>
-              Mapa
+              <span className="font-semibold">Mapa</span>
             </div>
           </button>
           <button
             onClick={() => setVistaActiva('lista')}
-            className={`flex-1 py-3 text-center font-medium transition-all ${
+            className={`nav-tab rounded-xl transition-all duration-300 ${
               vistaActiva === 'lista'
-                ? 'bg-white text-orange-600 shadow-inner'
-                : 'text-white hover:bg-orange-400'
+                ? 'bg-gradient-to-r from-[var(--color-salsa)] to-[var(--color-mango)] text-white shadow-lg'
+                : 'text-gray-600 hover:text-[var(--color-salsa)]'
             }`}
           >
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2 py-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
               </svg>
-              Lista
+              <span className="font-semibold">Lista</span>
             </div>
           </button>
         </div>
       </header>
 
       {/* Contenido Principal */}
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 overflow-hidden relative -mt-4">
         {/* Vista de Mapa */}
-        <div className={`absolute inset-0 transition-opacity duration-300 ${vistaActiva === 'mapa' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
-          <Mapa
-            userLocation={userLocation}
-            onUserLocationChange={setUserLocation}
-            puestos={puestosFiltrados}
-            mapCenter={mapCenter}
-            onPuestoClick={handlePuestoClick}
-          />
+        <div 
+          className={`absolute inset-0 transition-all duration-500 ease-out ${
+            vistaActiva === 'mapa' 
+              ? 'opacity-100 translate-x-0 z-10' 
+              : 'opacity-0 -translate-x-full z-0 pointer-events-none'
+          }`}
+        >
+          <div className="h-full p-4 pt-6">
+            <div className="h-full rounded-3xl overflow-hidden shadow-2xl">
+              <Mapa
+                userLocation={userLocation}
+                onUserLocationChange={setUserLocation}
+                puestos={puestosFiltrados}
+                mapCenter={mapCenter}
+                onPuestoClick={handlePuestoClick}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Vista de Lista */}
-        <div className={`absolute inset-0 transition-opacity duration-300 ${vistaActiva === 'lista' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+        <div 
+          className={`absolute inset-0 transition-all duration-500 ease-out ${
+            vistaActiva === 'lista' 
+              ? 'opacity-100 translate-x-0 z-10' 
+              : 'opacity-0 translate-x-full z-0 pointer-events-none'
+          }`}
+        >
           <ListaPuestos
             userLocation={userLocation}
             onPuestoClick={handlePuestoClick}
@@ -120,33 +154,53 @@ export default function Home() {
         </div>
       </div>
 
-      {/* FAB - Botón flotante para agregar */}
+      {/* FAB - Botón flotante con animación */}
       <button
         onClick={() => setMostrarFormulario(true)}
-        className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-full shadow-2xl hover:shadow-3xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center z-30"
+        className="fab bottom-8 right-6 animate-pulse-glow"
         aria-label="Agregar puesto"
       >
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
         </svg>
       </button>
 
+      {/* Tooltip del FAB */}
+      <div className="fixed bottom-10 right-24 z-40 opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
+        <div className="glass-card px-4 py-2 rounded-xl text-sm font-medium text-[var(--color-carbon)] whitespace-nowrap">
+          Agregar nuevo puesto
+        </div>
+      </div>
+
       {/* Modal de Formulario */}
       {mostrarFormulario && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-end sm:items-center justify-center">
-          <div className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto animate-slide-up">
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between rounded-t-3xl sm:rounded-t-2xl">
-              <h2 className="text-xl font-bold text-gray-900">Agregar Puesto</h2>
+        <div 
+          className="modal-overlay animate-fade-in"
+          onClick={(e) => e.target === e.currentTarget && setMostrarFormulario(false)}
+        >
+          <div className="modal-content animate-slide-up">
+            {/* Header del modal */}
+            <div className="sticky top-0 z-10 glass-card border-b border-white/20 px-6 py-5 flex items-center justify-between">
+              <div>
+                <h2 className="font-display text-2xl font-bold text-[var(--color-carbon)]">
+                  Nuevo Puesto
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Comparte un lugar delicioso 🌶️
+                </p>
+              </div>
               <button
                 onClick={() => setMostrarFormulario(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                className="w-12 h-12 flex items-center justify-center rounded-2xl bg-gray-100 hover:bg-gray-200 transition-all duration-300 hover:rotate-90"
               >
                 <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="p-6">
+            
+            {/* Contenido del formulario */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
               <FormularioAgregarPuesto
                 onPuestoAgregado={handlePuestoAgregado}
                 onCancelar={() => setMostrarFormulario(false)}

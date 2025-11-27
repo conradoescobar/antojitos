@@ -1,6 +1,17 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
+const tipoEmojis = {
+  'Tacos': '🌮',
+  'Tortas': '🥪',
+  'Quesadillas': '🧀',
+  'Tamales': '🫔',
+  'Antojitos': '🌶️',
+  'Bebidas': '🥤',
+  'Postres': '🍮',
+  'Otro': '🍽️'
+}
+
 export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }) {
   const [nombre, setNombre] = useState('')
   const [tipoComida, setTipoComida] = useState('')
@@ -18,7 +29,7 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
   const handleFotoChange = (e) => {
     const file = e.target.files[0]
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB máximo
+      if (file.size > 5 * 1024 * 1024) {
         setError('La foto no debe superar 5MB')
         return
       }
@@ -33,17 +44,16 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
     try {
       const fileExt = foto.name.split('.').pop()
       const fileName = `${puestoId}-${Date.now()}.${fileExt}`
-      const filePath = `${fileName}`
 
       const { error: uploadError } = await supabase.storage
         .from('fotos-puestos')
-        .upload(filePath, foto)
+        .upload(fileName, foto)
 
       if (uploadError) throw uploadError
 
       const { data } = supabase.storage
         .from('fotos-puestos')
-        .getPublicUrl(filePath)
+        .getPublicUrl(fileName)
 
       return data.publicUrl
     } catch (err) {
@@ -60,11 +70,10 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       return
     }
 
-    // Verificar variables de entorno
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
     const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
     if (!supabaseUrl || !supabaseAnonKey) {
-      setError('Error de configuración: Las variables de entorno de Supabase no están configuradas. Verifica la configuración en Vercel.')
+      setError('Error de configuración: Las variables de entorno de Supabase no están configuradas.')
       return
     }
 
@@ -73,7 +82,6 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       setError(null)
       setUbicacionPendiente(true)
 
-      // Obtener ubicación actual
       const position = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
@@ -83,7 +91,6 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
 
       const { latitude, longitude } = position.coords
 
-      // Insertar puesto
       const puestoData = {
         nombre: nombre.trim(),
         tipo_comida: tipoComida || null,
@@ -103,12 +110,9 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
 
       if (insertError) throw insertError
 
-      // Subir foto si existe
       let fotoUrl = null
       if (foto) {
         fotoUrl = await subirFoto(nuevoPuesto.id)
-
-        // Actualizar puesto con URL de foto
         const { error: updateError } = await supabase
           .from('puestos')
           .update({ foto_url: fotoUrl })
@@ -117,7 +121,6 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
         if (updateError) throw updateError
       }
 
-      // Limpiar formulario
       setNombre('')
       setTipoComida('')
       setDescripcion('')
@@ -132,24 +135,11 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
     } catch (err) {
       console.error('Error agregando puesto:', err)
       if (err.code === 1) {
-        setError('No se pudo obtener tu ubicación. Por favor permite el acceso a tu ubicación.')
-      } else if (err.message && err.message.includes('fotos-puestos')) {
-        setError('Error subiendo la foto. Asegúrate de que el bucket "fotos-puestos" esté configurado en Supabase.')
+        setError('No se pudo obtener tu ubicación. Por favor permite el acceso.')
       } else if (err.message) {
-        // Mostrar el mensaje de error específico de Supabase
-        let errorMessage = err.message
-        if (err.message.includes('permission denied') || err.message.includes('new row violates row-level security')) {
-          errorMessage = 'Error de permisos. Verifica las políticas RLS en Supabase para la tabla "puestos".'
-        } else if (err.message.includes('relation') && err.message.includes('does not exist')) {
-          errorMessage = 'La tabla "puestos" no existe en Supabase. Verifica la estructura de la base de datos.'
-        } else if (err.message.includes('column') && err.message.includes('does not exist')) {
-          errorMessage = 'Error en la estructura de la tabla. Verifica que todas las columnas existan en Supabase.'
-        } else if (err.message.includes('schema cache') || err.message.includes('Could not find')) {
-          errorMessage = 'Error de caché del schema en Supabase. Esto puede pasar si acabas de agregar una columna. Intenta: 1) Esperar unos minutos, 2) Verificar que todas las columnas existan en Supabase, 3) Refrescar la página y volver a intentar.'
-        }
-        setError(`Error: ${errorMessage}`)
+        setError(`Error: ${err.message}`)
       } else {
-        setError('Error al agregar el puesto. Intenta de nuevo. Revisa la consola para más detalles.')
+        setError('Error al agregar el puesto. Intenta de nuevo.')
       }
     } finally {
       setLoading(false)
@@ -158,154 +148,182 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Agregar Puesto</h2>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Nombre */}
+      <div>
+        <label className="block text-sm font-bold text-[var(--color-carbon)] mb-2">
+          Nombre del puesto <span className="text-[var(--color-salsa)]">*</span>
+        </label>
+        <input
+          type="text"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          className="input-field"
+          placeholder="Ej: Tacos Don Pepe"
+          required
+        />
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Nombre */}
-        <div>
-          <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre del puesto *
-          </label>
-          <input
-            type="text"
-            id="nombre"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            placeholder="Ej: Tacos Don Pepe"
-            required
-          />
+      {/* Tipo de comida con chips */}
+      <div>
+        <label className="block text-sm font-bold text-[var(--color-carbon)] mb-3">
+          Tipo de comida
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {tipos.map((tipo) => (
+            <button
+              key={tipo}
+              type="button"
+              onClick={() => setTipoComida(tipoComida === tipo ? '' : tipo)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 ${
+                tipoComida === tipo
+                  ? 'bg-gradient-to-r from-[var(--color-salsa)] to-[var(--color-mango)] text-white shadow-lg scale-105'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <span>{tipoEmojis[tipo]}</span>
+              <span>{tipo}</span>
+            </button>
+          ))}
         </div>
+      </div>
 
-        {/* Tipo de comida */}
-        <div>
-          <label htmlFor="tipo" className="block text-sm font-medium text-gray-700 mb-1">
-            Tipo de comida
-          </label>
-          <select
-            id="tipo"
-            value={tipoComida}
-            onChange={(e) => setTipoComida(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-          >
-            <option value="">Selecciona un tipo</option>
-            {tipos.map((tipo) => (
-              <option key={tipo} value={tipo}>
-                {tipo}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Descripción */}
+      <div>
+        <label className="block text-sm font-bold text-[var(--color-carbon)] mb-2">
+          Descripción
+        </label>
+        <textarea
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
+          rows={3}
+          className="input-field resize-none"
+          placeholder="Cuéntanos sobre este lugar..."
+          maxLength={300}
+        />
+        <p className="text-xs text-gray-400 mt-1 text-right">{descripcion.length}/300</p>
+      </div>
 
-        {/* Descripción */}
-        <div>
-          <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
-            Descripción
-          </label>
-          <textarea
-            id="descripcion"
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
-            placeholder="Breve descripción del puesto..."
-            maxLength={300}
-          />
-        </div>
-
-        {/* Horario */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Horario
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label htmlFor="horarioApertura" className="block text-xs text-gray-600 mb-1">
-                Apertura
-              </label>
-              <input
-                type="time"
-                id="horarioApertura"
-                value={horarioApertura}
-                onChange={(e) => setHorarioApertura(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label htmlFor="horarioCierre" className="block text-xs text-gray-600 mb-1">
-                Cierre
-              </label>
-              <input
-                type="time"
-                id="horarioCierre"
-                value={horarioCierre}
-                onChange={(e) => setHorarioCierre(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
-            </div>
+      {/* Horario */}
+      <div>
+        <label className="block text-sm font-bold text-[var(--color-carbon)] mb-2">
+          Horario
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Apertura</label>
+            <input
+              type="time"
+              value={horarioApertura}
+              onChange={(e) => setHorarioApertura(e.target.value)}
+              className="input-field py-3"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Cierre</label>
+            <input
+              type="time"
+              value={horarioCierre}
+              onChange={(e) => setHorarioCierre(e.target.value)}
+              className="input-field py-3"
+            />
           </div>
         </div>
+      </div>
 
-        {/* Foto */}
-        <div>
-          <label htmlFor="foto" className="block text-sm font-medium text-gray-700 mb-1">
-            Foto (opcional)
-          </label>
+      {/* Foto */}
+      <div>
+        <label className="block text-sm font-bold text-[var(--color-carbon)] mb-2">
+          Foto
+        </label>
+        <div className="relative">
           <input
             type="file"
-            id="foto"
             accept="image/*"
             onChange={handleFotoChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            className="hidden"
+            id="foto-input"
           />
-          <p className="text-xs text-gray-500 mt-1">Máximo 5MB - JPG, PNG o WebP</p>
-
-          {previsualizacion && (
-            <div className="mt-2">
+          <label
+            htmlFor="foto-input"
+            className="flex flex-col items-center justify-center w-full h-40 rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-[var(--color-mango)] cursor-pointer transition-all duration-300"
+          >
+            {previsualizacion ? (
               <img
                 src={previsualizacion}
                 alt="Previsualización"
-                className="w-full h-40 object-cover rounded-lg"
+                className="w-full h-full object-cover rounded-2xl"
               />
-            </div>
-          )}
-        </div>
-
-        {/* Info de ubicación */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <p className="text-sm text-blue-800">
-            📍 Se usará tu ubicación actual para marcar el puesto en el mapa.
-          </p>
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-2 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
-
-        {/* Botones */}
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-orange-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-          >
-            {ubicacionPendiente ? 'Obteniendo ubicación...' : loading ? 'Guardando...' : 'Agregar Puesto'}
-          </button>
-          {onCancelar && (
+            ) : (
+              <>
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--color-mango-light)] to-[var(--color-mango)] flex items-center justify-center mb-3">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p className="text-sm font-medium text-gray-600">Toca para agregar foto</p>
+                <p className="text-xs text-gray-400 mt-1">JPG, PNG • Máx. 5MB</p>
+              </>
+            )}
+          </label>
+          {previsualizacion && (
             <button
               type="button"
-              onClick={onCancelar}
-              className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+              onClick={() => {
+                setFoto(null)
+                setPrevisualizacion(null)
+              }}
+              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
             >
-              Cancelar
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           )}
         </div>
-      </form>
-    </div>
+      </div>
+
+      {/* Info de ubicación */}
+      <div className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
+        <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0">
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </div>
+        <p className="text-sm text-blue-800">
+          Se usará tu ubicación actual para marcar el puesto en el mapa
+        </p>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 border border-red-200">
+          <span className="text-xl">⚠️</span>
+          <p className="text-sm text-red-800">{error}</p>
+        </div>
+      )}
+
+      {/* Botón de envío */}
+      <button
+        type="submit"
+        disabled={loading}
+        className={`w-full btn-primary py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed ${loading ? '' : ''}`}
+      >
+        <span className="flex items-center justify-center gap-2">
+          {loading ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              {ubicacionPendiente ? 'Obteniendo ubicación...' : 'Guardando...'}
+            </>
+          ) : (
+            <>
+              <span>🌮</span>
+              Agregar Puesto
+            </>
+          )}
+        </span>
+      </button>
+    </form>
   )
 }

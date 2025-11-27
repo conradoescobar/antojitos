@@ -1,20 +1,25 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-function EstrellaClickeable({ filled, onHover, onClick }) {
+function EstrellaClickeable({ filled, onHover, onClick, index }) {
   return (
     <button
       type="button"
       onMouseEnter={onHover}
       onClick={onClick}
-      className="focus:outline-none transition-transform hover:scale-110"
+      className="focus:outline-none transition-all duration-200 hover:scale-125 active:scale-95"
+      style={{ animationDelay: `${index * 0.05}s` }}
     >
       <svg
-        className="w-8 h-8"
-        fill={filled ? '#F97316' : 'none'}
-        stroke="#F97316"
+        className="w-10 h-10 transition-all duration-200"
+        fill={filled ? '#FFB703' : 'none'}
+        stroke={filled ? '#FFB703' : '#D1D5DB'}
         strokeWidth="2"
         viewBox="0 0 24 24"
+        style={filled ? { 
+          filter: 'drop-shadow(0 4px 8px rgba(255, 183, 3, 0.4))',
+          transform: 'rotate(-5deg)'
+        } : {}}
       >
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
       </svg>
@@ -44,27 +49,22 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
 
       const { error: insertError } = await supabase
         .from('resenas')
-        .insert([
-          {
-            puesto_id: puestoId,
-            estrellas,
-            comentario: comentario.trim() || null
-          }
-        ])
+        .insert([{
+          puesto_id: puestoId,
+          estrellas,
+          comentario: comentario.trim() || null
+        }])
 
       if (insertError) throw insertError
 
-      // Limpiar formulario
       setEstrellas(0)
       setComentario('')
       setExito(true)
 
-      // Notificar al padre que se envió una reseña
       if (onResenaEnviada) {
         onResenaEnviada()
       }
 
-      // Ocultar mensaje de éxito después de 3 segundos
       setTimeout(() => setExito(false), 3000)
     } catch (err) {
       console.error('Error enviando reseña:', err)
@@ -76,60 +76,90 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
 
   const displayEstrellas = hoverEstrellas || estrellas
 
-  return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <h3 className="font-semibold text-gray-900 mb-4">Deja tu reseña</h3>
+  // Mensajes según la calificación
+  const mensajesCalificacion = {
+    1: '😢 Muy malo',
+    2: '😕 Malo',
+    3: '😐 Regular',
+    4: '😊 Bueno',
+    5: '🤩 ¡Excelente!'
+  }
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+  return (
+    <div className="glass-card rounded-3xl overflow-hidden shadow-xl">
+      <div className="p-5 border-b border-gray-100 bg-gradient-to-r from-[var(--color-mango)]/5 to-[var(--color-salsa)]/5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-salsa)] to-[var(--color-mango)] flex items-center justify-center">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            </svg>
+          </div>
+          <h3 className="font-display text-lg font-bold text-[var(--color-carbon)]">
+            Deja tu reseña
+          </h3>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="p-5 space-y-5">
         {/* Selector de estrellas */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Calificación
+        <div className="text-center">
+          <label className="block text-sm font-bold text-[var(--color-carbon)] mb-4">
+            ¿Qué te pareció?
           </label>
+          
           <div
-            className="flex gap-1"
+            className="flex justify-center gap-2 mb-3"
             onMouseLeave={() => setHoverEstrellas(0)}
           >
             {[1, 2, 3, 4, 5].map((num) => (
               <EstrellaClickeable
                 key={num}
+                index={num}
                 filled={num <= displayEstrellas}
                 onHover={() => setHoverEstrellas(num)}
                 onClick={() => setEstrellas(num)}
               />
             ))}
           </div>
+
+          {/* Mensaje de calificación */}
+          <div className={`h-8 transition-all duration-300 ${displayEstrellas > 0 ? 'opacity-100' : 'opacity-0'}`}>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-gradient-to-r from-[var(--color-mango)]/20 to-[var(--color-salsa)]/20 text-sm font-semibold text-[var(--color-carbon)]">
+              {mensajesCalificacion[displayEstrellas]}
+            </span>
+          </div>
         </div>
 
         {/* Campo de comentario */}
         <div>
-          <label htmlFor="comentario" className="block text-sm font-medium text-gray-700 mb-2">
-            Comentario (opcional)
+          <label className="block text-sm font-bold text-[var(--color-carbon)] mb-2">
+            Comentario <span className="font-normal text-gray-400">(opcional)</span>
           </label>
           <textarea
-            id="comentario"
             value={comentario}
             onChange={(e) => setComentario(e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
-            placeholder="Cuéntanos sobre tu experiencia..."
+            className="input-field resize-none"
+            placeholder="Cuéntanos tu experiencia..."
             maxLength={500}
           />
-          <p className="text-xs text-gray-500 mt-1">
-            {comentario.length}/500 caracteres
+          <p className="text-xs text-gray-400 mt-1 text-right">
+            {comentario.length}/500
           </p>
         </div>
 
         {/* Mensajes de error/éxito */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-2 rounded-lg text-sm">
-            {error}
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-red-50 border border-red-200 animate-scale-in">
+            <span className="text-xl">⚠️</span>
+            <p className="text-sm text-red-800">{error}</p>
           </div>
         )}
 
         {exito && (
-          <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-2 rounded-lg text-sm">
-            ¡Reseña enviada con éxito!
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-green-50 border border-green-200 animate-scale-in">
+            <span className="text-xl">🎉</span>
+            <p className="text-sm text-green-800 font-medium">¡Gracias por tu reseña!</p>
           </div>
         )}
 
@@ -137,9 +167,21 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
         <button
           type="submit"
           disabled={loading || estrellas === 0}
-          className="w-full bg-orange-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          className="w-full btn-primary py-4 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Enviando...' : 'Enviar reseña'}
+          <span className="flex items-center justify-center gap-2">
+            {loading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Enviando...
+              </>
+            ) : (
+              <>
+                <span>✨</span>
+                Enviar reseña
+              </>
+            )}
+          </span>
         </button>
       </form>
     </div>
