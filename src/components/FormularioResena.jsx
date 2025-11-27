@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Card, Button } from './ui'
 
 function EstrellaClickeable({ filled, onHover, onClick }) {
   return (
@@ -8,16 +7,12 @@ function EstrellaClickeable({ filled, onHover, onClick }) {
       type="button"
       onMouseEnter={onHover}
       onClick={onClick}
-      className="focus:outline-none transition-all duration-200 hover:scale-110 active:scale-95"
+      className="focus:outline-none transition-all duration-300 hover:scale-125 active:scale-95"
     >
       <svg
-        className={`w-8 h-8 transition-all duration-200 ${
-          filled
-            ? 'star-filled'
-            : 'text-gray-300 hover:text-gray-400'
-        }`}
-        fill={filled ? 'currentColor' : 'none'}
-        stroke="currentColor"
+        className={`w-10 h-10 transition-all duration-300 star-neon ${filled ? 'filled' : ''}`}
+        fill={filled ? 'var(--neon-yellow)' : 'none'}
+        stroke={filled ? 'var(--neon-yellow)' : 'var(--text-muted)'}
         strokeWidth="2"
         viewBox="0 0 24 24"
       >
@@ -80,20 +75,27 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
   const starLabels = ['', 'Malo', 'Regular', 'Bueno', 'Muy bueno', 'Excelente']
 
   return (
-    <Card>
-      <h3 className="font-semibold text-gray-900 mb-4">
-        Deja tu reseña
-      </h3>
+    <div className="neon-card rounded-3xl p-6">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--neon-pink)] to-[var(--neon-orange)] flex items-center justify-center" style={{ boxShadow: 'var(--glow-pink)' }}>
+          <svg className="w-5 h-5 text-[var(--night-black)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+          </svg>
+        </div>
+        <h3 className="font-display text-xl text-[var(--text-bright)] tracking-wide">
+          DEJA TU RESEÑA
+        </h3>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Selector de estrellas */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
+          <label className="block text-sm font-display text-[var(--text-dim)] tracking-wider uppercase mb-4">
             Calificación
           </label>
           <div className="flex flex-col items-center">
             <div
-              className="flex gap-1"
+              className="flex gap-2"
               onMouseLeave={() => setHoverEstrellas(0)}
             >
               {[1, 2, 3, 4, 5].map((num) => (
@@ -105,65 +107,72 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
                 />
               ))}
             </div>
-            <p className={`text-sm font-medium mt-2 h-5 transition-all duration-200 ${
-              displayEstrellas > 0 ? 'text-warm-600' : 'text-gray-400'
-            }`}>
-              {displayEstrellas > 0 ? starLabels[displayEstrellas] : 'Toca para calificar'}
+            <p className={`text-base font-display mt-3 h-6 tracking-wider transition-all duration-300 ${
+              displayEstrellas > 0 ? 'text-[var(--neon-yellow)]' : 'text-[var(--text-muted)]'
+            }`} style={displayEstrellas > 0 ? { textShadow: 'var(--glow-yellow)' } : {}}>
+              {displayEstrellas > 0 ? starLabels[displayEstrellas].toUpperCase() : 'TOCA PARA CALIFICAR'}
             </p>
           </div>
         </div>
 
         {/* Campo de comentario */}
-        <div className="space-y-1.5">
-          <label htmlFor="comentario" className="block text-sm font-medium text-gray-700">
+        <div className="space-y-2">
+          <label className="block text-sm font-display text-[var(--text-dim)] tracking-wider uppercase">
             Comentario (opcional)
           </label>
           <textarea
-            id="comentario"
             value={comentario}
             onChange={(e) => setComentario(e.target.value)}
             rows={3}
-            className="w-full px-3 py-2.5 text-sm bg-white text-gray-900 placeholder-gray-400 border border-gray-200 rounded-xl resize-none transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:border-accent-500 focus:ring-accent-500/20 hover:border-gray-300"
+            className="input-dark resize-none"
             placeholder="Cuéntanos sobre tu experiencia..."
             maxLength={500}
           />
-          <p className="text-xs text-gray-400 text-right">
+          <p className="text-xs text-[var(--text-muted)] text-right">
             {comentario.length}/500
           </p>
         </div>
 
         {/* Mensajes de error/éxito */}
         {error && (
-          <div className="flex items-center gap-3 p-3 bg-error-50 border border-error-100 rounded-xl">
-            <svg className="w-5 h-5 text-error-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--neon-pink)]/10 border border-[var(--neon-pink)]/20 animate-fade-in">
+            <svg className="w-5 h-5 text-[var(--neon-pink)] flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
-            <p className="text-sm text-error-600">{error}</p>
+            <p className="text-sm text-[var(--neon-pink)]">{error}</p>
           </div>
         )}
 
         {exito && (
-          <div className="flex items-center gap-3 p-3 bg-success-50 border border-success-100 rounded-xl animate-fade-in">
-            <svg className="w-5 h-5 text-success-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--neon-green)]/10 border border-[var(--neon-green)]/20 animate-fade-in">
+            <svg className="w-5 h-5 text-[var(--neon-green)] flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-sm text-success-600">¡Reseña enviada con éxito!</p>
+            <p className="text-sm text-[var(--neon-green)]">¡Reseña enviada con éxito!</p>
           </div>
         )}
 
         {/* Botón de envío */}
-        <Button
+        <button
           type="submit"
-          loading={loading}
-          disabled={estrellas === 0}
-          fullWidth
+          disabled={loading || estrellas === 0}
+          className="btn-neon w-full flex items-center justify-center gap-2"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-          </svg>
-          Enviar reseña
-        </Button>
+          {loading ? (
+            <>
+              <div className="w-5 h-5 border-2 border-[var(--night-black)] border-t-transparent rounded-full animate-spin" />
+              Enviando...
+            </>
+          ) : (
+            <>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+              </svg>
+              Enviar reseña
+            </>
+          )}
+        </button>
       </form>
-    </Card>
+    </div>
   )
 }

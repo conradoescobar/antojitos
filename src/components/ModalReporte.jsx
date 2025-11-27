@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Button } from './ui'
 
 export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
   const [tipoReporte, setTipoReporte] = useState('')
@@ -51,18 +50,17 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
   // Estado de éxito
   if (enviado) {
     return (
-      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center animate-fade-in">
-        <div className="absolute inset-0 bg-gray-900/20 backdrop-blur-sm" onClick={onCerrar} />
-        <div className="relative bg-white rounded-t-2xl sm:rounded-2xl p-8 max-w-sm w-full text-center animate-slide-up sm:animate-scale-in shadow-xl">
-          <div className="w-14 h-14 bg-success-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg className="w-7 h-7 text-success-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+      <div className="modal-overlay animate-fade-in">
+        <div className="modal-content p-8 max-w-sm text-center animate-scale-in">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--neon-green)] to-[var(--neon-cyan)] flex items-center justify-center mx-auto mb-4" style={{ boxShadow: 'var(--glow-cyan)' }}>
+            <svg className="w-8 h-8 text-[var(--night-black)]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Gracias por tu reporte
+          <h3 className="font-display text-2xl gradient-text mb-2 tracking-wide">
+            ¡GRACIAS!
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-[var(--text-muted)]">
             Revisaremos la información que nos enviaste.
           </p>
         </div>
@@ -72,49 +70,47 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center animate-fade-in"
+      className="modal-overlay animate-fade-in"
       onClick={(e) => e.target === e.currentTarget && onCerrar()}
     >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gray-900/20 backdrop-blur-sm" />
-
       {/* Modal */}
-      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto animate-slide-up sm:animate-scale-in shadow-xl safe-area-bottom">
+      <div className="modal-content animate-slide-up safe-area-bottom">
         {/* Header */}
-        <div className="sticky top-0 bg-white px-5 py-4 border-b border-gray-100 flex justify-between items-center rounded-t-2xl">
+        <div className="sticky top-0 glass-dark px-6 py-5 border-b border-white/5 flex justify-between items-center">
           <div>
-            <h3 className="text-base font-semibold text-gray-900">
-              Reportar problema
+            <h3 className="font-display text-xl gradient-text tracking-wide">
+              REPORTAR PROBLEMA
             </h3>
-            <p className="text-sm text-gray-500 truncate max-w-[200px]">
+            <p className="text-sm text-[var(--text-muted)] truncate max-w-[200px]">
               {nombrePuesto}
             </p>
           </div>
           <button
             onClick={onCerrar}
-            className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors text-gray-500"
+            className="w-10 h-10 rounded-xl bg-[var(--night-medium)] flex items-center justify-center hover:bg-[var(--neon-pink)] hover:text-[var(--night-black)] transition-all duration-300 hover:rotate-90"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-5">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Tipo de reporte */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-display text-[var(--text-dim)] tracking-wider uppercase mb-3">
               ¿Qué problema tiene este lugar?
             </label>
             <div className="space-y-2">
               {tiposReporte.map((tipo) => (
                 <label
                   key={tipo.id}
-                  className={`flex items-center gap-3 p-3.5 rounded-xl cursor-pointer transition-all duration-150 border ${
+                  className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-300 border ${
                     tipoReporte === tipo.label
-                      ? 'bg-accent-50 border-accent-200 text-gray-900'
-                      : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                      ? 'bg-[var(--neon-pink)]/10 border-[var(--neon-pink)]/50 text-[var(--text-bright)]'
+                      : 'bg-[var(--night-medium)] border-transparent text-[var(--text-dim)] hover:border-white/10'
                   }`}
+                  style={tipoReporte === tipo.label ? { boxShadow: '0 0 20px rgba(255, 46, 99, 0.1)' } : {}}
                 >
                   <input
                     type="radio"
@@ -124,12 +120,14 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
                     onChange={(e) => setTipoReporte(e.target.value)}
                     className="sr-only"
                   />
-                  <span className="text-lg">{tipo.icon}</span>
-                  <span className="text-sm font-medium flex-1">{tipo.label}</span>
+                  <span className="text-2xl">{tipo.icon}</span>
+                  <span className="text-sm font-semibold flex-1">{tipo.label}</span>
                   {tipoReporte === tipo.label && (
-                    <svg className="w-5 h-5 text-accent-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <div className="w-6 h-6 rounded-full bg-[var(--neon-pink)] flex items-center justify-center" style={{ boxShadow: 'var(--glow-pink)' }}>
+                      <svg className="w-4 h-4 text-[var(--night-black)]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
                   )}
                 </label>
               ))}
@@ -137,16 +135,15 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
           </div>
 
           {/* Comentario opcional */}
-          <div className="space-y-1.5">
-            <label htmlFor="comentario" className="block text-sm font-medium text-gray-700">
+          <div className="space-y-2">
+            <label className="block text-sm font-display text-[var(--text-dim)] tracking-wider uppercase">
               Comentario adicional (opcional)
             </label>
             <textarea
-              id="comentario"
               value={comentario}
               onChange={(e) => setComentario(e.target.value)}
               rows={3}
-              className="w-full px-3 py-2.5 text-sm bg-white text-gray-900 placeholder-gray-400 border border-gray-200 rounded-xl resize-none transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:border-accent-500 focus:ring-accent-500/20 hover:border-gray-300"
+              className="input-dark resize-none"
               placeholder="Agrega cualquier detalle adicional..."
               maxLength={300}
             />
@@ -154,23 +151,28 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
 
           {/* Botones */}
           <div className="flex gap-3 pt-2">
-            <Button
+            <button
               type="button"
-              variant="secondary"
               onClick={onCerrar}
-              className="flex-1"
+              className="btn-secondary flex-1"
             >
               Cancelar
-            </Button>
-            <Button
+            </button>
+            <button
               type="submit"
-              variant="danger"
-              disabled={!tipoReporte}
-              loading={loading}
-              className="flex-1"
+              disabled={!tipoReporte || loading}
+              className="btn-neon flex-1 flex items-center justify-center gap-2"
+              style={{ background: tipoReporte ? 'linear-gradient(135deg, var(--neon-pink) 0%, #ff1744 100%)' : undefined }}
             >
-              Enviar reporte
-            </Button>
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-[var(--night-black)] border-t-transparent rounded-full animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                'Enviar reporte'
+              )}
+            </button>
           </div>
         </form>
       </div>
