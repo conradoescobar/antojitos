@@ -51,7 +51,7 @@ function MapUpdater({ center, userLocation }) {
   // Centrar en ubicación del usuario al cargar
   useEffect(() => {
     if (userLocation) {
-      map.setView(userLocation, 15, { animate: true, duration: 0.8 })
+      map.setView(userLocation, 17, { animate: true, duration: 0.8 })
     }
   }, [userLocation, map])
 
