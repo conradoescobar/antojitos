@@ -400,3 +400,18 @@ textarea.input-field {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* App container - simula formato móvil en escritorio */
+@media (min-width: 481px) {
+  #root {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    box-shadow: 0 0 40px rgba(26, 25, 21, 0.1);
+  }
+
+  body {
+    background: #E5E1DB;
+  }
+}
