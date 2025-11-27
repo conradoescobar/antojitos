@@ -20,23 +20,20 @@ const tipoEmojis = {
 }
 
 // Ícono personalizado para el mapa
+const puestoIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 50" width="40" height="50">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E63946"/>
+      <stop offset="100%" style="stop-color:#FFB703"/>
+    </linearGradient>
+  </defs>
+  <path d="M20 0C9 0 0 9 0 20c0 15 20 30 20 30s20-15 20-30C40 9 31 0 20 0z" fill="url(%23grad)"/>
+  <circle cx="20" cy="18" r="8" fill="white"/>
+  <circle cx="20" cy="18" r="4" fill="#E63946"/>
+</svg>`
+
 const puestoIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 50" width="40" height="50">
-      <defs>
-        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#E63946"/>
-          <stop offset="100%" style="stop-color:#FFB703"/>
-        </linearGradient>
-        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
-        </filter>
-      </defs>
-      <path d="M20 0C9 0 0 9 0 20c0 15 20 30 20 30s20-15 20-30C40 9 31 0 20 0z" 
-            fill="url(#grad)" filter="url(#shadow)"/>
-      <circle cx="20" cy="18" r="8" fill="white"/>
-    </svg>
-  `),
+  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(puestoIconSvg),
   iconSize: [40, 50],
   iconAnchor: [20, 50],
   popupAnchor: [0, -50]
