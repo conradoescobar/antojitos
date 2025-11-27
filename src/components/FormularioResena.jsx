@@ -77,7 +77,13 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
       setTimeout(() => setExito(false), 3000)
     } catch (err) {
       console.error('Error enviando resena:', err)
-      setError('Error al enviar la resena. Intenta de nuevo.')
+      if (err.message?.includes('permission denied') || err.message?.includes('row-level security')) {
+        setError('Error de permisos. Verifica las politicas RLS de la tabla "resenas" en Supabase.')
+      } else if (err.code === '42P01') {
+        setError('La tabla "resenas" no existe. Creala en Supabase.')
+      } else {
+        setError(`Error: ${err.message || 'Error al enviar la resena. Intenta de nuevo.'}`)
+      }
     } finally {
       setLoading(false)
     }
