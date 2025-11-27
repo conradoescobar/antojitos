@@ -29,40 +29,36 @@ const createUserIcon = () => {
   })
 }
 
-// Marcador de puesto - estilo minimalista Apple
-const createPuestoIcon = (isSelected = false) => {
-  const scale = isSelected ? 1.15 : 1
-  const size = 44 * scale
+// Marcador de puesto - pin terracota original
+const puestoIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" width="40" height="48">
+  <path d="M20 2C12.27 2 6 8.27 6 16c0 10 14 28 14 28s14-18 14-28c0-7.73-6.27-14-14-14z"
+        fill="#D97757" stroke="white" stroke-width="2"/>
+  <circle cx="20" cy="16" r="6" fill="white"/>
+  <circle cx="20" cy="16" r="3" fill="#D97757"/>
+</svg>`
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 52" width="${size}" height="${size * 52/44}">
-    <defs>
-      <filter id="markerShadow${isSelected ? 'Sel' : ''}" x="-30%" y="-10%" width="160%" height="140%">
-        <feDropShadow dx="0" dy="${isSelected ? 4 : 2}" stdDeviation="${isSelected ? 6 : 4}" flood-color="#000" flood-opacity="${isSelected ? 0.25 : 0.18}"/>
-      </filter>
-      <linearGradient id="markerGrad${isSelected ? 'Sel' : ''}" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" style="stop-color:#FF6B4A"/>
-        <stop offset="100%" style="stop-color:#E8533C"/>
-      </linearGradient>
-    </defs>
-    <g filter="url(#markerShadow${isSelected ? 'Sel' : ''})">
-      <path d="M22 4C13.16 4 6 11.16 6 20c0 12 16 28 16 28s16-16 16-28c0-8.84-7.16-16-16-16z"
-            fill="url(#markerGrad${isSelected ? 'Sel' : ''})" />
-      <circle cx="22" cy="19" r="8" fill="white" fill-opacity="0.95"/>
-      <path d="M19 19l2 2 4-4" stroke="#E8533C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    </g>
-  </svg>`
-
-  return new L.Icon({
-    iconUrl: 'data:image/svg+xml,' + encodeURIComponent(svg),
-    iconSize: [size, size * 52/44],
-    iconAnchor: [size/2, size * 52/44],
-    className: isSelected ? 'marker-selected' : 'marker-default'
-  })
-}
+const puestoIconSelectedSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" width="46" height="55">
+  <path d="M20 2C12.27 2 6 8.27 6 16c0 10 14 28 14 28s14-18 14-28c0-7.73-6.27-14-14-14z"
+        fill="#D97757" stroke="white" stroke-width="2.5"/>
+  <circle cx="20" cy="16" r="6" fill="white"/>
+  <circle cx="20" cy="16" r="3" fill="#D97757"/>
+</svg>`
 
 const userIcon = createUserIcon()
-const puestoIcon = createPuestoIcon(false)
-const puestoIconSelected = createPuestoIcon(true)
+
+const puestoIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(puestoIconSvg),
+  iconSize: [40, 48],
+  iconAnchor: [20, 48],
+  className: 'marker-default'
+})
+
+const puestoIconSelected = new L.Icon({
+  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(puestoIconSelectedSvg),
+  iconSize: [46, 55],
+  iconAnchor: [23, 55],
+  className: 'marker-selected'
+})
 
 // Componente para manejar eventos del mapa
 function MapController({ center, userLocation, selectedPuesto, onMapClick }) {
