@@ -50,6 +50,13 @@ const AlertIcon = () => (
   </svg>
 )
 
+const TrashIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </svg>
+)
+
 const StarIcon = ({ filled, size = 24 }) => (
   <svg
     width={size}
@@ -98,6 +105,8 @@ export default function DetallePuesto() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [mostrarModalReporte, setMostrarModalReporte] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(null) // { type: 'puesto' | 'resena', id?: string }
+  const [deleting, setDeleting] = useState(false)
 
   const fetchResenas = async () => {
     try {
@@ -144,6 +153,46 @@ export default function DetallePuesto() {
 
     fetchPuestoYResenas()
   }, [id])
+
+  // Eliminar puesto
+  const handleDeletePuesto = async () => {
+    try {
+      setDeleting(true)
+      const { error } = await supabase
+        .from('puestos')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+      navigate('/')
+    } catch (err) {
+      console.error('Error eliminando puesto:', err)
+      alert('Error al eliminar: ' + err.message)
+    } finally {
+      setDeleting(false)
+      setConfirmDelete(null)
+    }
+  }
+
+  // Eliminar reseña
+  const handleDeleteResena = async (resenaId) => {
+    try {
+      setDeleting(true)
+      const { error } = await supabase
+        .from('resenas')
+        .delete()
+        .eq('id', resenaId)
+
+      if (error) throw error
+      await fetchResenas()
+    } catch (err) {
+      console.error('Error eliminando reseña:', err)
+      alert('Error al eliminar: ' + err.message)
+    } finally {
+      setDeleting(false)
+      setConfirmDelete(null)
+    }
+  }
 
   if (loading) {
     return (
@@ -225,6 +274,13 @@ export default function DetallePuesto() {
           >
             {puesto.nombre}
           </h1>
+          <button
+            onClick={() => setConfirmDelete({ type: 'puesto' })}
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors hover:bg-red-50"
+            style={{ color: '#dc2626' }}
+          >
+            <TrashIcon />
+          </button>
         </div>
       </header>
 
@@ -410,13 +466,25 @@ export default function DetallePuesto() {
                         ))}
                       </div>
                     </div>
-                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      {new Date(resena.created_at).toLocaleDateString('es-MX', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        {new Date(resena.created_at).toLocaleDateString('es-MX', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </span>
+                      <button
+                        onClick={() => setConfirmDelete({ type: 'resena', id: resena.id })}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-red-50"
+                        style={{ color: '#dc2626' }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Puntuaciones por categoría */}
@@ -490,6 +558,69 @@ export default function DetallePuesto() {
           nombrePuesto={puesto.nombre}
           onCerrar={() => setMostrarModalReporte(false)}
         />
+      )}
+
+      {/* Modal de confirmación de eliminación */}
+      {confirmDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
+          style={{ background: 'rgba(0, 0, 0, 0.5)' }}
+          onClick={() => setConfirmDelete(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl p-6 animate-scale-in"
+            style={{ background: 'var(--bg-card)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center"
+              style={{ background: 'rgba(220, 38, 38, 0.1)' }}
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-center mb-2" style={{ color: 'var(--text-primary)' }}>
+              {confirmDelete.type === 'puesto' ? 'Eliminar puesto' : 'Eliminar reseña'}
+            </h3>
+            <p className="text-sm text-center mb-6" style={{ color: 'var(--text-secondary)' }}>
+              {confirmDelete.type === 'puesto'
+                ? 'Se eliminarán también todas las reseñas asociadas. Esta acción no se puede deshacer.'
+                : 'Esta acción no se puede deshacer.'}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="flex-1 py-3 rounded-xl font-medium transition-colors"
+                style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  if (confirmDelete.type === 'puesto') {
+                    handleDeletePuesto()
+                  } else {
+                    handleDeleteResena(confirmDelete.id)
+                  }
+                }}
+                disabled={deleting}
+                className="flex-1 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                style={{ background: '#dc2626', color: 'white' }}
+              >
+                {deleting ? (
+                  <>
+                    <div className="spinner" style={{ width: '18px', height: '18px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} />
+                    Eliminando...
+                  </>
+                ) : (
+                  'Eliminar'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
