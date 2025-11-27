@@ -465,7 +465,7 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, 
                 zoomControl={true}
               >
                 <TileLayer
-                  url="https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
+                  url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                   maxZoom={20}
                 />
                 <LocationPicker

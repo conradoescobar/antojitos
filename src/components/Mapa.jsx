@@ -132,9 +132,9 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
       >
         <MapUpdater center={mapCenter} userLocation={userLocation} />
 
-        {/* Mapa minimalista */}
+        {/* Mapa minimalista CARTO Positron */}
         <TileLayer
-          url="https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
           maxZoom={20}
         />
 
