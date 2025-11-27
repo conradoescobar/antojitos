@@ -85,7 +85,7 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
     const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
     if (!supabaseUrl || !supabaseAnonKey) {
-      setError('Error de configuración: Variables de Supabase no configuradas.')
+      setError('Error de configuracion: Variables de Supabase no configuradas.')
       return
     }
 
@@ -148,13 +148,13 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
     } catch (err) {
       console.error('Error agregando puesto:', err)
       if (err.code === 1) {
-        setError('No se pudo obtener tu ubicación. Por favor permite el acceso.')
+        setError('No se pudo obtener tu ubicacion. Por favor permite el acceso.')
       } else if (err.message && err.message.includes('fotos-puestos')) {
         setError('Error subiendo la foto. Verifica el bucket en Supabase.')
       } else if (err.message) {
         let errorMessage = err.message
         if (err.message.includes('permission denied') || err.message.includes('row-level security')) {
-          errorMessage = 'Error de permisos. Verifica las políticas RLS en Supabase.'
+          errorMessage = 'Error de permisos. Verifica las politicas RLS en Supabase.'
         }
         setError(`Error: ${errorMessage}`)
       } else {
@@ -172,10 +172,10 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       <div>
         <label
           htmlFor="nombre"
-          className="block text-sm font-semibold mb-2"
+          className="block text-sm font-medium mb-2"
           style={{ color: 'var(--text-primary)' }}
         >
-          Nombre del puesto <span style={{ color: 'var(--accent-coral)' }}>*</span>
+          Nombre del puesto <span style={{ color: 'var(--primary)' }}>*</span>
         </label>
         <input
           type="text"
@@ -192,7 +192,7 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       <div>
         <label
           htmlFor="tipo"
-          className="block text-sm font-semibold mb-2"
+          className="block text-sm font-medium mb-2"
           style={{ color: 'var(--text-primary)' }}
         >
           Tipo de comida
@@ -212,14 +212,14 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
         </select>
       </div>
 
-      {/* Descripción */}
+      {/* Descripcion */}
       <div>
         <label
           htmlFor="descripcion"
-          className="block text-sm font-semibold mb-2"
+          className="block text-sm font-medium mb-2"
           style={{ color: 'var(--text-primary)' }}
         >
-          Descripción
+          Descripcion
         </label>
         <textarea
           id="descripcion"
@@ -227,7 +227,7 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
           onChange={(e) => setDescripcion(e.target.value)}
           rows={3}
           className="input-field"
-          placeholder="Breve descripción del puesto..."
+          placeholder="Breve descripcion del puesto..."
           maxLength={300}
         />
         <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
@@ -237,7 +237,7 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
 
       {/* Horario */}
       <div>
-        <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
           Horario
         </label>
         <div className="grid grid-cols-2 gap-3">
@@ -270,14 +270,14 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
 
       {/* Foto */}
       <div>
-        <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
           Foto (opcional)
         </label>
         {previsualizacion ? (
-          <div className="relative rounded-2xl overflow-hidden">
+          <div className="relative rounded-xl overflow-hidden">
             <img
               src={previsualizacion}
-              alt="Previsualización"
+              alt="Previsualizacion"
               className="w-full h-48 object-cover"
             />
             <button
@@ -288,7 +288,7 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
               }}
               className="absolute top-3 right-3 w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-105"
               style={{
-                background: 'rgba(13, 11, 14, 0.8)',
+                background: 'rgba(255, 255, 255, 0.9)',
                 color: 'var(--text-primary)'
               }}
             >
@@ -297,16 +297,16 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
           </div>
         ) : (
           <label
-            className="flex flex-col items-center justify-center w-full h-40 rounded-2xl cursor-pointer transition-all hover:scale-[1.01]"
+            className="flex flex-col items-center justify-center w-full h-40 rounded-xl cursor-pointer transition-all hover:border-[var(--primary)]"
             style={{
-              background: 'var(--bg-elevated)',
-              border: '2px dashed var(--border-subtle)',
+              background: 'var(--bg-secondary)',
+              border: '2px dashed var(--border)',
               color: 'var(--text-muted)'
             }}
           >
             <CameraIcon />
             <span className="text-sm mt-2">Toca para agregar foto</span>
-            <span className="text-xs mt-1">Máx. 5MB</span>
+            <span className="text-xs mt-1">Max. 5MB</span>
             <input
               type="file"
               accept="image/*"
@@ -317,33 +317,33 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
         )}
       </div>
 
-      {/* Info de ubicación */}
+      {/* Info de ubicacion */}
       <div
-        className="flex items-center gap-3 p-4 rounded-2xl"
+        className="flex items-center gap-3 p-4 rounded-xl"
         style={{
-          background: 'rgba(34, 211, 238, 0.1)',
-          border: '1px solid rgba(34, 211, 238, 0.2)'
+          background: 'var(--primary-light)',
+          border: '1px solid rgba(217, 119, 87, 0.2)'
         }}
       >
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: 'rgba(34, 211, 238, 0.15)', color: 'var(--accent-cyan)' }}
+          style={{ background: 'rgba(217, 119, 87, 0.15)', color: 'var(--primary)' }}
         >
           <MapPinIcon />
         </div>
-        <p className="text-sm" style={{ color: 'var(--accent-cyan)' }}>
-          Se usará tu ubicación actual para marcar el puesto
+        <p className="text-sm" style={{ color: 'var(--primary)' }}>
+          Se usara tu ubicacion actual para marcar el puesto
         </p>
       </div>
 
       {/* Error */}
       {error && (
         <div
-          className="p-4 rounded-2xl"
+          className="p-4 rounded-xl"
           style={{
-            background: 'rgba(255, 107, 107, 0.1)',
-            border: '1px solid rgba(255, 107, 107, 0.2)',
-            color: 'var(--accent-coral)'
+            background: 'rgba(217, 119, 87, 0.1)',
+            border: '1px solid rgba(217, 119, 87, 0.2)',
+            color: 'var(--primary)'
           }}
         >
           <p className="text-sm">{error}</p>
@@ -359,18 +359,12 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
         >
           {ubicacionPendiente ? (
             <>
-              <div
-                className="w-5 h-5 rounded-full animate-spin"
-                style={{ border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white' }}
-              />
-              Obteniendo ubicación...
+              <div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }} />
+              Obteniendo ubicacion...
             </>
           ) : loading ? (
             <>
-              <div
-                className="w-5 h-5 rounded-full animate-spin"
-                style={{ border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white' }}
-              />
+              <div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }} />
               Guardando...
             </>
           ) : (

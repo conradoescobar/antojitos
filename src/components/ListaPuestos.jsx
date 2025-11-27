@@ -116,16 +116,10 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
     return (
       <div
         className="h-full flex items-center justify-center"
-        style={{ background: 'var(--bg-deep)' }}
+        style={{ background: 'var(--bg-main)' }}
       >
         <div className="text-center">
-          <div
-            className="w-14 h-14 rounded-full mx-auto mb-5 animate-spin"
-            style={{
-              border: '3px solid var(--bg-elevated)',
-              borderTopColor: 'var(--accent-amber)'
-            }}
-          />
+          <div className="spinner mx-auto mb-5" />
           <p style={{ color: 'var(--text-secondary)' }}>Buscando antojitos...</p>
         </div>
       </div>
@@ -136,20 +130,20 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
     return (
       <div
         className="h-full flex items-center justify-center p-6"
-        style={{ background: 'var(--bg-deep)' }}
+        style={{ background: 'var(--bg-main)' }}
       >
         <div className="text-center max-w-sm">
           <div
             className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
-            style={{ background: 'rgba(255, 107, 107, 0.15)' }}
+            style={{ background: 'rgba(217, 119, 87, 0.1)' }}
           >
-            <svg className="w-8 h-8" style={{ color: 'var(--accent-coral)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className="w-8 h-8" style={{ color: 'var(--primary)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </div>
-          <p className="font-semibold mb-2" style={{ color: 'var(--accent-coral)' }}>
+          <p className="font-semibold mb-2" style={{ color: 'var(--primary)' }}>
             Error al cargar
           </p>
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -161,11 +155,11 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
   }
 
   return (
-    <div className="h-full overflow-y-auto pattern-dots" style={{ background: 'var(--bg-deep)' }}>
+    <div className="h-full overflow-y-auto" style={{ background: 'var(--bg-main)' }}>
       {/* Barra de búsqueda */}
       <div
         className="sticky top-0 z-20 px-4 pt-4 pb-2"
-        style={{ background: 'linear-gradient(180deg, var(--bg-deep) 80%, transparent 100%)' }}
+        style={{ background: 'var(--bg-main)' }}
       >
         <div className="relative">
           <input
@@ -174,7 +168,6 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
             onChange={(e) => onBusquedaChange && onBusquedaChange(e.target.value)}
             placeholder="Buscar por nombre, tipo..."
             className="input-field pl-12 pr-12"
-            style={{ fontSize: '0.95rem' }}
           />
           <div
             className="absolute left-4 top-1/2 -translate-y-1/2"
@@ -185,7 +178,7 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
           {busqueda && (
             <button
               onClick={() => onBusquedaChange && onBusquedaChange('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors hover:bg-[var(--bg-elevated)]"
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors hover:bg-[var(--bg-secondary)]"
               style={{ color: 'var(--text-muted)' }}
             >
               <CloseIcon />
@@ -197,20 +190,14 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
       {/* Chips de filtro */}
       <div
         className="sticky top-[72px] z-10 px-4 pb-3"
-        style={{ background: 'var(--bg-deep)' }}
+        style={{ background: 'var(--bg-main)' }}
       >
         <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
           {tiposDisponibles.map((tipo) => (
             <button
               key={tipo}
               onClick={() => onFiltroChange && onFiltroChange(tipo)}
-              className={`chip whitespace-nowrap transition-all duration-300 ${
-                filtroTipo === tipo ? 'chip-active' : 'chip-default'
-              }`}
-              style={filtroTipo === tipo ? {
-                transform: 'scale(1.05)',
-                boxShadow: '0 4px 16px rgba(245, 158, 11, 0.3)'
-              } : {}}
+              className={`chip ${filtroTipo === tipo ? 'chip-active' : ''}`}
             >
               {tipo}
             </button>
@@ -226,7 +213,7 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
           </span>
           {' '}{puestosConDistancia.length === 1 ? 'lugar encontrado' : 'lugares encontrados'}
           {filtroTipo !== 'Todos' && (
-            <span style={{ color: 'var(--accent-amber)' }}> · {filtroTipo}</span>
+            <span style={{ color: 'var(--primary)' }}> · {filtroTipo}</span>
           )}
         </p>
       </div>
@@ -238,11 +225,8 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
             <div
               key={puesto.id}
               onClick={() => onPuestoClick(puesto)}
-              className={`rounded-2xl overflow-hidden cursor-pointer card-hover animate-fade-in-up stagger-${Math.min(index + 1, 8)}`}
-              style={{
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-subtle)'
-              }}
+              className="card cursor-pointer animate-fade-in-up"
+              style={{ animationDelay: `${index * 0.05}s` }}
             >
               <div className="flex gap-4 p-4">
                 {/* Imagen */}
@@ -257,7 +241,7 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
                     <div
                       className="w-24 h-24 rounded-xl flex items-center justify-center"
                       style={{
-                        background: 'linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-card) 100%)',
+                        background: 'var(--bg-secondary)',
                         color: 'var(--text-muted)'
                       }}
                     >
@@ -269,24 +253,24 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
                 {/* Info */}
                 <div className="flex-1 min-w-0 py-1">
                   <h3
-                    className="font-bold text-lg truncate mb-1.5"
+                    className="font-semibold text-base truncate mb-1.5"
                     style={{ color: 'var(--text-primary)' }}
                   >
                     {puesto.nombre}
                   </h3>
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     <span
-                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
+                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
                       style={{
-                        background: 'rgba(245, 158, 11, 0.15)',
-                        color: 'var(--accent-amber)'
+                        background: 'var(--primary-light)',
+                        color: 'var(--primary)'
                       }}
                     >
                       {puesto.tipo_comida || 'Comida'}
                     </span>
                     {puesto.distancia !== null && (
                       <span
-                        className="inline-flex items-center gap-1 text-xs font-medium"
+                        className="inline-flex items-center gap-1 text-xs"
                         style={{ color: 'var(--text-muted)' }}
                       >
                         <MapPinIcon />
@@ -298,7 +282,7 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
                   </div>
                   {puesto.descripcion && (
                     <p
-                      className="text-sm line-clamp-2 leading-relaxed"
+                      className="text-sm line-clamp-2"
                       style={{ color: 'var(--text-secondary)' }}
                     >
                       {puesto.descripcion}
@@ -320,10 +304,13 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
       ) : (
         <div className="px-4 py-16 text-center">
           <div
-            className="w-20 h-20 rounded-3xl mx-auto mb-5 flex items-center justify-center"
-            style={{ background: 'var(--bg-card)' }}
+            className="w-20 h-20 rounded-2xl mx-auto mb-5 flex items-center justify-center"
+            style={{ background: 'var(--bg-secondary)' }}
           >
-            <span className="text-4xl">🔍</span>
+            <svg className="w-10 h-10" style={{ color: 'var(--text-muted)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
           </div>
           <p className="font-semibold text-lg mb-2" style={{ color: 'var(--text-primary)' }}>
             No hay resultados

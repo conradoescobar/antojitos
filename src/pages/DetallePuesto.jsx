@@ -9,14 +9,8 @@ import 'leaflet/dist/leaflet.css'
 
 // Ícono personalizado para el mapa
 const puestoIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40">
-  <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FF6B6B"/>
-      <stop offset="100%" style="stop-color:#F59E0B"/>
-    </linearGradient>
-  </defs>
   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
-        fill="url(#grad)" stroke="white" stroke-width="1.5"/>
+        fill="#D97757" stroke="white" stroke-width="1.5"/>
   <circle cx="12" cy="9" r="3" fill="white"/>
 </svg>`
 
@@ -29,7 +23,7 @@ const puestoIcon = new L.Icon({
 
 // Iconos SVG
 const BackIcon = () => (
-  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M19 12H5M12 19l-7-7 7-7" />
   </svg>
 )
@@ -66,8 +60,7 @@ const StarIcon = ({ filled, size = 24 }) => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className={`star ${filled ? 'star-filled' : ''}`}
-    style={{ color: filled ? 'var(--accent-amber)' : 'var(--text-muted)' }}
+    style={{ color: filled ? '#D97757' : 'var(--text-muted)' }}
   >
     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
   </svg>
@@ -78,7 +71,7 @@ function PromedioEstrellas({ promedio, total }) {
     <div className="flex items-center gap-3">
       <div className="flex gap-0.5">
         {[1, 2, 3, 4, 5].map((num) => (
-          <StarIcon key={num} filled={num <= Math.round(promedio)} size={22} />
+          <StarIcon key={num} filled={num <= Math.round(promedio)} size={20} />
         ))}
       </div>
       <span style={{ color: 'var(--text-secondary)' }}>
@@ -87,10 +80,10 @@ function PromedioEstrellas({ promedio, total }) {
             <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
               {promedio.toFixed(1)}
             </span>
-            {' · '}{total} {total === 1 ? 'reseña' : 'reseñas'}
+            {' · '}{total} {total === 1 ? 'resena' : 'resenas'}
           </>
         ) : (
-          'Sin reseñas aún'
+          'Sin resenas aun'
         )}
       </span>
     </div>
@@ -117,7 +110,7 @@ export default function DetallePuesto() {
       if (resenasError) throw resenasError
       setResenas(resenasData || [])
     } catch (err) {
-      console.error('Error cargando reseñas:', err)
+      console.error('Error cargando resenas:', err)
     }
   }
 
@@ -149,16 +142,10 @@ export default function DetallePuesto() {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ background: 'var(--bg-deep)' }}
+        style={{ background: 'var(--bg-main)' }}
       >
         <div className="text-center">
-          <div
-            className="w-16 h-16 rounded-full mx-auto mb-6 animate-spin"
-            style={{
-              border: '3px solid var(--bg-elevated)',
-              borderTopColor: 'var(--accent-amber)'
-            }}
-          />
+          <div className="spinner mx-auto mb-6" />
           <p style={{ color: 'var(--text-secondary)' }}>Cargando...</p>
         </div>
       </div>
@@ -169,16 +156,16 @@ export default function DetallePuesto() {
     return (
       <div
         className="min-h-screen flex items-center justify-center p-6"
-        style={{ background: 'var(--bg-deep)' }}
+        style={{ background: 'var(--bg-main)' }}
       >
         <div className="text-center max-w-sm">
           <div
             className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center"
-            style={{ background: 'rgba(255, 107, 107, 0.15)' }}
+            style={{ background: 'var(--primary-light)' }}
           >
             <AlertIcon />
           </div>
-          <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--accent-coral)' }}>
+          <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
             No encontrado
           </h2>
           <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
@@ -197,25 +184,26 @@ export default function DetallePuesto() {
     : 0
 
   return (
-    <div className="min-h-screen pb-8" style={{ background: 'var(--bg-deep)' }}>
-      {/* Header fijo con blur */}
+    <div className="min-h-screen pb-8" style={{ background: 'var(--bg-main)' }}>
+      {/* Header fijo */}
       <header
-        className="sticky top-0 z-50 glass-heavy animate-slide-down"
-        style={{ borderBottom: '1px solid var(--border-subtle)' }}
+        className="sticky top-0 z-50"
+        style={{
+          background: 'var(--bg-card)',
+          borderBottom: '1px solid var(--border-light)',
+          boxShadow: 'var(--shadow-sm)'
+        }}
       >
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
           <button
             onClick={() => navigate('/')}
-            className="w-11 h-11 rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-            style={{
-              background: 'var(--bg-elevated)',
-              color: 'var(--text-primary)'
-            }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors hover:bg-[var(--bg-secondary)]"
+            style={{ color: 'var(--text-primary)' }}
           >
             <BackIcon />
           </button>
           <h1
-            className="text-lg font-bold truncate flex-1"
+            className="text-lg font-semibold truncate flex-1"
             style={{ color: 'var(--text-primary)' }}
           >
             {puesto.nombre}
@@ -226,13 +214,7 @@ export default function DetallePuesto() {
       <div className="max-w-3xl mx-auto px-4 space-y-5 pt-5">
         {/* Imagen del puesto */}
         {puesto.foto_url && (
-          <div
-            className="rounded-3xl overflow-hidden animate-fade-in-up"
-            style={{
-              background: 'var(--bg-card)',
-              boxShadow: 'var(--shadow-card)'
-            }}
-          >
+          <div className="card overflow-hidden animate-fade-in-up">
             <img
               src={puesto.foto_url}
               alt={puesto.nombre}
@@ -241,24 +223,18 @@ export default function DetallePuesto() {
           </div>
         )}
 
-        {/* Información principal */}
-        <div
-          className="rounded-3xl p-6 space-y-5 animate-fade-in-up stagger-1"
-          style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-subtle)'
-          }}
-        >
-          {/* Título y tipo */}
+        {/* Informacion principal */}
+        <div className="card p-6 space-y-5 animate-fade-in-up">
+          {/* Titulo y tipo */}
           <div>
-            <h2 className="font-display text-3xl font-bold mb-3 text-gradient-fire">
+            <h2 className="text-2xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               {puesto.nombre}
             </h2>
             {puesto.tipo_comida && (
               <span
-                className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold"
+                className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium"
                 style={{
-                  background: 'var(--gradient-fire)',
+                  background: 'var(--primary)',
                   color: 'white'
                 }}
               >
@@ -269,13 +245,13 @@ export default function DetallePuesto() {
 
           {/* Rating */}
           <div
-            className="p-4 rounded-2xl"
-            style={{ background: 'var(--bg-elevated)' }}
+            className="p-4 rounded-xl"
+            style={{ background: 'var(--bg-secondary)' }}
           >
             <PromedioEstrellas promedio={promedioEstrellas} total={resenas.length} />
           </div>
 
-          {/* Descripción */}
+          {/* Descripcion */}
           {puesto.descripcion && (
             <p
               className="text-base leading-relaxed"
@@ -288,14 +264,14 @@ export default function DetallePuesto() {
           {/* Horario */}
           {(puesto.horario_apertura || puesto.horario_cierre) && (
             <div
-              className="flex items-center gap-4 p-4 rounded-2xl"
-              style={{ background: 'var(--bg-elevated)' }}
+              className="flex items-center gap-4 p-4 rounded-xl"
+              style={{ background: 'var(--bg-secondary)' }}
             >
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{
-                  background: 'rgba(245, 158, 11, 0.15)',
-                  color: 'var(--accent-amber)'
+                  background: 'var(--primary-light)',
+                  color: 'var(--primary)'
                 }}
               >
                 <ClockIcon />
@@ -304,7 +280,7 @@ export default function DetallePuesto() {
                 <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>
                   Horario
                 </p>
-                <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
                   {puesto.horario_apertura && puesto.horario_cierre
                     ? `${puesto.horario_apertura.slice(0, 5)} - ${puesto.horario_cierre.slice(0, 5)}`
                     : puesto.horario_apertura
@@ -315,14 +291,13 @@ export default function DetallePuesto() {
             </div>
           )}
 
-          {/* Botón reportar */}
+          {/* Boton reportar */}
           <button
             onClick={() => setMostrarModalReporte(true)}
-            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-3 py-3 rounded-xl font-medium transition-colors hover:bg-[var(--bg-secondary)]"
             style={{
-              background: 'var(--bg-elevated)',
               color: 'var(--text-secondary)',
-              border: '1px solid var(--border-subtle)'
+              border: '1px solid var(--border)'
             }}
           >
             <AlertIcon />
@@ -332,28 +307,22 @@ export default function DetallePuesto() {
 
         {/* Mapa */}
         {puesto.latitud && puesto.longitud && (
-          <div
-            className="rounded-3xl overflow-hidden animate-fade-in-up stagger-2"
-            style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-subtle)'
-            }}
-          >
+          <div className="card overflow-hidden animate-fade-in-up">
             <div
               className="px-6 py-4 flex items-center gap-3"
-              style={{ borderBottom: '1px solid var(--border-subtle)' }}
+              style={{ borderBottom: '1px solid var(--border-light)' }}
             >
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{
-                  background: 'rgba(245, 158, 11, 0.15)',
-                  color: 'var(--accent-amber)'
+                  background: 'var(--primary-light)',
+                  color: 'var(--primary)'
                 }}
               >
                 <MapPinIcon />
               </div>
-              <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                Ubicación
+              <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                Ubicacion
               </span>
             </div>
             <div className="h-56">
@@ -367,7 +336,7 @@ export default function DetallePuesto() {
               >
                 <TileLayer
                   attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                 />
                 <Marker position={[puesto.latitud, puesto.longitud]} icon={puestoIcon} />
               </MapContainer>
@@ -375,25 +344,19 @@ export default function DetallePuesto() {
           </div>
         )}
 
-        {/* Formulario de reseña */}
-        <div className="animate-fade-in-up stagger-3">
+        {/* Formulario de resena */}
+        <div className="animate-fade-in-up">
           <FormularioResena puestoId={id} onResenaEnviada={fetchResenas} />
         </div>
 
-        {/* Lista de reseñas */}
-        <div
-          className="rounded-3xl overflow-hidden animate-fade-in-up stagger-4"
-          style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-subtle)'
-          }}
-        >
+        {/* Lista de resenas */}
+        <div className="card overflow-hidden animate-fade-in-up">
           <div
             className="px-6 py-4"
-            style={{ borderBottom: '1px solid var(--border-subtle)' }}
+            style={{ borderBottom: '1px solid var(--border-light)' }}
           >
-            <h3 className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
-              Reseñas
+            <h3 className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>
+              Resenas
               {resenas.length > 0 && (
                 <span
                   className="ml-2 text-sm font-normal"
@@ -410,15 +373,15 @@ export default function DetallePuesto() {
               {resenas.map((resena, index) => (
                 <div
                   key={resena.id}
-                  className="p-6 transition-colors"
+                  className="p-6"
                   style={{
-                    borderBottom: index < resenas.length - 1 ? '1px solid var(--border-subtle)' : 'none'
+                    borderBottom: index < resenas.length - 1 ? '1px solid var(--border-light)' : 'none'
                   }}
                 >
                   <div className="flex flex-wrap items-center gap-3 mb-3">
                     <div className="flex gap-0.5">
                       {[1, 2, 3, 4, 5].map((num) => (
-                        <StarIcon key={num} filled={num <= resena.estrellas} size={18} />
+                        <StarIcon key={num} filled={num <= resena.estrellas} size={16} />
                       ))}
                     </div>
                     <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
@@ -444,15 +407,15 @@ export default function DetallePuesto() {
             <div className="p-12 text-center">
               <div
                 className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
-                style={{ background: 'var(--bg-elevated)' }}
+                style={{ background: 'var(--bg-secondary)' }}
               >
-                <StarIcon filled={false} size={32} />
+                <StarIcon filled={false} size={28} />
               </div>
-              <p className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                Sin reseñas todavía
+              <p className="font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+                Sin resenas todavia
               </p>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                ¡Sé el primero en compartir tu experiencia!
+                Se el primero en compartir tu experiencia
               </p>
             </div>
           )}

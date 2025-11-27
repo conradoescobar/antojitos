@@ -24,8 +24,8 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
 
   const tiposReporte = [
     { value: 'Ya no existe', icon: '🚫' },
-    { value: 'Está cerrado permanentemente', icon: '🔒' },
-    { value: 'Ubicación incorrecta', icon: '📍' },
+    { value: 'Esta cerrado permanentemente', icon: '🔒' },
+    { value: 'Ubicacion incorrecta', icon: '📍' },
     { value: 'Otro', icon: '💬' }
   ]
 
@@ -62,34 +62,31 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
     }
   }
 
-  // Vista de éxito
+  // Vista de exito
   if (enviado) {
     return (
       <div
         className="fixed inset-0 flex items-center justify-center z-50 p-4 animate-fade-in"
-        style={{ background: 'rgba(13, 11, 14, 0.85)' }}
+        style={{ background: 'rgba(26, 25, 21, 0.5)' }}
       >
         <div
-          className="max-w-sm w-full p-8 text-center animate-scale-in rounded-3xl"
-          style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-subtle)'
-          }}
+          className="max-w-sm w-full p-8 text-center animate-scale-in rounded-2xl"
+          style={{ background: 'var(--bg-card)' }}
         >
           <div
             className="w-20 h-20 rounded-2xl mx-auto mb-5 flex items-center justify-center"
             style={{
-              background: 'rgba(163, 230, 53, 0.15)',
-              color: 'var(--accent-lime)'
+              background: 'rgba(34, 197, 94, 0.1)',
+              color: '#16a34a'
             }}
           >
             <CheckIcon />
           </div>
           <h3
-            className="text-xl font-bold mb-2"
+            className="text-xl font-semibold mb-2"
             style={{ color: 'var(--text-primary)' }}
           >
-            ¡Gracias!
+            Gracias
           </h3>
           <p style={{ color: 'var(--text-secondary)' }}>
             Revisaremos tu reporte pronto
@@ -102,29 +99,26 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
   return (
     <div
       className="fixed inset-0 flex items-center justify-center z-50 p-4 animate-fade-in"
-      style={{ background: 'rgba(13, 11, 14, 0.85)' }}
+      style={{ background: 'rgba(26, 25, 21, 0.5)' }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onCerrar()
       }}
     >
       <div
-        className="max-w-md w-full max-h-[90vh] overflow-y-auto animate-scale-in rounded-3xl"
-        style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-subtle)'
-        }}
+        className="max-w-md w-full max-h-[90vh] overflow-y-auto animate-scale-in rounded-2xl"
+        style={{ background: 'var(--bg-card)' }}
       >
         {/* Header */}
         <div
           className="sticky top-0 z-10 px-6 py-5 flex items-start justify-between"
           style={{
             background: 'var(--bg-card)',
-            borderBottom: '1px solid var(--border-subtle)'
+            borderBottom: '1px solid var(--border-light)'
           }}
         >
           <div>
             <h3
-              className="text-lg font-bold"
+              className="text-lg font-semibold"
               style={{ color: 'var(--text-primary)' }}
             >
               Reportar problema
@@ -135,11 +129,8 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
           </div>
           <button
             onClick={onCerrar}
-            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-            style={{
-              background: 'var(--bg-elevated)',
-              color: 'var(--text-secondary)'
-            }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors hover:bg-[var(--bg-secondary)]"
+            style={{ color: 'var(--text-secondary)' }}
           >
             <CloseIcon />
           </button>
@@ -149,19 +140,19 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
           {/* Tipo de reporte */}
           <div>
             <label
-              className="block text-sm font-semibold mb-3"
+              className="block text-sm font-medium mb-3"
               style={{ color: 'var(--text-primary)' }}
             >
-              ¿Qué problema tiene este puesto?
+              Que problema tiene este puesto?
             </label>
             <div className="space-y-2">
               {tiposReporte.map((tipo) => (
                 <label
                   key={tipo.value}
-                  className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all"
+                  className="flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all"
                   style={{
-                    background: tipoReporte === tipo.value ? 'rgba(245, 158, 11, 0.1)' : 'var(--bg-elevated)',
-                    border: tipoReporte === tipo.value ? '2px solid var(--accent-amber)' : '2px solid transparent'
+                    background: tipoReporte === tipo.value ? 'var(--primary-light)' : 'var(--bg-secondary)',
+                    border: tipoReporte === tipo.value ? '2px solid var(--primary)' : '2px solid transparent'
                   }}
                 >
                   <input
@@ -176,7 +167,7 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
                   <span
                     className="font-medium"
                     style={{
-                      color: tipoReporte === tipo.value ? 'var(--accent-amber)' : 'var(--text-primary)'
+                      color: tipoReporte === tipo.value ? 'var(--primary)' : 'var(--text-primary)'
                     }}
                   >
                     {tipo.value}
@@ -185,7 +176,7 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
                     <div className="ml-auto">
                       <svg
                         className="w-5 h-5"
-                        style={{ color: 'var(--accent-amber)' }}
+                        style={{ color: 'var(--primary)' }}
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -206,7 +197,7 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
           <div>
             <label
               htmlFor="comentario"
-              className="block text-sm font-semibold mb-2"
+              className="block text-sm font-medium mb-2"
               style={{ color: 'var(--text-primary)' }}
             >
               Detalles adicionales <span style={{ color: 'var(--text-muted)' }}>(opcional)</span>
@@ -238,10 +229,7 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
             >
               {loading ? (
                 <>
-                  <div
-                    className="w-5 h-5 rounded-full animate-spin"
-                    style={{ border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white' }}
-                  />
+                  <div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }} />
                   Enviando...
                 </>
               ) : (
