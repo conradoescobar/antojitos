@@ -161,41 +161,60 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
                 icon={puestoIcon}
               >
                 <Popup>
-                  <div className="min-w-[200px]">
-                    <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
-                      {puesto.nombre}
-                    </h3>
-                    {puesto.tipo_comida && (
-                      <span
-                        className="inline-block px-2.5 py-1 rounded-full text-xs font-medium mb-2"
-                        style={{
-                          background: 'var(--primary-light)',
-                          color: 'var(--primary)'
-                        }}
+                  <div className="min-w-[220px]" style={{ margin: '-8px -12px' }}>
+                    {/* Foto del puesto */}
+                    {puesto.foto_url ? (
+                      <img
+                        src={puesto.foto_url}
+                        alt={puesto.nombre}
+                        className="w-full h-32 object-cover"
+                        style={{ borderRadius: '12px 12px 0 0' }}
+                      />
+                    ) : (
+                      <div
+                        className="w-full h-24 flex items-center justify-center"
+                        style={{ background: 'var(--bg-secondary)', borderRadius: '12px 12px 0 0' }}
                       >
-                        {puesto.tipo_comida}
-                      </span>
+                        <svg className="w-10 h-10" style={{ color: 'var(--text-muted)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                      </div>
                     )}
-                    {puesto.descripcion && (
-                      <p
-                        className="text-xs mb-3 line-clamp-2"
-                        style={{ color: 'var(--text-secondary)' }}
-                      >
-                        {puesto.descripcion}
-                      </p>
-                    )}
-                    {onPuestoClick && (
-                      <button
-                        onClick={() => onPuestoClick(puesto)}
-                        className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
-                        style={{
-                          background: 'var(--primary)',
-                          color: 'white'
-                        }}
-                      >
-                        Ver detalles
-                      </button>
-                    )}
+
+                    {/* Info */}
+                    <div className="p-3">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <h3 className="font-bold text-base leading-tight" style={{ color: 'var(--text-primary)' }}>
+                          {puesto.nombre}
+                        </h3>
+                        {puesto.tipo_comida && (
+                          <span
+                            className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium"
+                            style={{
+                              background: 'var(--primary-light)',
+                              color: 'var(--primary)'
+                            }}
+                          >
+                            {puesto.tipo_comida}
+                          </span>
+                        )}
+                      </div>
+
+                      {onPuestoClick && (
+                        <button
+                          onClick={() => onPuestoClick(puesto)}
+                          className="w-full py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90"
+                          style={{
+                            background: 'var(--primary)',
+                            color: 'white'
+                          }}
+                        >
+                          Ver mas
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </Popup>
               </Marker>

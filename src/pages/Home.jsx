@@ -20,7 +20,7 @@ const BuscarIcon = ({ active }) => (
 )
 
 const AgregarIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <line x1="12" y1="5" x2="12" y2="19" />
     <line x1="5" y1="12" x2="19" y2="12" />
   </svg>
@@ -76,14 +76,6 @@ export default function Home() {
     )
   }
 
-  const handleTabClick = (tab) => {
-    if (tab === 'agregar') {
-      setMostrarModalAgregar(true)
-    } else {
-      setTabActiva(tab)
-    }
-  }
-
   return (
     <div className="h-screen flex flex-col" style={{ background: 'var(--bg-main)' }}>
       {/* Contenido Principal */}
@@ -97,6 +89,19 @@ export default function Home() {
             mapCenter={mapCenter}
             onPuestoClick={handlePuestoClick}
           />
+
+          {/* Botón flotante de agregar */}
+          <button
+            onClick={() => setMostrarModalAgregar(true)}
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] w-14 h-14 rounded-full flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
+            style={{
+              background: 'var(--primary)',
+              color: 'white',
+              boxShadow: '0 4px 20px rgba(217, 119, 87, 0.4)'
+            }}
+          >
+            <AgregarIcon />
+          </button>
         </div>
 
         {/* Vista Buscar (Lista) */}
@@ -137,7 +142,7 @@ export default function Home() {
               <div className="grid grid-cols-3 gap-4 mb-8">
                 {[
                   { value: '0', label: 'Favoritos' },
-                  { value: '0', label: 'Reseñas' },
+                  { value: '0', label: 'Resenas' },
                   { value: '0', label: 'Agregados' }
                 ].map((stat) => (
                   <div key={stat.label} className="card p-4 text-center">
@@ -151,9 +156,9 @@ export default function Home() {
               <div className="card">
                 {[
                   { icon: '❤️', label: 'Mis favoritos' },
-                  { icon: '⭐', label: 'Mis reseñas' },
+                  { icon: '⭐', label: 'Mis resenas' },
                   { icon: '📍', label: 'Puestos agregados' },
-                  { icon: '⚙️', label: 'Configuración' }
+                  { icon: '⚙️', label: 'Configuracion' }
                 ].map((item, index, arr) => (
                   <button
                     key={item.label}
@@ -172,7 +177,7 @@ export default function Home() {
               {/* Banner próximamente */}
               <div className="mt-6 p-4 rounded-xl text-center" style={{ background: 'var(--primary-light)' }}>
                 <p className="text-sm font-medium" style={{ color: 'var(--primary)' }}>
-                  Próximamente: favoritos, historial y más
+                  Proximamente: favoritos, historial y mas
                 </p>
               </div>
             </div>
@@ -180,7 +185,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
+      {/* Bottom Navigation - Sin botón agregar */}
       <nav
         className="flex-shrink-0 safe-area-bottom"
         style={{
@@ -192,8 +197,8 @@ export default function Home() {
         <div className="flex items-center justify-around max-w-md mx-auto">
           {/* Explorar */}
           <button
-            onClick={() => handleTabClick('explorar')}
-            className="flex flex-col items-center gap-1 py-3 px-5 transition-colors"
+            onClick={() => setTabActiva('explorar')}
+            className="flex flex-col items-center gap-1 py-3 px-8 transition-colors"
             style={{ color: tabActiva === 'explorar' ? 'var(--primary)' : 'var(--text-muted)' }}
           >
             <ExplorarIcon active={tabActiva === 'explorar'} />
@@ -202,36 +207,18 @@ export default function Home() {
 
           {/* Buscar */}
           <button
-            onClick={() => handleTabClick('buscar')}
-            className="flex flex-col items-center gap-1 py-3 px-5 transition-colors"
+            onClick={() => setTabActiva('buscar')}
+            className="flex flex-col items-center gap-1 py-3 px-8 transition-colors"
             style={{ color: tabActiva === 'buscar' ? 'var(--primary)' : 'var(--text-muted)' }}
           >
             <BuscarIcon active={tabActiva === 'buscar'} />
             <span className="text-xs font-medium">Buscar</span>
           </button>
 
-          {/* Agregar - Destacado */}
-          <button
-            onClick={() => handleTabClick('agregar')}
-            className="flex flex-col items-center gap-1 py-2 px-5 -mt-3 transition-transform hover:scale-105 active:scale-95"
-          >
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center"
-              style={{
-                background: 'var(--primary)',
-                color: 'white',
-                boxShadow: 'var(--shadow-md)'
-              }}
-            >
-              <AgregarIcon />
-            </div>
-            <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Agregar</span>
-          </button>
-
           {/* Perfil */}
           <button
-            onClick={() => handleTabClick('perfil')}
-            className="flex flex-col items-center gap-1 py-3 px-5 transition-colors"
+            onClick={() => setTabActiva('perfil')}
+            className="flex flex-col items-center gap-1 py-3 px-8 transition-colors"
             style={{ color: tabActiva === 'perfil' ? 'var(--primary)' : 'var(--text-muted)' }}
           >
             <PerfilIcon active={tabActiva === 'perfil'} />
@@ -278,6 +265,7 @@ export default function Home() {
               <FormularioAgregarPuesto
                 onPuestoAgregado={handlePuestoAgregado}
                 onCancelar={() => setMostrarModalAgregar(false)}
+                userLocation={userLocation}
               />
             </div>
           </div>

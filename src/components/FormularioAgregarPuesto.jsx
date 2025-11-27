@@ -1,11 +1,37 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet'
+import L from 'leaflet'
 import { supabase } from '../lib/supabase'
+import 'leaflet/dist/leaflet.css'
+
+// Icono del marcador
+const markerIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" width="40" height="48">
+  <path d="M20 2C12.27 2 6 8.27 6 16c0 10 14 28 14 28s14-18 14-28c0-7.73-6.27-14-14-14z"
+        fill="#D97757" stroke="white" stroke-width="2"/>
+  <circle cx="20" cy="16" r="6" fill="white"/>
+  <circle cx="20" cy="16" r="3" fill="#D97757"/>
+</svg>`
+
+const markerIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(markerIconSvg),
+  iconSize: [40, 48],
+  iconAnchor: [20, 48]
+})
 
 // Iconos
 const CameraIcon = () => (
-  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
     <circle cx="12" cy="13" r="4" />
+  </svg>
+)
+
+const MenuIcon = () => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
   </svg>
 )
 
@@ -23,7 +49,29 @@ const CloseIcon = () => (
   </svg>
 )
 
-export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }) {
+// Componente para seleccionar ubicación en el mapa
+function LocationPicker({ position, onPositionChange }) {
+  useMapEvents({
+    click(e) {
+      onPositionChange([e.latlng.lat, e.latlng.lng])
+    }
+  })
+
+  return position ? <Marker position={position} icon={markerIcon} /> : null
+}
+
+// Componente para centrar el mapa
+function MapCenterer({ center }) {
+  const map = useMap()
+  useEffect(() => {
+    if (center) {
+      map.setView(center, 16)
+    }
+  }, [center, map])
+  return null
+}
+
+export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, userLocation }) {
   const [nombre, setNombre] = useState('')
   const [tipoComida, setTipoComida] = useState('')
   const [descripcion, setDescripcion] = useState('')
@@ -31,41 +79,55 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
   const [horarioCierre, setHorarioCierre] = useState('')
   const [foto, setFoto] = useState(null)
   const [previsualizacion, setPrevisualizacion] = useState(null)
+  const [fotoCarta, setFotoCarta] = useState(null)
+  const [previsualizacionCarta, setPrevisualizacionCarta] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [ubicacionPendiente, setUbicacionPendiente] = useState(false)
+  const [ubicacionSeleccionada, setUbicacionSeleccionada] = useState(null)
+  const [mostrarMapa, setMostrarMapa] = useState(false)
 
   const tipos = ['Tacos', 'Tortas', 'Quesadillas', 'Tamales', 'Antojitos', 'Bebidas', 'Postres', 'Otro']
 
-  const handleFotoChange = (e) => {
+  // Inicializar ubicación con la del usuario
+  useEffect(() => {
+    if (userLocation && !ubicacionSeleccionada) {
+      setUbicacionSeleccionada(userLocation)
+    }
+  }, [userLocation])
+
+  const handleFotoChange = (e, tipo) => {
     const file = e.target.files[0]
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
         setError('La foto no debe superar 5MB')
         return
       }
-      setFoto(file)
-      setPrevisualizacion(URL.createObjectURL(file))
+      if (tipo === 'puesto') {
+        setFoto(file)
+        setPrevisualizacion(URL.createObjectURL(file))
+      } else {
+        setFotoCarta(file)
+        setPrevisualizacionCarta(URL.createObjectURL(file))
+      }
     }
   }
 
-  const subirFoto = async (puestoId) => {
-    if (!foto) return null
+  const subirFoto = async (puestoId, file, sufijo = '') => {
+    if (!file) return null
 
     try {
-      const fileExt = foto.name.split('.').pop()
-      const fileName = `${puestoId}-${Date.now()}.${fileExt}`
-      const filePath = `${fileName}`
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${puestoId}${sufijo}-${Date.now()}.${fileExt}`
 
       const { error: uploadError } = await supabase.storage
         .from('fotos-puestos')
-        .upload(filePath, foto)
+        .upload(fileName, file)
 
       if (uploadError) throw uploadError
 
       const { data } = supabase.storage
         .from('fotos-puestos')
-        .getPublicUrl(filePath)
+        .getPublicUrl(fileName)
 
       return data.publicUrl
     } catch (err) {
@@ -82,6 +144,11 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       return
     }
 
+    if (!ubicacionSeleccionada) {
+      setError('Selecciona la ubicacion del puesto en el mapa')
+      return
+    }
+
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
     const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
     if (!supabaseUrl || !supabaseAnonKey) {
@@ -92,16 +159,6 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
     try {
       setLoading(true)
       setError(null)
-      setUbicacionPendiente(true)
-
-      const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000
-        })
-      })
-
-      const { latitude, longitude } = position.coords
 
       const puestoData = {
         nombre: nombre.trim(),
@@ -109,8 +166,8 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
         descripcion: descripcion.trim() || null,
         horario_apertura: horarioApertura || null,
         horario_cierre: horarioCierre || null,
-        latitud: latitude,
-        longitud: longitude,
+        latitud: ubicacionSeleccionada[0],
+        longitud: ubicacionSeleccionada[1],
         activo: true
       }
 
@@ -123,17 +180,29 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       if (insertError) throw insertError
 
       let fotoUrl = null
+      let fotoCartaUrl = null
+
       if (foto) {
-        fotoUrl = await subirFoto(nuevoPuesto.id)
+        fotoUrl = await subirFoto(nuevoPuesto.id, foto)
+      }
+      if (fotoCarta) {
+        fotoCartaUrl = await subirFoto(nuevoPuesto.id, fotoCarta, '-carta')
+      }
+
+      if (fotoUrl || fotoCartaUrl) {
+        const updateData = {}
+        if (fotoUrl) updateData.foto_url = fotoUrl
+        if (fotoCartaUrl) updateData.foto_carta_url = fotoCartaUrl
 
         const { error: updateError } = await supabase
           .from('puestos')
-          .update({ foto_url: fotoUrl })
+          .update(updateData)
           .eq('id', nuevoPuesto.id)
 
         if (updateError) throw updateError
       }
 
+      // Limpiar formulario
       setNombre('')
       setTipoComida('')
       setDescripcion('')
@@ -141,17 +210,16 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       setHorarioCierre('')
       setFoto(null)
       setPrevisualizacion(null)
+      setFotoCarta(null)
+      setPrevisualizacionCarta(null)
+      setUbicacionSeleccionada(null)
 
       if (onPuestoAgregado) {
-        onPuestoAgregado({ ...nuevoPuesto, foto_url: fotoUrl })
+        onPuestoAgregado({ ...nuevoPuesto, foto_url: fotoUrl, foto_carta_url: fotoCartaUrl })
       }
     } catch (err) {
       console.error('Error agregando puesto:', err)
-      if (err.code === 1) {
-        setError('No se pudo obtener tu ubicacion. Por favor permite el acceso.')
-      } else if (err.message && err.message.includes('fotos-puestos')) {
-        setError('Error subiendo la foto. Verifica el bucket en Supabase.')
-      } else if (err.message) {
+      if (err.message) {
         let errorMessage = err.message
         if (err.message.includes('permission denied') || err.message.includes('row-level security')) {
           errorMessage = 'Error de permisos. Verifica las politicas RLS en Supabase.'
@@ -162,7 +230,6 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       }
     } finally {
       setLoading(false)
-      setUbicacionPendiente(false)
     }
   }
 
@@ -225,14 +292,11 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
           id="descripcion"
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
-          rows={3}
+          rows={2}
           className="input-field"
           placeholder="Breve descripcion del puesto..."
           maxLength={300}
         />
-        <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
-          {descripcion.length}/300 caracteres
-        </p>
       </div>
 
       {/* Horario */}
@@ -268,72 +332,157 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
         </div>
       </div>
 
-      {/* Foto */}
+      {/* Fotos */}
       <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-          Foto (opcional)
+        <label className="block text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
+          Fotos
         </label>
-        {previsualizacion ? (
-          <div className="relative rounded-xl overflow-hidden">
-            <img
-              src={previsualizacion}
-              alt="Previsualizacion"
-              className="w-full h-48 object-cover"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setFoto(null)
-                setPrevisualizacion(null)
-              }}
-              className="absolute top-3 right-3 w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-105"
-              style={{
-                background: 'rgba(255, 255, 255, 0.9)',
-                color: 'var(--text-primary)'
-              }}
-            >
-              <CloseIcon />
-            </button>
+        <div className="grid grid-cols-2 gap-3">
+          {/* Foto del puesto */}
+          <div>
+            <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Foto del puesto</p>
+            {previsualizacion ? (
+              <div className="relative rounded-xl overflow-hidden aspect-square">
+                <img
+                  src={previsualizacion}
+                  alt="Previsualizacion"
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFoto(null)
+                    setPrevisualizacion(null)
+                  }}
+                  className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(255, 255, 255, 0.9)', color: 'var(--text-primary)' }}
+                >
+                  <CloseIcon />
+                </button>
+              </div>
+            ) : (
+              <label
+                className="flex flex-col items-center justify-center aspect-square rounded-xl cursor-pointer transition-all hover:border-[var(--primary)]"
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: '2px dashed var(--border)',
+                  color: 'var(--text-muted)'
+                }}
+              >
+                <CameraIcon />
+                <span className="text-xs mt-1">Puesto</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFotoChange(e, 'puesto')}
+                  className="hidden"
+                />
+              </label>
+            )}
           </div>
-        ) : (
-          <label
-            className="flex flex-col items-center justify-center w-full h-40 rounded-xl cursor-pointer transition-all hover:border-[var(--primary)]"
-            style={{
-              background: 'var(--bg-secondary)',
-              border: '2px dashed var(--border)',
-              color: 'var(--text-muted)'
-            }}
-          >
-            <CameraIcon />
-            <span className="text-sm mt-2">Toca para agregar foto</span>
-            <span className="text-xs mt-1">Max. 5MB</span>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFotoChange}
-              className="hidden"
-            />
-          </label>
-        )}
+
+          {/* Foto de la carta */}
+          <div>
+            <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Carta / Menu</p>
+            {previsualizacionCarta ? (
+              <div className="relative rounded-xl overflow-hidden aspect-square">
+                <img
+                  src={previsualizacionCarta}
+                  alt="Carta"
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFotoCarta(null)
+                    setPrevisualizacionCarta(null)
+                  }}
+                  className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(255, 255, 255, 0.9)', color: 'var(--text-primary)' }}
+                >
+                  <CloseIcon />
+                </button>
+              </div>
+            ) : (
+              <label
+                className="flex flex-col items-center justify-center aspect-square rounded-xl cursor-pointer transition-all hover:border-[var(--primary)]"
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: '2px dashed var(--border)',
+                  color: 'var(--text-muted)'
+                }}
+              >
+                <MenuIcon />
+                <span className="text-xs mt-1">Carta</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFotoChange(e, 'carta')}
+                  className="hidden"
+                />
+              </label>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Info de ubicacion */}
-      <div
-        className="flex items-center gap-3 p-4 rounded-xl"
-        style={{
-          background: 'var(--primary-light)',
-          border: '1px solid rgba(217, 119, 87, 0.2)'
-        }}
-      >
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: 'rgba(217, 119, 87, 0.15)', color: 'var(--primary)' }}
-        >
-          <MapPinIcon />
-        </div>
-        <p className="text-sm" style={{ color: 'var(--primary)' }}>
-          Se usara tu ubicacion actual para marcar el puesto
-        </p>
+      {/* Selector de ubicación */}
+      <div>
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+          Ubicacion <span style={{ color: 'var(--primary)' }}>*</span>
+        </label>
+
+        {!mostrarMapa ? (
+          <button
+            type="button"
+            onClick={() => setMostrarMapa(true)}
+            className="w-full flex items-center justify-center gap-3 p-4 rounded-xl transition-all hover:border-[var(--primary)]"
+            style={{
+              background: ubicacionSeleccionada ? 'var(--primary-light)' : 'var(--bg-secondary)',
+              border: ubicacionSeleccionada ? '2px solid var(--primary)' : '2px dashed var(--border)',
+              color: ubicacionSeleccionada ? 'var(--primary)' : 'var(--text-muted)'
+            }}
+          >
+            <MapPinIcon />
+            <span className="text-sm font-medium">
+              {ubicacionSeleccionada ? 'Ubicacion seleccionada - Toca para cambiar' : 'Seleccionar en el mapa'}
+            </span>
+          </button>
+        ) : (
+          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+            <div className="h-64 relative">
+              <MapContainer
+                center={ubicacionSeleccionada || userLocation || [19.4326, -99.1332]}
+                zoom={16}
+                className="w-full h-full"
+                zoomControl={true}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+                  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                />
+                <LocationPicker
+                  position={ubicacionSeleccionada}
+                  onPositionChange={setUbicacionSeleccionada}
+                />
+                <MapCenterer center={ubicacionSeleccionada || userLocation} />
+              </MapContainer>
+            </div>
+            <div className="p-3 flex items-center justify-between" style={{ background: 'var(--bg-secondary)' }}>
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                Toca en el mapa para marcar la ubicacion
+              </p>
+              <button
+                type="button"
+                onClick={() => setMostrarMapa(false)}
+                className="text-xs font-medium px-3 py-1 rounded-full"
+                style={{ background: 'var(--primary)', color: 'white' }}
+              >
+                Listo
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Error */}
@@ -357,12 +506,7 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
           disabled={loading}
           className="btn-primary flex-1 flex items-center justify-center gap-2"
         >
-          {ubicacionPendiente ? (
-            <>
-              <div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }} />
-              Obteniendo ubicacion...
-            </>
-          ) : loading ? (
+          {loading ? (
             <>
               <div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }} />
               Guardando...
