@@ -132,11 +132,10 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
       >
         <MapUpdater center={mapCenter} userLocation={userLocation} />
 
-        {/* Mapa OpenStreetMap - mejor soporte de zoom */}
+        {/* Mapa minimalista */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          maxZoom={19}
+          url="https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
+          maxZoom={20}
         />
 
         {/* Marcador del usuario */}

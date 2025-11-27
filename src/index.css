@@ -375,10 +375,7 @@ textarea.input-field {
 }
 
 .leaflet-control-attribution {
-  background: rgba(250, 249, 247, 0.9) !important;
-  color: var(--text-muted) !important;
-  font-size: 10px !important;
-  padding: 2px 6px !important;
+  display: none !important;
 }
 
 /* Focus states */
