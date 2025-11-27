@@ -101,9 +101,16 @@ export default function DetallePuesto() {
 
   const fetchResenas = async () => {
     try {
+      // Cargar reseñas con sus fotos
       const { data: resenasData, error: resenasError } = await supabase
         .from('resenas')
-        .select('*')
+        .select(`
+          *,
+          resenas_fotos (
+            id,
+            foto_url
+          )
+        `)
         .eq('puesto_id', id)
         .order('created_at', { ascending: false })
 
@@ -179,9 +186,19 @@ export default function DetallePuesto() {
     )
   }
 
+  // Calcular promedio general de todas las reseñas
   const promedioEstrellas = resenas.length > 0
-    ? resenas.reduce((sum, r) => sum + r.estrellas, 0) / resenas.length
+    ? resenas.reduce((sum, r) => sum + (r.promedio || 0), 0) / resenas.length
     : 0
+
+  // Categorías para mostrar
+  const CATEGORIAS = [
+    { key: 'sabor', label: 'Sabor', emoji: '😋' },
+    { key: 'precio', label: 'Precio', emoji: '💰' },
+    { key: 'higiene', label: 'Higiene', emoji: '✨' },
+    { key: 'cantidad', label: 'Cantidad', emoji: '🍽️' },
+    { key: 'atencion', label: 'Atención', emoji: '🤝' }
+  ]
 
   return (
     <div className="min-h-screen pb-8 overflow-y-auto" style={{ background: 'var(--bg-main)', height: '100dvh' }}>
@@ -378,13 +395,22 @@ export default function DetallePuesto() {
                     borderBottom: index < resenas.length - 1 ? '1px solid var(--border-light)' : 'none'
                   }}
                 >
-                  <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map((num) => (
-                        <StarIcon key={num} filled={num <= resena.estrellas} size={16} />
-                      ))}
+                  {/* Header con promedio y fecha */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="text-lg font-bold px-2.5 py-1 rounded-lg"
+                        style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}
+                      >
+                        {resena.promedio?.toFixed(1) || '-'}
+                      </span>
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((num) => (
+                          <StarIcon key={num} filled={num <= Math.round(resena.promedio || 0)} size={14} />
+                        ))}
+                      </div>
                     </div>
-                    <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
                       {new Date(resena.created_at).toLocaleDateString('es-MX', {
                         year: 'numeric',
                         month: 'short',
@@ -392,9 +418,44 @@ export default function DetallePuesto() {
                       })}
                     </span>
                   </div>
+
+                  {/* Puntuaciones por categoría */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {CATEGORIAS.map((cat) => {
+                      const valor = resena[cat.key]
+                      if (!valor) return null
+                      return (
+                        <div
+                          key={cat.key}
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs"
+                          style={{ background: 'var(--bg-secondary)' }}
+                        >
+                          <span>{cat.emoji}</span>
+                          <span style={{ color: 'var(--text-secondary)' }}>{cat.label}</span>
+                          <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{valor}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* Fotos de la reseña */}
+                  {resena.resenas_fotos && resena.resenas_fotos.length > 0 && (
+                    <div className="flex gap-2 mb-4 overflow-x-auto hide-scrollbar">
+                      {resena.resenas_fotos.map((foto) => (
+                        <img
+                          key={foto.id}
+                          src={foto.foto_url}
+                          alt="Foto de reseña"
+                          className="w-24 h-24 rounded-xl object-cover flex-shrink-0"
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Comentario */}
                   {resena.comentario && (
                     <p
-                      className="leading-relaxed"
+                      className="leading-relaxed text-sm"
                       style={{ color: 'var(--text-secondary)' }}
                     >
                       {resena.comentario}
