@@ -43,6 +43,11 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
       return
     }
 
+    if (!supabase) {
+      setError('Error de configuración: Supabase no está configurado')
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)

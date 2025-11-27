@@ -17,6 +17,10 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!tipoReporte) return
+    if (!supabase) {
+      alert('Error de configuración: Supabase no está configurado')
+      return
+    }
 
     try {
       setLoading(true)

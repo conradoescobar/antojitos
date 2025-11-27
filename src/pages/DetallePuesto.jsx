@@ -89,6 +89,8 @@ export default function DetallePuesto() {
   const [imageLoaded, setImageLoaded] = useState(false)
 
   const fetchResenas = async () => {
+    if (!supabase) return
+
     try {
       const { data, error } = await supabase
         .from('resenas')
@@ -105,6 +107,12 @@ export default function DetallePuesto() {
 
   useEffect(() => {
     async function fetchPuestoYResenas() {
+      if (!supabase) {
+        setError('Supabase no está configurado')
+        setLoading(false)
+        return
+      }
+
       try {
         setLoading(true)
         const { data, error } = await supabase
