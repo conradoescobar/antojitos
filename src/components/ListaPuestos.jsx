@@ -1,9 +1,45 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-// Función para calcular distancia entre dos coordenadas (fórmula de Haversine)
+// Iconos
+const SearchIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+)
+
+const CloseIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+)
+
+const MapPinIcon = () => (
+  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+)
+
+const ChevronIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="9 18 15 12 9 6" />
+  </svg>
+)
+
+const ImageIcon = () => (
+  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+    <polyline points="21 15 16 10 5 21" />
+  </svg>
+)
+
+// Función para calcular distancia (Haversine)
 function calcularDistancia(lat1, lon1, lat2, lon2) {
-  const R = 6371 // Radio de la Tierra en km
+  const R = 6371
   const dLat = (lat2 - lat1) * Math.PI / 180
   const dLon = (lon2 - lon1) * Math.PI / 180
   const a =
@@ -11,8 +47,7 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
     Math.sin(dLon / 2) * Math.sin(dLon / 2)
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  const distancia = R * c
-  return distancia
+  return R * c
 }
 
 export default function ListaPuestos({ userLocation, onPuestoClick, puestos, setPuestos, filtroTipo, onFiltroChange, busqueda, onBusquedaChange }) {
@@ -31,7 +66,6 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
           .eq('activo', true)
 
         if (error) throw error
-
         setPuestos(data || [])
       } catch (err) {
         console.error('Error cargando puestos:', err)
@@ -44,15 +78,13 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
     fetchPuestos()
   }, [setPuestos])
 
-  // Filtrar por tipo y búsqueda
+  // Filtrar
   let puestosFiltrados = puestos
 
-  // Filtrar por tipo si no es "Todos"
   if (filtroTipo !== 'Todos') {
     puestosFiltrados = puestosFiltrados.filter(p => p.tipo_comida === filtroTipo)
   }
 
-  // Filtrar por búsqueda
   if (busqueda && busqueda.trim()) {
     const busquedaLower = busqueda.toLowerCase().trim()
     puestosFiltrados = puestosFiltrados.filter(p =>
@@ -62,7 +94,7 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
     )
   }
 
-  // Calcular distancias y ordenar por cercanía
+  // Calcular distancias y ordenar
   const puestosConDistancia = puestosFiltrados.map(puesto => {
     if (userLocation && puesto.latitud && puesto.longitud) {
       const distancia = calcularDistancia(
@@ -82,10 +114,19 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
 
   if (loading) {
     return (
-      <div className="h-full bg-white flex items-center justify-center">
+      <div
+        className="h-full flex items-center justify-center"
+        style={{ background: 'var(--bg-deep)' }}
+      >
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando puestos...</p>
+          <div
+            className="w-14 h-14 rounded-full mx-auto mb-5 animate-spin"
+            style={{
+              border: '3px solid var(--bg-elevated)',
+              borderTopColor: 'var(--accent-amber)'
+            }}
+          />
+          <p style={{ color: 'var(--text-secondary)' }}>Buscando antojitos...</p>
         </div>
       </div>
     )
@@ -93,68 +134,83 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
 
   if (error) {
     return (
-      <div className="h-full bg-white flex items-center justify-center p-4">
-        <div className="text-center">
-          <p className="text-red-600 font-semibold mb-2">Error al cargar puestos</p>
-          <p className="text-gray-600 text-sm">{error}</p>
+      <div
+        className="h-full flex items-center justify-center p-6"
+        style={{ background: 'var(--bg-deep)' }}
+      >
+        <div className="text-center max-w-sm">
+          <div
+            className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+            style={{ background: 'rgba(255, 107, 107, 0.15)' }}
+          >
+            <svg className="w-8 h-8" style={{ color: 'var(--accent-coral)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <p className="font-semibold mb-2" style={{ color: 'var(--accent-coral)' }}>
+            Error al cargar
+          </p>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            {error}
+          </p>
         </div>
       </div>
     )
   }
 
-  if (puestos.length === 0) {
-    return (
-      <div className="h-full bg-white flex items-center justify-center p-4">
-        <p className="text-gray-500">No hay puestos disponibles en este momento</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="h-full bg-gray-50 overflow-y-auto">
-      {/* Barra de búsqueda flotante */}
-      <div className="sticky top-0 bg-gradient-to-b from-gray-50 to-transparent z-10 px-4 pt-4 pb-2">
+    <div className="h-full overflow-y-auto pattern-dots" style={{ background: 'var(--bg-deep)' }}>
+      {/* Barra de búsqueda */}
+      <div
+        className="sticky top-0 z-20 px-4 pt-4 pb-2"
+        style={{ background: 'linear-gradient(180deg, var(--bg-deep) 80%, transparent 100%)' }}
+      >
         <div className="relative">
           <input
             type="text"
             value={busqueda || ''}
             onChange={(e) => onBusquedaChange && onBusquedaChange(e.target.value)}
-            placeholder="Buscar puestos..."
-            className="w-full px-4 py-3 pl-12 pr-12 bg-white border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all shadow-sm"
+            placeholder="Buscar por nombre, tipo..."
+            className="input-field pl-12 pr-12"
+            style={{ fontSize: '0.95rem' }}
           />
-          <svg
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <div
+            className="absolute left-4 top-1/2 -translate-y-1/2"
+            style={{ color: 'var(--text-muted)' }}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+            <SearchIcon />
+          </div>
           {busqueda && (
             <button
               onClick={() => onBusquedaChange && onBusquedaChange('')}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors hover:bg-[var(--bg-elevated)]"
+              style={{ color: 'var(--text-muted)' }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <CloseIcon />
             </button>
           )}
         </div>
       </div>
 
       {/* Chips de filtro */}
-      <div className="px-4 pb-3 sticky top-[72px] bg-gray-50 z-10">
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <div
+        className="sticky top-[72px] z-10 px-4 pb-3"
+        style={{ background: 'var(--bg-deep)' }}
+      >
+        <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
           {tiposDisponibles.map((tipo) => (
             <button
               key={tipo}
               onClick={() => onFiltroChange && onFiltroChange(tipo)}
-              className={`px-4 py-2 rounded-full font-semibold text-sm whitespace-nowrap transition-all duration-200 ${
-                filtroTipo === tipo
-                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md scale-105'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+              className={`chip whitespace-nowrap transition-all duration-300 ${
+                filtroTipo === tipo ? 'chip-active' : 'chip-default'
               }`}
+              style={filtroTipo === tipo ? {
+                transform: 'scale(1.05)',
+                boxShadow: '0 4px 16px rgba(245, 158, 11, 0.3)'
+              } : {}}
             >
               {tipo}
             </button>
@@ -162,78 +218,121 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
         </div>
       </div>
 
-      {/* Contador de resultados */}
+      {/* Contador */}
       <div className="px-4 pb-3">
-        <p className="text-sm text-gray-600 font-medium">
-          {puestosConDistancia.length} {puestosConDistancia.length === 1 ? 'puesto encontrado' : 'puestos encontrados'}
-          {filtroTipo !== 'Todos' && ` · ${filtroTipo}`}
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          <span className="font-semibold" style={{ color: 'var(--text-secondary)' }}>
+            {puestosConDistancia.length}
+          </span>
+          {' '}{puestosConDistancia.length === 1 ? 'lugar encontrado' : 'lugares encontrados'}
+          {filtroTipo !== 'Todos' && (
+            <span style={{ color: 'var(--accent-amber)' }}> · {filtroTipo}</span>
+          )}
         </p>
       </div>
 
-      {/* Tarjetas de puestos */}
-      <div className="px-4 pb-4 space-y-3">
-        {puestosConDistancia.map((puesto) => (
-          <div
-            key={puesto.id}
-            onClick={() => onPuestoClick(puesto)}
-            className="bg-white rounded-2xl shadow-sm hover:shadow-xl active:scale-98 cursor-pointer transition-all duration-200 overflow-hidden border border-gray-100"
-          >
-            <div className="flex gap-4 p-4">
-              {/* Miniatura de foto */}
-              <div className="flex-shrink-0">
-                {puesto.foto_url ? (
-                  <img
-                    src={puesto.foto_url}
-                    alt={puesto.nombre}
-                    className="w-24 h-24 object-cover rounded-xl"
-                  />
-                ) : (
-                  <div className="w-24 h-24 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center">
-                    <svg className="w-10 h-10 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-
-              {/* Información */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-gray-900 mb-1 text-lg truncate">
-                  {puesto.nombre}
-                </h3>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
-                    {puesto.tipo_comida || 'Comida'}
-                  </span>
-                  {puesto.distancia !== null && (
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-600">
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      {puesto.distancia < 1
-                        ? `${(puesto.distancia * 1000).toFixed(0)}m`
-                        : `${puesto.distancia.toFixed(1)}km`}
-                    </span>
+      {/* Lista de puestos */}
+      {puestosConDistancia.length > 0 ? (
+        <div className="px-4 pb-24 space-y-3">
+          {puestosConDistancia.map((puesto, index) => (
+            <div
+              key={puesto.id}
+              onClick={() => onPuestoClick(puesto)}
+              className={`rounded-2xl overflow-hidden cursor-pointer card-hover animate-fade-in-up stagger-${Math.min(index + 1, 8)}`}
+              style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-subtle)'
+              }}
+            >
+              <div className="flex gap-4 p-4">
+                {/* Imagen */}
+                <div className="flex-shrink-0">
+                  {puesto.foto_url ? (
+                    <img
+                      src={puesto.foto_url}
+                      alt={puesto.nombre}
+                      className="w-24 h-24 object-cover rounded-xl"
+                    />
+                  ) : (
+                    <div
+                      className="w-24 h-24 rounded-xl flex items-center justify-center"
+                      style={{
+                        background: 'linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-card) 100%)',
+                        color: 'var(--text-muted)'
+                      }}
+                    >
+                      <ImageIcon />
+                    </div>
                   )}
                 </div>
-                {puesto.descripcion && (
-                  <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                    {puesto.descripcion}
-                  </p>
-                )}
-              </div>
 
-              {/* Flecha indicadora */}
-              <div className="flex-shrink-0 flex items-center">
-                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                {/* Info */}
+                <div className="flex-1 min-w-0 py-1">
+                  <h3
+                    className="font-bold text-lg truncate mb-1.5"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
+                    {puesto.nombre}
+                  </h3>
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span
+                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
+                      style={{
+                        background: 'rgba(245, 158, 11, 0.15)',
+                        color: 'var(--accent-amber)'
+                      }}
+                    >
+                      {puesto.tipo_comida || 'Comida'}
+                    </span>
+                    {puesto.distancia !== null && (
+                      <span
+                        className="inline-flex items-center gap-1 text-xs font-medium"
+                        style={{ color: 'var(--text-muted)' }}
+                      >
+                        <MapPinIcon />
+                        {puesto.distancia < 1
+                          ? `${(puesto.distancia * 1000).toFixed(0)}m`
+                          : `${puesto.distancia.toFixed(1)}km`}
+                      </span>
+                    )}
+                  </div>
+                  {puesto.descripcion && (
+                    <p
+                      className="text-sm line-clamp-2 leading-relaxed"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
+                      {puesto.descripcion}
+                    </p>
+                  )}
+                </div>
+
+                {/* Flecha */}
+                <div
+                  className="flex-shrink-0 flex items-center"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  <ChevronIcon />
+                </div>
               </div>
             </div>
+          ))}
+        </div>
+      ) : (
+        <div className="px-4 py-16 text-center">
+          <div
+            className="w-20 h-20 rounded-3xl mx-auto mb-5 flex items-center justify-center"
+            style={{ background: 'var(--bg-card)' }}
+          >
+            <span className="text-4xl">🔍</span>
           </div>
-        ))}
-      </div>
+          <p className="font-semibold text-lg mb-2" style={{ color: 'var(--text-primary)' }}>
+            No hay resultados
+          </p>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Intenta con otros filtros o términos de búsqueda
+          </p>
+        </div>
+      )}
     </div>
   )
 }

@@ -7,44 +7,91 @@ import FormularioResena from '../components/FormularioResena'
 import ModalReporte from '../components/ModalReporte'
 import 'leaflet/dist/leaflet.css'
 
-// Ícono naranja para el mapa pequeño
+// Ícono personalizado para el mapa
+const puestoIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B6B"/>
+      <stop offset="100%" style="stop-color:#F59E0B"/>
+    </linearGradient>
+  </defs>
+  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+        fill="url(#grad)" stroke="white" stroke-width="1.5"/>
+  <circle cx="12" cy="9" r="3" fill="white"/>
+</svg>`
+
 const puestoIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
-      <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"
-            fill="#F97316" stroke="white" stroke-width="1.5"/>
-      <circle cx="12" cy="12" r="3" fill="white"/>
-    </svg>
-  `),
-  iconSize: [36, 36],
-  iconAnchor: [18, 36],
-  popupAnchor: [0, -36]
+  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(puestoIconSvg),
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+  popupAnchor: [0, -40]
 })
 
-function EstrellaIcono({ filled }) {
-  return (
-    <svg
-      className="w-5 h-5"
-      fill={filled ? '#F97316' : 'none'}
-      stroke="#F97316"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-    </svg>
-  )
-}
+// Iconos SVG
+const BackIcon = () => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 12H5M12 19l-7-7 7-7" />
+  </svg>
+)
+
+const ClockIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+)
+
+const MapPinIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+)
+
+const AlertIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+)
+
+const StarIcon = ({ filled, size = 24 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill={filled ? 'currentColor' : 'none'}
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={`star ${filled ? 'star-filled' : ''}`}
+    style={{ color: filled ? 'var(--accent-amber)' : 'var(--text-muted)' }}
+  >
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+)
 
 function PromedioEstrellas({ promedio, total }) {
   return (
-    <div className="flex items-center gap-2">
-      <div className="flex">
+    <div className="flex items-center gap-3">
+      <div className="flex gap-0.5">
         {[1, 2, 3, 4, 5].map((num) => (
-          <EstrellaIcono key={num} filled={num <= Math.round(promedio)} />
+          <StarIcon key={num} filled={num <= Math.round(promedio)} size={22} />
         ))}
       </div>
-      <span className="text-sm text-gray-600">
-        {promedio > 0 ? promedio.toFixed(1) : 'Sin reseñas'} ({total} {total === 1 ? 'reseña' : 'reseñas'})
+      <span style={{ color: 'var(--text-secondary)' }}>
+        {promedio > 0 ? (
+          <>
+            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+              {promedio.toFixed(1)}
+            </span>
+            {' · '}{total} {total === 1 ? 'reseña' : 'reseñas'}
+          </>
+        ) : (
+          'Sin reseñas aún'
+        )}
       </span>
     </div>
   )
@@ -78,8 +125,6 @@ export default function DetallePuesto() {
     async function fetchPuestoYResenas() {
       try {
         setLoading(true)
-
-        // Fetch puesto
         const { data: puestoData, error: puestoError } = await supabase
           .from('puestos')
           .select('*')
@@ -88,8 +133,6 @@ export default function DetallePuesto() {
 
         if (puestoError) throw puestoError
         setPuesto(puestoData)
-
-        // Fetch reseñas
         await fetchResenas()
       } catch (err) {
         console.error('Error cargando puesto:', err)
@@ -104,10 +147,19 @@ export default function DetallePuesto() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: 'var(--bg-deep)' }}
+      >
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando puesto...</p>
+          <div
+            className="w-16 h-16 rounded-full mx-auto mb-6 animate-spin"
+            style={{
+              border: '3px solid var(--bg-elevated)',
+              borderTopColor: 'var(--accent-amber)'
+            }}
+          />
+          <p style={{ color: 'var(--text-secondary)' }}>Cargando...</p>
         </div>
       </div>
     )
@@ -115,14 +167,25 @@ export default function DetallePuesto() {
 
   if (error || !puesto) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="text-center">
-          <p className="text-red-600 font-semibold mb-4">Error al cargar el puesto</p>
-          <button
-            onClick={() => navigate('/')}
-            className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600"
+      <div
+        className="min-h-screen flex items-center justify-center p-6"
+        style={{ background: 'var(--bg-deep)' }}
+      >
+        <div className="text-center max-w-sm">
+          <div
+            className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center"
+            style={{ background: 'rgba(255, 107, 107, 0.15)' }}
           >
-            Volver al mapa
+            <AlertIcon />
+          </div>
+          <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--accent-coral)' }}>
+            No encontrado
+          </h2>
+          <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
+            Este puesto no existe o fue eliminado
+          </p>
+          <button onClick={() => navigate('/')} className="btn-primary w-full">
+            Volver al inicio
           </button>
         </div>
       </div>
@@ -134,69 +197,114 @@ export default function DetallePuesto() {
     : 0
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-6">
-      {/* Header con gradiente */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
+    <div className="min-h-screen pb-8" style={{ background: 'var(--bg-deep)' }}>
+      {/* Header fijo con blur */}
+      <header
+        className="sticky top-0 z-50 glass-heavy animate-slide-down"
+        style={{ borderBottom: '1px solid var(--border-subtle)' }}
+      >
+        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
           <button
             onClick={() => navigate('/')}
-            className="p-2 hover:bg-white/20 rounded-full transition-colors active:scale-95"
+            className="w-11 h-11 rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+            style={{
+              background: 'var(--bg-elevated)',
+              color: 'var(--text-primary)'
+            }}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-            </svg>
+            <BackIcon />
           </button>
-          <h1 className="text-xl font-bold truncate">{puesto.nombre}</h1>
+          <h1
+            className="text-lg font-bold truncate flex-1"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            {puesto.nombre}
+          </h1>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-4xl mx-auto px-4 space-y-4 -mt-4">
-        {/* Foto del puesto con esquinas redondeadas superiores */}
+      <div className="max-w-3xl mx-auto px-4 space-y-5 pt-5">
+        {/* Imagen del puesto */}
         {puesto.foto_url && (
-          <div className="bg-white rounded-2xl overflow-hidden shadow-lg">
+          <div
+            className="rounded-3xl overflow-hidden animate-fade-in-up"
+            style={{
+              background: 'var(--bg-card)',
+              boxShadow: 'var(--shadow-card)'
+            }}
+          >
             <img
               src={puesto.foto_url}
               alt={puesto.nombre}
-              className="w-full h-72 object-cover"
+              className="w-full h-72 sm:h-80 object-cover"
             />
           </div>
         )}
 
-        {/* Tarjeta de información principal */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 space-y-4 border border-gray-100">
+        {/* Información principal */}
+        <div
+          className="rounded-3xl p-6 space-y-5 animate-fade-in-up stagger-1"
+          style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-subtle)'
+          }}
+        >
+          {/* Título y tipo */}
           <div>
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex-1">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">{puesto.nombre}</h2>
-                {puesto.tipo_comida && (
-                  <span className="inline-flex items-center bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-sm">
-                    {puesto.tipo_comida}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-orange-50 border border-orange-100 rounded-xl p-4">
-              <PromedioEstrellas promedio={promedioEstrellas} total={resenas.length} />
-            </div>
+            <h2 className="font-display text-3xl font-bold mb-3 text-gradient-fire">
+              {puesto.nombre}
+            </h2>
+            {puesto.tipo_comida && (
+              <span
+                className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold"
+                style={{
+                  background: 'var(--gradient-fire)',
+                  color: 'white'
+                }}
+              >
+                {puesto.tipo_comida}
+              </span>
+            )}
           </div>
 
+          {/* Rating */}
+          <div
+            className="p-4 rounded-2xl"
+            style={{ background: 'var(--bg-elevated)' }}
+          >
+            <PromedioEstrellas promedio={promedioEstrellas} total={resenas.length} />
+          </div>
+
+          {/* Descripción */}
           {puesto.descripcion && (
-            <div className="pt-3">
-              <p className="text-gray-700 leading-relaxed text-base">{puesto.descripcion}</p>
-            </div>
+            <p
+              className="text-base leading-relaxed"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              {puesto.descripcion}
+            </p>
           )}
 
+          {/* Horario */}
           {(puesto.horario_apertura || puesto.horario_cierre) && (
-            <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-xl">
-              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            <div
+              className="flex items-center gap-4 p-4 rounded-2xl"
+              style={{ background: 'var(--bg-elevated)' }}
+            >
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: 'rgba(245, 158, 11, 0.15)',
+                  color: 'var(--accent-amber)'
+                }}
+              >
+                <ClockIcon />
               </div>
               <div>
-                <p className="text-xs text-gray-500 font-medium">Horario</p>
-                <p className="font-semibold">
+                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>
+                  Horario
+                </p>
+                <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                   {puesto.horario_apertura && puesto.horario_cierre
                     ? `${puesto.horario_apertura.slice(0, 5)} - ${puesto.horario_cierre.slice(0, 5)}`
                     : puesto.horario_apertura
@@ -207,29 +315,46 @@ export default function DetallePuesto() {
             </div>
           )}
 
-          {/* Botón de reportar con mejor diseño */}
+          {/* Botón reportar */}
           <button
             onClick={() => setMostrarModalReporte(true)}
-            className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 active:scale-98 transition-all font-semibold"
+            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+            style={{
+              background: 'var(--bg-elevated)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border-subtle)'
+            }}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+            <AlertIcon />
             Reportar problema
           </button>
         </div>
 
-        {/* Mapa con mejor diseño */}
+        {/* Mapa */}
         {puesto.latitud && puesto.longitud && (
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-            <div className="px-6 py-4 border-b bg-gradient-to-r from-gray-50 to-white">
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <h3 className="font-bold text-gray-900">Ubicación</h3>
+          <div
+            className="rounded-3xl overflow-hidden animate-fade-in-up stagger-2"
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-subtle)'
+            }}
+          >
+            <div
+              className="px-6 py-4 flex items-center gap-3"
+              style={{ borderBottom: '1px solid var(--border-subtle)' }}
+            >
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{
+                  background: 'rgba(245, 158, 11, 0.15)',
+                  color: 'var(--accent-amber)'
+                }}
+              >
+                <MapPinIcon />
               </div>
+              <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Ubicación
+              </span>
             </div>
             <div className="h-56">
               <MapContainer
@@ -241,8 +366,8 @@ export default function DetallePuesto() {
                 scrollWheelZoom={false}
               >
                 <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                 />
                 <Marker position={[puesto.latitud, puesto.longitud]} icon={puestoIcon} />
               </MapContainer>
@@ -251,49 +376,84 @@ export default function DetallePuesto() {
         )}
 
         {/* Formulario de reseña */}
-        <FormularioResena puestoId={id} onResenaEnviada={fetchResenas} />
+        <div className="animate-fade-in-up stagger-3">
+          <FormularioResena puestoId={id} onResenaEnviada={fetchResenas} />
+        </div>
 
-        {/* Reseñas con mejor diseño */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b bg-gradient-to-r from-gray-50 to-white">
-            <h3 className="font-bold text-gray-900 text-lg">
-              Reseñas · {resenas.length}
+        {/* Lista de reseñas */}
+        <div
+          className="rounded-3xl overflow-hidden animate-fade-in-up stagger-4"
+          style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-subtle)'
+          }}
+        >
+          <div
+            className="px-6 py-4"
+            style={{ borderBottom: '1px solid var(--border-subtle)' }}
+          >
+            <h3 className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
+              Reseñas
+              {resenas.length > 0 && (
+                <span
+                  className="ml-2 text-sm font-normal"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  ({resenas.length})
+                </span>
+              )}
             </h3>
           </div>
 
           {resenas.length > 0 ? (
-            <div className="divide-y divide-gray-100">
-              {resenas.map((resena) => (
-                <div key={resena.id} className="p-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
-                    <div className="flex">
+            <div>
+              {resenas.map((resena, index) => (
+                <div
+                  key={resena.id}
+                  className="p-6 transition-colors"
+                  style={{
+                    borderBottom: index < resenas.length - 1 ? '1px solid var(--border-subtle)' : 'none'
+                  }}
+                >
+                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                    <div className="flex gap-0.5">
                       {[1, 2, 3, 4, 5].map((num) => (
-                        <EstrellaIcono key={num} filled={num <= resena.estrellas} />
+                        <StarIcon key={num} filled={num <= resena.estrellas} size={18} />
                       ))}
                     </div>
-                    <span className="text-sm text-gray-500 font-medium">
+                    <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
                       {new Date(resena.created_at).toLocaleDateString('es-MX', {
                         year: 'numeric',
-                        month: 'long',
+                        month: 'short',
                         day: 'numeric'
                       })}
                     </span>
                   </div>
                   {resena.comentario && (
-                    <p className="text-gray-700 leading-relaxed">{resena.comentario}</p>
+                    <p
+                      className="leading-relaxed"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
+                      {resena.comentario}
+                    </p>
                   )}
                 </div>
               ))}
             </div>
           ) : (
             <div className="p-12 text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                </svg>
+              <div
+                className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+                style={{ background: 'var(--bg-elevated)' }}
+              >
+                <StarIcon filled={false} size={32} />
               </div>
-              <p className="text-gray-600 font-medium mb-1">Aún no hay reseñas</p>
-              <p className="text-sm text-gray-500">¡Sé el primero en dejar una reseña!</p>
+              <p className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+                Sin reseñas todavía
+              </p>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                ¡Sé el primero en compartir tu experiencia!
+              </p>
             </div>
           )}
         </div>

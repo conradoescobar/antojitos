@@ -4,6 +4,40 @@ import Mapa from '../components/Mapa'
 import ListaPuestos from '../components/ListaPuestos'
 import FormularioAgregarPuesto from '../components/FormularioAgregarPuesto'
 
+// Iconos SVG inline
+const MapIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+    <line x1="8" y1="2" x2="8" y2="18" />
+    <line x1="16" y1="6" x2="16" y2="22" />
+  </svg>
+)
+
+const ListIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="8" y1="6" x2="21" y2="6" />
+    <line x1="8" y1="12" x2="21" y2="12" />
+    <line x1="8" y1="18" x2="21" y2="18" />
+    <line x1="3" y1="6" x2="3.01" y2="6" />
+    <line x1="3" y1="12" x2="3.01" y2="12" />
+    <line x1="3" y1="18" x2="3.01" y2="18" />
+  </svg>
+)
+
+const PlusIcon = () => (
+  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+)
+
+const CloseIcon = () => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+)
+
 export default function Home() {
   const navigate = useNavigate()
   const [userLocation, setUserLocation] = useState(null)
@@ -11,7 +45,7 @@ export default function Home() {
   const [mapCenter, setMapCenter] = useState(null)
   const [filtroTipo, setFiltroTipo] = useState('Todos')
   const [busqueda, setBusqueda] = useState('')
-  const [vistaActiva, setVistaActiva] = useState('mapa') // 'mapa' o 'lista'
+  const [vistaActiva, setVistaActiva] = useState('mapa')
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
 
   const handlePuestoClick = (puesto) => {
@@ -23,7 +57,7 @@ export default function Home() {
     setMostrarFormulario(false)
   }
 
-  // Filtrar puestos para el mapa (por tipo y búsqueda)
+  // Filtrar puestos
   let puestosFiltrados = puestos
 
   if (filtroTipo !== 'Todos') {
@@ -40,62 +74,92 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Header Superior */}
-      <header className="bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg z-20">
-        <div className="px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <span className="text-2xl">🌮</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">Antojitos Cerca</h1>
-                <p className="text-xs text-orange-100">Encuentra los mejores puestos</p>
-              </div>
+    <div className="h-screen flex flex-col" style={{ background: 'var(--bg-deep)' }}>
+      {/* Header */}
+      <header className="relative z-20 animate-slide-down">
+        {/* Fondo con gradiente sutil */}
+        <div
+          className="absolute inset-0 opacity-80"
+          style={{
+            background: 'linear-gradient(180deg, var(--bg-card) 0%, transparent 100%)'
+          }}
+        />
+
+        <div className="relative px-5 pt-6 pb-4">
+          {/* Logo y título */}
+          <div className="flex items-center gap-4 mb-5">
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center animate-float"
+              style={{
+                background: 'var(--gradient-fire)',
+                boxShadow: '0 8px 32px rgba(245, 158, 11, 0.3)'
+              }}
+            >
+              <span className="text-3xl">🌮</span>
+            </div>
+            <div>
+              <h1 className="font-display text-2xl font-bold text-gradient-fire">
+                Antojitos
+              </h1>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                Encuentra sabor cerca de ti
+              </p>
             </div>
           </div>
-        </div>
 
-        {/* Tabs de navegación */}
-        <div className="flex border-t border-orange-400">
-          <button
-            onClick={() => setVistaActiva('mapa')}
-            className={`flex-1 py-3 text-center font-medium transition-all ${
-              vistaActiva === 'mapa'
-                ? 'bg-white text-orange-600 shadow-inner'
-                : 'text-white hover:bg-orange-400'
-            }`}
+          {/* Tabs de navegación */}
+          <div
+            className="flex rounded-2xl p-1.5"
+            style={{ background: 'var(--bg-elevated)' }}
           >
-            <div className="flex items-center justify-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
+            <button
+              onClick={() => setVistaActiva('mapa')}
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${
+                vistaActiva === 'mapa'
+                  ? 'text-white shadow-lg'
+                  : ''
+              }`}
+              style={vistaActiva === 'mapa' ? {
+                background: 'var(--gradient-fire)',
+                boxShadow: '0 4px 20px rgba(245, 158, 11, 0.3)'
+              } : {
+                color: 'var(--text-secondary)'
+              }}
+            >
+              <MapIcon />
               Mapa
-            </div>
-          </button>
-          <button
-            onClick={() => setVistaActiva('lista')}
-            className={`flex-1 py-3 text-center font-medium transition-all ${
-              vistaActiva === 'lista'
-                ? 'bg-white text-orange-600 shadow-inner'
-                : 'text-white hover:bg-orange-400'
-            }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-              </svg>
-              Lista
-            </div>
-          </button>
+            </button>
+            <button
+              onClick={() => setVistaActiva('lista')}
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${
+                vistaActiva === 'lista'
+                  ? 'text-white shadow-lg'
+                  : ''
+              }`}
+              style={vistaActiva === 'lista' ? {
+                background: 'var(--gradient-fire)',
+                boxShadow: '0 4px 20px rgba(245, 158, 11, 0.3)'
+              } : {
+                color: 'var(--text-secondary)'
+              }}
+            >
+              <ListIcon />
+              Explorar
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Contenido Principal */}
       <div className="flex-1 overflow-hidden relative">
         {/* Vista de Mapa */}
-        <div className={`absolute inset-0 transition-opacity duration-300 ${vistaActiva === 'mapa' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+        <div
+          className={`absolute inset-0 transition-all duration-500 ${
+            vistaActiva === 'mapa'
+              ? 'opacity-100 z-10 scale-100'
+              : 'opacity-0 z-0 scale-95 pointer-events-none'
+          }`}
+        >
           <Mapa
             userLocation={userLocation}
             onUserLocationChange={setUserLocation}
@@ -106,7 +170,13 @@ export default function Home() {
         </div>
 
         {/* Vista de Lista */}
-        <div className={`absolute inset-0 transition-opacity duration-300 ${vistaActiva === 'lista' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+        <div
+          className={`absolute inset-0 transition-all duration-500 ${
+            vistaActiva === 'lista'
+              ? 'opacity-100 z-10 scale-100'
+              : 'opacity-0 z-0 scale-95 pointer-events-none'
+          }`}
+        >
           <ListaPuestos
             userLocation={userLocation}
             onPuestoClick={handlePuestoClick}
@@ -123,34 +193,68 @@ export default function Home() {
       {/* FAB - Botón flotante para agregar */}
       <button
         onClick={() => setMostrarFormulario(true)}
-        className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-full shadow-2xl hover:shadow-3xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center z-30"
+        className="fixed bottom-8 right-6 w-16 h-16 rounded-2xl flex items-center justify-center z-30 transition-all duration-300 hover:scale-110 active:scale-95 animate-pulse-glow"
+        style={{
+          background: 'var(--gradient-fire)',
+          boxShadow: '0 8px 32px rgba(245, 158, 11, 0.4)'
+        }}
         aria-label="Agregar puesto"
       >
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-        </svg>
+        <PlusIcon />
       </button>
 
       {/* Modal de Formulario */}
       {mostrarFormulario && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-end sm:items-center justify-center">
-          <div className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto animate-slide-up">
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between rounded-t-3xl sm:rounded-t-2xl">
-              <h2 className="text-xl font-bold text-gray-900">Agregar Puesto</h2>
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center animate-fade-in"
+          style={{ background: 'rgba(13, 11, 14, 0.8)' }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setMostrarFormulario(false)
+          }}
+        >
+          <div
+            className="w-full max-w-lg max-h-[92vh] overflow-hidden animate-slide-up rounded-t-3xl sm:rounded-3xl"
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-subtle)'
+            }}
+          >
+            {/* Header del modal */}
+            <div
+              className="sticky top-0 z-10 px-6 py-5 flex items-center justify-between"
+              style={{
+                background: 'var(--bg-card)',
+                borderBottom: '1px solid var(--border-subtle)'
+              }}
+            >
+              <div>
+                <h2 className="text-xl font-bold text-gradient-fire font-display">
+                  Nuevo Puesto
+                </h2>
+                <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+                  Comparte tu descubrimiento
+                </p>
+              </div>
               <button
                 onClick={() => setMostrarFormulario(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                style={{
+                  background: 'var(--bg-elevated)',
+                  color: 'var(--text-secondary)'
+                }}
               >
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <CloseIcon />
               </button>
             </div>
-            <div className="p-6">
-              <FormularioAgregarPuesto
-                onPuestoAgregado={handlePuestoAgregado}
-                onCancelar={() => setMostrarFormulario(false)}
-              />
+
+            {/* Contenido scrolleable */}
+            <div className="overflow-y-auto" style={{ maxHeight: 'calc(92vh - 88px)' }}>
+              <div className="p-6">
+                <FormularioAgregarPuesto
+                  onPuestoAgregado={handlePuestoAgregado}
+                  onCancelar={() => setMostrarFormulario(false)}
+                />
+              </div>
             </div>
           </div>
         </div>

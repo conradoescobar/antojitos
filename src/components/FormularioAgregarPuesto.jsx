@@ -1,6 +1,28 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
+// Iconos
+const CameraIcon = () => (
+  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+    <circle cx="12" cy="13" r="4" />
+  </svg>
+)
+
+const MapPinIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+)
+
+const CloseIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+)
+
 export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }) {
   const [nombre, setNombre] = useState('')
   const [tipoComida, setTipoComida] = useState('')
@@ -18,7 +40,7 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
   const handleFotoChange = (e) => {
     const file = e.target.files[0]
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB máximo
+      if (file.size > 5 * 1024 * 1024) {
         setError('La foto no debe superar 5MB')
         return
       }
@@ -60,11 +82,10 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       return
     }
 
-    // Verificar variables de entorno
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
     const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
     if (!supabaseUrl || !supabaseAnonKey) {
-      setError('Error de configuración: Las variables de entorno de Supabase no están configuradas. Verifica la configuración en Vercel.')
+      setError('Error de configuración: Variables de Supabase no configuradas.')
       return
     }
 
@@ -73,7 +94,6 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
       setError(null)
       setUbicacionPendiente(true)
 
-      // Obtener ubicación actual
       const position = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
@@ -83,7 +103,6 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
 
       const { latitude, longitude } = position.coords
 
-      // Insertar puesto
       const puestoData = {
         nombre: nombre.trim(),
         tipo_comida: tipoComida || null,
@@ -103,12 +122,10 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
 
       if (insertError) throw insertError
 
-      // Subir foto si existe
       let fotoUrl = null
       if (foto) {
         fotoUrl = await subirFoto(nuevoPuesto.id)
 
-        // Actualizar puesto con URL de foto
         const { error: updateError } = await supabase
           .from('puestos')
           .update({ foto_url: fotoUrl })
@@ -117,7 +134,6 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
         if (updateError) throw updateError
       }
 
-      // Limpiar formulario
       setNombre('')
       setTipoComida('')
       setDescripcion('')
@@ -132,24 +148,17 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
     } catch (err) {
       console.error('Error agregando puesto:', err)
       if (err.code === 1) {
-        setError('No se pudo obtener tu ubicación. Por favor permite el acceso a tu ubicación.')
+        setError('No se pudo obtener tu ubicación. Por favor permite el acceso.')
       } else if (err.message && err.message.includes('fotos-puestos')) {
-        setError('Error subiendo la foto. Asegúrate de que el bucket "fotos-puestos" esté configurado en Supabase.')
+        setError('Error subiendo la foto. Verifica el bucket en Supabase.')
       } else if (err.message) {
-        // Mostrar el mensaje de error específico de Supabase
         let errorMessage = err.message
-        if (err.message.includes('permission denied') || err.message.includes('new row violates row-level security')) {
-          errorMessage = 'Error de permisos. Verifica las políticas RLS en Supabase para la tabla "puestos".'
-        } else if (err.message.includes('relation') && err.message.includes('does not exist')) {
-          errorMessage = 'La tabla "puestos" no existe en Supabase. Verifica la estructura de la base de datos.'
-        } else if (err.message.includes('column') && err.message.includes('does not exist')) {
-          errorMessage = 'Error en la estructura de la tabla. Verifica que todas las columnas existan en Supabase.'
-        } else if (err.message.includes('schema cache') || err.message.includes('Could not find')) {
-          errorMessage = 'Error de caché del schema en Supabase. Esto puede pasar si acabas de agregar una columna. Intenta: 1) Esperar unos minutos, 2) Verificar que todas las columnas existan en Supabase, 3) Refrescar la página y volver a intentar.'
+        if (err.message.includes('permission denied') || err.message.includes('row-level security')) {
+          errorMessage = 'Error de permisos. Verifica las políticas RLS en Supabase.'
         }
         setError(`Error: ${errorMessage}`)
       } else {
-        setError('Error al agregar el puesto. Intenta de nuevo. Revisa la consola para más detalles.')
+        setError('Error al agregar el puesto. Intenta de nuevo.')
       }
     } finally {
       setLoading(false)
@@ -158,154 +167,226 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar }
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Agregar Puesto</h2>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Nombre */}
+      <div>
+        <label
+          htmlFor="nombre"
+          className="block text-sm font-semibold mb-2"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          Nombre del puesto <span style={{ color: 'var(--accent-coral)' }}>*</span>
+        </label>
+        <input
+          type="text"
+          id="nombre"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          className="input-field"
+          placeholder="Ej: Tacos Don Pepe"
+          required
+        />
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Nombre */}
-        <div>
-          <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre del puesto *
-          </label>
-          <input
-            type="text"
-            id="nombre"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            placeholder="Ej: Tacos Don Pepe"
-            required
-          />
-        </div>
+      {/* Tipo de comida */}
+      <div>
+        <label
+          htmlFor="tipo"
+          className="block text-sm font-semibold mb-2"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          Tipo de comida
+        </label>
+        <select
+          id="tipo"
+          value={tipoComida}
+          onChange={(e) => setTipoComida(e.target.value)}
+          className="input-field"
+        >
+          <option value="">Selecciona un tipo</option>
+          {tipos.map((tipo) => (
+            <option key={tipo} value={tipo}>
+              {tipo}
+            </option>
+          ))}
+        </select>
+      </div>
 
-        {/* Tipo de comida */}
-        <div>
-          <label htmlFor="tipo" className="block text-sm font-medium text-gray-700 mb-1">
-            Tipo de comida
-          </label>
-          <select
-            id="tipo"
-            value={tipoComida}
-            onChange={(e) => setTipoComida(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-          >
-            <option value="">Selecciona un tipo</option>
-            {tipos.map((tipo) => (
-              <option key={tipo} value={tipo}>
-                {tipo}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Descripción */}
+      <div>
+        <label
+          htmlFor="descripcion"
+          className="block text-sm font-semibold mb-2"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          Descripción
+        </label>
+        <textarea
+          id="descripcion"
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
+          rows={3}
+          className="input-field"
+          placeholder="Breve descripción del puesto..."
+          maxLength={300}
+        />
+        <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
+          {descripcion.length}/300 caracteres
+        </p>
+      </div>
 
-        {/* Descripción */}
-        <div>
-          <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
-            Descripción
-          </label>
-          <textarea
-            id="descripcion"
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
-            placeholder="Breve descripción del puesto..."
-            maxLength={300}
-          />
-        </div>
-
-        {/* Horario */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Horario
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label htmlFor="horarioApertura" className="block text-xs text-gray-600 mb-1">
-                Apertura
-              </label>
-              <input
-                type="time"
-                id="horarioApertura"
-                value={horarioApertura}
-                onChange={(e) => setHorarioApertura(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label htmlFor="horarioCierre" className="block text-xs text-gray-600 mb-1">
-                Cierre
-              </label>
-              <input
-                type="time"
-                id="horarioCierre"
-                value={horarioCierre}
-                onChange={(e) => setHorarioCierre(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
-            </div>
+      {/* Horario */}
+      <div>
+        <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+          Horario
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="horarioApertura" className="block text-xs mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+              Apertura
+            </label>
+            <input
+              type="time"
+              id="horarioApertura"
+              value={horarioApertura}
+              onChange={(e) => setHorarioApertura(e.target.value)}
+              className="input-field"
+            />
+          </div>
+          <div>
+            <label htmlFor="horarioCierre" className="block text-xs mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+              Cierre
+            </label>
+            <input
+              type="time"
+              id="horarioCierre"
+              value={horarioCierre}
+              onChange={(e) => setHorarioCierre(e.target.value)}
+              className="input-field"
+            />
           </div>
         </div>
+      </div>
 
-        {/* Foto */}
-        <div>
-          <label htmlFor="foto" className="block text-sm font-medium text-gray-700 mb-1">
-            Foto (opcional)
-          </label>
-          <input
-            type="file"
-            id="foto"
-            accept="image/*"
-            onChange={handleFotoChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-          />
-          <p className="text-xs text-gray-500 mt-1">Máximo 5MB - JPG, PNG o WebP</p>
-
-          {previsualizacion && (
-            <div className="mt-2">
-              <img
-                src={previsualizacion}
-                alt="Previsualización"
-                className="w-full h-40 object-cover rounded-lg"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Info de ubicación */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <p className="text-sm text-blue-800">
-            📍 Se usará tu ubicación actual para marcar el puesto en el mapa.
-          </p>
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-2 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
-
-        {/* Botones */}
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-orange-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-          >
-            {ubicacionPendiente ? 'Obteniendo ubicación...' : loading ? 'Guardando...' : 'Agregar Puesto'}
-          </button>
-          {onCancelar && (
+      {/* Foto */}
+      <div>
+        <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+          Foto (opcional)
+        </label>
+        {previsualizacion ? (
+          <div className="relative rounded-2xl overflow-hidden">
+            <img
+              src={previsualizacion}
+              alt="Previsualización"
+              className="w-full h-48 object-cover"
+            />
             <button
               type="button"
-              onClick={onCancelar}
-              className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+              onClick={() => {
+                setFoto(null)
+                setPrevisualizacion(null)
+              }}
+              className="absolute top-3 right-3 w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-105"
+              style={{
+                background: 'rgba(13, 11, 14, 0.8)',
+                color: 'var(--text-primary)'
+              }}
             >
-              Cancelar
+              <CloseIcon />
             </button>
-          )}
+          </div>
+        ) : (
+          <label
+            className="flex flex-col items-center justify-center w-full h-40 rounded-2xl cursor-pointer transition-all hover:scale-[1.01]"
+            style={{
+              background: 'var(--bg-elevated)',
+              border: '2px dashed var(--border-subtle)',
+              color: 'var(--text-muted)'
+            }}
+          >
+            <CameraIcon />
+            <span className="text-sm mt-2">Toca para agregar foto</span>
+            <span className="text-xs mt-1">Máx. 5MB</span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFotoChange}
+              className="hidden"
+            />
+          </label>
+        )}
+      </div>
+
+      {/* Info de ubicación */}
+      <div
+        className="flex items-center gap-3 p-4 rounded-2xl"
+        style={{
+          background: 'rgba(34, 211, 238, 0.1)',
+          border: '1px solid rgba(34, 211, 238, 0.2)'
+        }}
+      >
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: 'rgba(34, 211, 238, 0.15)', color: 'var(--accent-cyan)' }}
+        >
+          <MapPinIcon />
         </div>
-      </form>
-    </div>
+        <p className="text-sm" style={{ color: 'var(--accent-cyan)' }}>
+          Se usará tu ubicación actual para marcar el puesto
+        </p>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div
+          className="p-4 rounded-2xl"
+          style={{
+            background: 'rgba(255, 107, 107, 0.1)',
+            border: '1px solid rgba(255, 107, 107, 0.2)',
+            color: 'var(--accent-coral)'
+          }}
+        >
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* Botones */}
+      <div className="flex gap-3 pt-2">
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn-primary flex-1 flex items-center justify-center gap-2"
+        >
+          {ubicacionPendiente ? (
+            <>
+              <div
+                className="w-5 h-5 rounded-full animate-spin"
+                style={{ border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white' }}
+              />
+              Obteniendo ubicación...
+            </>
+          ) : loading ? (
+            <>
+              <div
+                className="w-5 h-5 rounded-full animate-spin"
+                style={{ border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white' }}
+              />
+              Guardando...
+            </>
+          ) : (
+            'Agregar Puesto'
+          )}
+        </button>
+        {onCancelar && (
+          <button
+            type="button"
+            onClick={onCancelar}
+            className="btn-secondary"
+          >
+            Cancelar
+          </button>
+        )}
+      </div>
+    </form>
   )
 }

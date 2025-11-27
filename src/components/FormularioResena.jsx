@@ -1,23 +1,36 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
+// Componente de estrella interactiva
+const StarIcon = ({ filled, size = 32 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill={filled ? 'currentColor' : 'none'}
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="star transition-all duration-200"
+    style={{
+      color: filled ? 'var(--accent-amber)' : 'var(--text-muted)',
+      filter: filled ? 'drop-shadow(0 0 8px rgba(245, 158, 11, 0.5))' : 'none'
+    }}
+  >
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+)
+
 function EstrellaClickeable({ filled, onHover, onClick }) {
   return (
     <button
       type="button"
       onMouseEnter={onHover}
       onClick={onClick}
-      className="focus:outline-none transition-transform hover:scale-110"
+      className="star focus:outline-none transition-transform hover:scale-125 active:scale-95"
     >
-      <svg
-        className="w-8 h-8"
-        fill={filled ? '#F97316' : 'none'}
-        stroke="#F97316"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-      >
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-      </svg>
+      <StarIcon filled={filled} />
     </button>
   )
 }
@@ -54,17 +67,14 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
 
       if (insertError) throw insertError
 
-      // Limpiar formulario
       setEstrellas(0)
       setComentario('')
       setExito(true)
 
-      // Notificar al padre que se envió una reseña
       if (onResenaEnviada) {
         onResenaEnviada()
       }
 
-      // Ocultar mensaje de éxito después de 3 segundos
       setTimeout(() => setExito(false), 3000)
     } catch (err) {
       console.error('Error enviando reseña:', err)
@@ -77,17 +87,32 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
   const displayEstrellas = hoverEstrellas || estrellas
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <h3 className="font-semibold text-gray-900 mb-4">Deja tu reseña</h3>
+    <div
+      className="rounded-3xl p-6"
+      style={{
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-subtle)'
+      }}
+    >
+      <h3
+        className="font-bold text-lg mb-5"
+        style={{ color: 'var(--text-primary)' }}
+      >
+        Deja tu reseña
+      </h3>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Selector de estrellas */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            className="block text-sm font-semibold mb-3"
+            style={{ color: 'var(--text-primary)' }}
+          >
             Calificación
           </label>
           <div
-            className="flex gap-1"
+            className="flex gap-2 p-4 rounded-2xl justify-center"
+            style={{ background: 'var(--bg-elevated)' }}
             onMouseLeave={() => setHoverEstrellas(0)}
           >
             {[1, 2, 3, 4, 5].map((num) => (
@@ -103,33 +128,55 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
 
         {/* Campo de comentario */}
         <div>
-          <label htmlFor="comentario" className="block text-sm font-medium text-gray-700 mb-2">
-            Comentario (opcional)
+          <label
+            htmlFor="comentario"
+            className="block text-sm font-semibold mb-2"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            Comentario <span style={{ color: 'var(--text-muted)' }}>(opcional)</span>
           </label>
           <textarea
             id="comentario"
             value={comentario}
             onChange={(e) => setComentario(e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+            className="input-field"
             placeholder="Cuéntanos sobre tu experiencia..."
             maxLength={500}
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
             {comentario.length}/500 caracteres
           </p>
         </div>
 
         {/* Mensajes de error/éxito */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-2 rounded-lg text-sm">
-            {error}
+          <div
+            className="p-4 rounded-2xl"
+            style={{
+              background: 'rgba(255, 107, 107, 0.1)',
+              border: '1px solid rgba(255, 107, 107, 0.2)',
+              color: 'var(--accent-coral)'
+            }}
+          >
+            <p className="text-sm">{error}</p>
           </div>
         )}
 
         {exito && (
-          <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-2 rounded-lg text-sm">
-            ¡Reseña enviada con éxito!
+          <div
+            className="p-4 rounded-2xl flex items-center gap-3"
+            style={{
+              background: 'rgba(163, 230, 53, 0.1)',
+              border: '1px solid rgba(163, 230, 53, 0.2)',
+              color: 'var(--accent-lime)'
+            }}
+          >
+            <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            <p className="text-sm font-medium">¡Reseña enviada con éxito!</p>
           </div>
         )}
 
@@ -137,9 +184,19 @@ export default function FormularioResena({ puestoId, onResenaEnviada }) {
         <button
           type="submit"
           disabled={loading || estrellas === 0}
-          className="w-full bg-orange-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          className="btn-primary w-full flex items-center justify-center gap-2"
         >
-          {loading ? 'Enviando...' : 'Enviar reseña'}
+          {loading ? (
+            <>
+              <div
+                className="w-5 h-5 rounded-full animate-spin"
+                style={{ border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white' }}
+              />
+              Enviando...
+            </>
+          ) : (
+            'Enviar reseña'
+          )}
         </button>
       </form>
     </div>

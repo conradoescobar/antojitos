@@ -6,40 +6,51 @@ import 'leaflet/dist/leaflet.css'
 // Coordenadas por defecto (CDMX)
 const CDMX_COORDS = [19.4326, -99.1332]
 
-// Crear un ícono azul personalizado para el marcador del usuario
+// Ícono para el usuario (pulso azul)
+const userIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <circle cx="20" cy="20" r="18" fill="#22D3EE" fill-opacity="0.2">
+    <animate attributeName="r" values="14;18;14" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="fill-opacity" values="0.4;0.1;0.4" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="20" cy="20" r="10" fill="#22D3EE" stroke="white" stroke-width="3"/>
+  <circle cx="20" cy="20" r="4" fill="white"/>
+</svg>`
+
 const userIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
-      <circle cx="12" cy="12" r="10" fill="#3B82F6" stroke="white" stroke-width="2"/>
-      <circle cx="12" cy="12" r="4" fill="white"/>
-    </svg>
-  `),
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
-  popupAnchor: [0, -16]
+  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(userIconSvg),
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+  popupAnchor: [0, -20]
 })
 
-// Crear un ícono naranja personalizado para los puestos
+// Ícono para los puestos (pin con gradiente)
+const puestoIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" width="40" height="48">
+  <defs>
+    <linearGradient id="pinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B6B"/>
+      <stop offset="100%" style="stop-color:#F59E0B"/>
+    </linearGradient>
+  </defs>
+  <path d="M20 2C12.27 2 6 8.27 6 16c0 10 14 28 14 28s14-18 14-28c0-7.73-6.27-14-14-14z"
+        fill="url(#pinGrad)" stroke="white" stroke-width="2"/>
+  <circle cx="20" cy="16" r="6" fill="white"/>
+  <circle cx="20" cy="16" r="3" fill="#F59E0B"/>
+</svg>`
+
 const puestoIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
-      <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"
-            fill="#F97316" stroke="white" stroke-width="1.5"/>
-      <circle cx="12" cy="12" r="3" fill="white"/>
-    </svg>
-  `),
-  iconSize: [36, 36],
-  iconAnchor: [18, 36],
-  popupAnchor: [0, -36]
+  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(puestoIconSvg),
+  iconSize: [40, 48],
+  iconAnchor: [20, 48],
+  popupAnchor: [0, -48]
 })
 
-// Componente para centrar el mapa cuando cambia la ubicación
+// Componente para centrar el mapa
 function MapUpdater({ center }) {
   const map = useMap()
 
   useEffect(() => {
     if (center) {
-      map.setView(center, 15)
+      map.setView(center, 15, { animate: true, duration: 0.5 })
     }
   }, [center, map])
 
@@ -51,7 +62,6 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
   const [permissionDenied, setPermissionDenied] = useState(false)
 
   useEffect(() => {
-    // Pedir permiso de geolocalización
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -79,40 +89,62 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
 
   return (
     <div className="relative w-full h-full">
+      {/* Aviso de ubicación */}
       {permissionDenied && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 rounded-lg shadow-lg">
-          <p className="text-sm">
-            No se pudo obtener tu ubicación. Mostrando Ciudad de México por defecto.
-          </p>
+        <div
+          className="absolute top-4 left-4 right-4 z-[1000] glass rounded-2xl px-4 py-3 animate-fade-in-up"
+          style={{ maxWidth: '400px', margin: '0 auto' }}
+        >
+          <div className="flex items-start gap-3">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(245, 158, 11, 0.15)' }}
+            >
+              <svg className="w-5 h-5" style={{ color: 'var(--accent-amber)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Ubicación no disponible
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                Mostrando Ciudad de México por defecto
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
       <MapContainer
         center={initialCenter}
-        zoom={13}
+        zoom={14}
         className="w-full h-full"
         zoomControl={true}
       >
         <MapUpdater center={mapCenter} />
 
+        {/* Mapa oscuro de CARTO */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
 
+        {/* Marcador del usuario */}
         {userLocation && (
           <Marker position={userLocation} icon={userIcon}>
             <Popup>
-              <div className="text-center">
-                <p className="font-semibold">Tu ubicación</p>
-                <p className="text-sm text-gray-600">
-                  {userLocation[0].toFixed(4)}, {userLocation[1].toFixed(4)}
+              <div className="text-center py-2">
+                <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                  Tu ubicación
                 </p>
               </div>
             </Popup>
           </Marker>
         )}
 
+        {/* Marcadores de puestos */}
         {puestos.map((puesto) => {
           if (puesto.latitud && puesto.longitud) {
             return (
@@ -122,24 +154,37 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
                 icon={puestoIcon}
               >
                 <Popup>
-                  <div className="min-w-[150px]">
-                    <h3 className="font-bold text-orange-600 mb-1">
+                  <div className="min-w-[180px]">
+                    <h3 className="font-bold text-base mb-1 text-gradient-fire">
                       {puesto.nombre}
                     </h3>
                     {puesto.tipo_comida && (
-                      <p className="text-sm text-gray-600 mb-1">
+                      <span
+                        className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold mb-2"
+                        style={{
+                          background: 'var(--gradient-fire)',
+                          color: 'white'
+                        }}
+                      >
                         {puesto.tipo_comida}
-                      </p>
+                      </span>
                     )}
                     {puesto.descripcion && (
-                      <p className="text-xs text-gray-500 mt-2 mb-2">
+                      <p
+                        className="text-xs mb-3 line-clamp-2"
+                        style={{ color: 'var(--text-secondary)' }}
+                      >
                         {puesto.descripcion}
                       </p>
                     )}
                     {onPuestoClick && (
                       <button
                         onClick={() => onPuestoClick(puesto)}
-                        className="w-full bg-orange-500 text-white text-sm px-3 py-1 rounded hover:bg-orange-600 transition-colors mt-2"
+                        className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        style={{
+                          background: 'var(--gradient-fire)',
+                          color: 'white'
+                        }}
                       >
                         Ver detalles
                       </button>
