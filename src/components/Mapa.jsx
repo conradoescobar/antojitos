@@ -29,36 +29,55 @@ const createUserIcon = () => {
   })
 }
 
-// Marcador de puesto - pin terracota original
-const puestoIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" width="40" height="48">
-  <path d="M20 2C12.27 2 6 8.27 6 16c0 10 14 28 14 28s14-18 14-28c0-7.73-6.27-14-14-14z"
-        fill="#D97757" stroke="white" stroke-width="2"/>
-  <circle cx="20" cy="16" r="6" fill="white"/>
-  <circle cx="20" cy="16" r="3" fill="#D97757"/>
-</svg>`
+// Emojis por tipo de comida
+const FOOD_EMOJIS = {
+  'Tacos': '🌮',
+  'Tortas': '🥪',
+  'Quesadillas': '🧀',
+  'Tamales': '🫔',
+  'Antojitos': '🍽️',
+  'Bebidas': '🥤',
+  'Postres': '🍰',
+  'Otro': '📍',
+  'default': '🌮'
+}
 
-const puestoIconSelectedSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" width="46" height="55">
-  <path d="M20 2C12.27 2 6 8.27 6 16c0 10 14 28 14 28s14-18 14-28c0-7.73-6.27-14-14-14z"
-        fill="#D97757" stroke="white" stroke-width="2.5"/>
-  <circle cx="20" cy="16" r="6" fill="white"/>
-  <circle cx="20" cy="16" r="3" fill="#D97757"/>
-</svg>`
+// Crear icono con emoji
+const createFoodIcon = (tipoComida, isSelected = false) => {
+  const emoji = FOOD_EMOJIS[tipoComida] || FOOD_EMOJIS['default']
+  const size = isSelected ? 48 : 40
+  const fontSize = isSelected ? 28 : 24
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <defs>
+      <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/>
+      </filter>
+    </defs>
+    <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 4}" fill="white" filter="url(#shadow)" stroke="${isSelected ? '#D97757' : '#e5e5e5'}" stroke-width="${isSelected ? 3 : 2}"/>
+    <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="${fontSize}">${emoji}</text>
+  </svg>`
+
+  return new L.Icon({
+    iconUrl: 'data:image/svg+xml,' + encodeURIComponent(svg),
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2],
+    className: isSelected ? 'marker-selected' : 'marker-default'
+  })
+}
+
+// Cache de iconos para mejor rendimiento
+const iconCache = {}
+
+const getFoodIcon = (tipoComida, isSelected = false) => {
+  const key = `${tipoComida || 'default'}-${isSelected}`
+  if (!iconCache[key]) {
+    iconCache[key] = createFoodIcon(tipoComida, isSelected)
+  }
+  return iconCache[key]
+}
 
 const userIcon = createUserIcon()
-
-const puestoIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(puestoIconSvg),
-  iconSize: [40, 48],
-  iconAnchor: [20, 48],
-  className: 'marker-default'
-})
-
-const puestoIconSelected = new L.Icon({
-  iconUrl: 'data:image/svg+xml,' + encodeURIComponent(puestoIconSelectedSvg),
-  iconSize: [46, 55],
-  iconAnchor: [23, 55],
-  className: 'marker-selected'
-})
 
 // Componente para manejar eventos del mapa
 function MapController({ center, userLocation, selectedPuesto, onMapClick }) {
@@ -380,7 +399,7 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
               <Marker
                 key={puesto.id}
                 position={[puesto.latitud, puesto.longitud]}
-                icon={isSelected ? puestoIconSelected : puestoIcon}
+                icon={getFoodIcon(puesto.tipo_comida, isSelected)}
                 eventHandlers={{
                   click: (e) => {
                     e.originalEvent.stopPropagation()
