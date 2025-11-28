@@ -114,7 +114,43 @@ function MapController({ center, userLocation, selectedPuesto, onMapClick }) {
   return null
 }
 
-// Mini card flotante estilo Apple
+// Componente de estrellas
+function StarRating({ rating }) {
+  const stars = []
+  const fullStars = Math.floor(rating || 0)
+  const hasHalf = (rating || 0) - fullStars >= 0.5
+
+  for (let i = 0; i < 5; i++) {
+    if (i < fullStars) {
+      stars.push(
+        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="#D97757" stroke="#D97757" strokeWidth="1">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      )
+    } else if (i === fullStars && hasHalf) {
+      stars.push(
+        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97757" strokeWidth="1">
+          <defs>
+            <linearGradient id="half">
+              <stop offset="50%" stopColor="#D97757" />
+              <stop offset="50%" stopColor="transparent" />
+            </linearGradient>
+          </defs>
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="url(#half)" />
+        </svg>
+      )
+    } else {
+      stars.push(
+        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      )
+    }
+  }
+  return <div className="flex gap-0.5">{stars}</div>
+}
+
+// Mini card flotante - diseño vertical compacto
 function FloatingCard({ puesto, onClose, onViewMore }) {
   const [isVisible, setIsVisible] = useState(false)
 
@@ -122,10 +158,15 @@ function FloatingCard({ puesto, onClose, onViewMore }) {
     requestAnimationFrame(() => setIsVisible(true))
   }, [])
 
-  const handleClose = () => {
-    setIsVisible(false)
-    setTimeout(onClose, 200)
+  // Calcular promedio de estrellas
+  const calcularPromedio = () => {
+    const campos = ['sabor', 'precio', 'higiene', 'cantidad', 'atencion']
+    const valores = campos.map(c => puesto[c]).filter(v => v != null && v > 0)
+    if (valores.length === 0) return 0
+    return valores.reduce((a, b) => a + b, 0) / valores.length
   }
+
+  const promedio = calcularPromedio()
 
   return (
     <div
@@ -135,92 +176,84 @@ function FloatingCard({ puesto, onClose, onViewMore }) {
       <div
         className="pointer-events-auto mx-auto transition-all duration-300 ease-out"
         style={{
-          maxWidth: '340px',
+          width: '160px',
           opacity: isVisible ? 1 : 0,
           transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.96)',
-          background: 'rgba(255, 255, 255, 0.92)',
+          background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          borderRadius: '20px',
-          boxShadow: '0 8px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
-          border: '1px solid rgba(255, 255, 255, 0.7)',
+          borderRadius: '16px',
+          boxShadow: '0 8px 40px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.8)',
           overflow: 'hidden'
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-stretch">
-          {/* Foto */}
-          <div className="flex-shrink-0 w-24 h-24 relative overflow-hidden">
-            {puesto.foto_url ? (
-              <img
-                src={puesto.foto_url}
-                alt={puesto.nombre}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div
-                className="w-full h-full flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%)' }}
-              >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#86868b" strokeWidth="1.5">
-                  <path d="M21 15V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V15" strokeLinecap="round"/>
-                  <path d="M12 3V15M12 15L8 11M12 15L16 11" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-            )}
-          </div>
-
-          {/* Info */}
-          <div className="flex-1 p-3.5 flex flex-col justify-center min-w-0">
-            <h3
-              className="font-semibold text-base leading-tight truncate"
-              style={{
-                color: '#1d1d1f',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
-                letterSpacing: '-0.01em'
-              }}
+        {/* Foto arriba */}
+        <div className="relative w-full h-24 overflow-hidden">
+          {puesto.foto_url ? (
+            <img
+              src={puesto.foto_url}
+              alt={puesto.nombre}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div
+              className="w-full h-full flex items-center justify-center text-3xl"
+              style={{ background: 'linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%)' }}
             >
-              {puesto.nombre}
-            </h3>
-
-            <div className="flex items-center gap-2 mt-1.5">
-              {puesto.tipo_comida && (
-                <span
-                  className="text-xs font-medium px-2 py-0.5 rounded-full"
-                  style={{
-                    background: 'rgba(232, 83, 60, 0.1)',
-                    color: '#E8533C'
-                  }}
-                >
-                  {puesto.tipo_comida}
-                </span>
-              )}
+              {FOOD_EMOJIS[puesto.tipo_comida] || '🌮'}
             </div>
-
-            <button
-              onClick={() => onViewMore(puesto)}
-              className="mt-2.5 text-sm font-medium transition-opacity hover:opacity-70 text-left"
-              style={{
-                color: '#007AFF',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif'
-              }}
-            >
-              Ver detalles
-            </button>
-          </div>
+          )}
 
           {/* Botón cerrar */}
           <button
-            onClick={handleClose}
-            className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            onClick={onClose}
+            className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
             style={{
-              background: 'rgba(0, 0, 0, 0.06)',
-              backdropFilter: 'blur(10px)'
+              background: 'rgba(0, 0, 0, 0.4)',
             }}
           >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#86868b" strokeWidth="1.8" strokeLinecap="round">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
               <path d="M2 2l8 8M10 2l-8 8"/>
             </svg>
+          </button>
+        </div>
+
+        {/* Info abajo */}
+        <div className="p-3">
+          {/* Nombre */}
+          <h3
+            className="font-semibold text-sm leading-tight truncate mb-1"
+            style={{ color: '#1d1d1f' }}
+          >
+            {puesto.nombre}
+          </h3>
+
+          {/* Estrellas */}
+          <div className="flex items-center gap-1 mb-2">
+            <StarRating rating={promedio} />
+            {promedio > 0 && (
+              <span className="text-xs font-medium" style={{ color: '#666' }}>
+                {promedio.toFixed(1)}
+              </span>
+            )}
+          </div>
+
+          {/* Botón + */}
+          <button
+            onClick={() => onViewMore(puesto)}
+            className="w-full py-2 rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95"
+            style={{
+              background: '#D97757',
+              color: 'white'
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span className="text-xs font-medium">Ver más</span>
           </button>
         </div>
       </div>
