@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import PlacePreviewSheet from './PlacePreviewSheet'
 
 // Coordenadas por defecto (CDMX)
 const CDMX_COORDS = [19.4326, -99.1332]
@@ -452,10 +453,11 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
         hasLocation={!!userLocation}
       />
 
-      {/* Mini card flotante */}
+      {/* Bottom Sheet de previsualización */}
       {selectedPuesto && (
-        <FloatingCard
+        <PlacePreviewSheet
           puesto={selectedPuesto}
+          userLocation={userLocation}
           onClose={() => setSelectedPuesto(null)}
           onViewMore={(puesto) => {
             setSelectedPuesto(null)
