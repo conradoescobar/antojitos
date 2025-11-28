@@ -6,20 +6,29 @@ import 'leaflet/dist/leaflet.css'
 // Coordenadas por defecto (CDMX)
 const CDMX_COORDS = [19.4326, -99.1332]
 
-// Marcador del usuario - estilo Apple con pulso suave
+// Colores del nuevo sistema de diseño
+const COLORS = {
+  primary: '#FF6F3C',
+  primaryHover: '#E5633A',
+  gray900: '#1A1A1A',
+  gray400: '#A1A1A2',
+  white: '#FFFFFF'
+}
+
+// Marcador del usuario - estilo minimalista con pulso
 const createUserIcon = () => {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
     <defs>
       <filter id="userShadow" x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.15"/>
+        <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.12"/>
       </filter>
     </defs>
-    <circle cx="24" cy="24" r="20" fill="#007AFF" fill-opacity="0.12">
-      <animate attributeName="r" values="16;20;16" dur="2.5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
-      <animate attributeName="fill-opacity" values="0.2;0.08;0.2" dur="2.5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+    <circle cx="24" cy="24" r="18" fill="${COLORS.primary}" fill-opacity="0.12">
+      <animate attributeName="r" values="14;18;14" dur="2s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+      <animate attributeName="fill-opacity" values="0.15;0.06;0.15" dur="2s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
     </circle>
-    <circle cx="24" cy="24" r="10" fill="#007AFF" filter="url(#userShadow)"/>
-    <circle cx="24" cy="24" r="4" fill="white"/>
+    <circle cx="24" cy="24" r="9" fill="${COLORS.primary}" filter="url(#userShadow)"/>
+    <circle cx="24" cy="24" r="3.5" fill="white"/>
   </svg>`
 
   return new L.Icon({
@@ -35,26 +44,28 @@ const FOOD_EMOJIS = {
   'Tortas': '🥪',
   'Quesadillas': '🧀',
   'Tamales': '🫔',
-  'Antojitos': '🍽️',
+  'Antojitos': '🌯',
   'Bebidas': '🥤',
-  'Postres': '🍰',
-  'Otro': '📍',
+  'Postres': '🍮',
+  'Otro': '🍽️',
   'default': '🌮'
 }
 
-// Crear icono con emoji
+// Crear icono con emoji - estilo Uber
 const createFoodIcon = (tipoComida, isSelected = false) => {
   const emoji = FOOD_EMOJIS[tipoComida] || FOOD_EMOJIS['default']
-  const size = isSelected ? 48 : 40
-  const fontSize = isSelected ? 28 : 24
+  const size = isSelected ? 52 : 44
+  const fontSize = isSelected ? 26 : 22
+  const borderColor = isSelected ? COLORS.primary : '#E8E8E9'
+  const shadowOpacity = isSelected ? '0.2' : '0.1'
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
     <defs>
-      <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/>
+      <filter id="markerShadow${isSelected ? 'Active' : ''}" x="-50%" y="-20%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="${shadowOpacity}"/>
       </filter>
     </defs>
-    <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 4}" fill="white" filter="url(#shadow)" stroke="${isSelected ? '#D97757' : '#e5e5e5'}" stroke-width="${isSelected ? 3 : 2}"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 3}" fill="white" filter="url(#markerShadow${isSelected ? 'Active' : ''})" stroke="${borderColor}" stroke-width="${isSelected ? 2.5 : 1.5}"/>
     <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="${fontSize}">${emoji}</text>
   </svg>`
 
@@ -114,8 +125,8 @@ function MapController({ center, userLocation, selectedPuesto, onMapClick }) {
   return null
 }
 
-// Componente de estrellas
-function StarRating({ rating }) {
+// Componente de estrellas - estilo minimalista
+function StarRating({ rating, size = 14 }) {
   const stars = []
   const fullStars = Math.floor(rating || 0)
   const hasHalf = (rating || 0) - fullStars >= 0.5
@@ -123,25 +134,25 @@ function StarRating({ rating }) {
   for (let i = 0; i < 5; i++) {
     if (i < fullStars) {
       stars.push(
-        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="#D97757" stroke="#D97757" strokeWidth="1">
+        <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill={COLORS.primary} stroke={COLORS.primary} strokeWidth="1">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       )
     } else if (i === fullStars && hasHalf) {
       stars.push(
-        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97757" strokeWidth="1">
+        <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={COLORS.primary} strokeWidth="1">
           <defs>
-            <linearGradient id="half">
-              <stop offset="50%" stopColor="#D97757" />
+            <linearGradient id={`half-${i}`}>
+              <stop offset="50%" stopColor={COLORS.primary} />
               <stop offset="50%" stopColor="transparent" />
             </linearGradient>
           </defs>
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="url(#half)" />
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill={`url(#half-${i})`} />
         </svg>
       )
     } else {
       stars.push(
-        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1">
+        <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#D4D4D5" strokeWidth="1">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       )
@@ -150,7 +161,7 @@ function StarRating({ rating }) {
   return <div className="flex gap-0.5">{stars}</div>
 }
 
-// Mini card flotante - diseño vertical compacto
+// Bottom Sheet flotante - estilo Uber/Airbnb
 function FloatingCard({ puesto, onClose, onViewMore }) {
   const [isVisible, setIsVisible] = useState(false)
 
@@ -176,84 +187,107 @@ function FloatingCard({ puesto, onClose, onViewMore }) {
       <div
         className="pointer-events-auto mx-auto transition-all duration-300 ease-out"
         style={{
-          width: '160px',
+          maxWidth: '280px',
           opacity: isVisible ? 1 : 0,
-          transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.96)',
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          borderRadius: '16px',
-          boxShadow: '0 8px 40px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.8)',
+          transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+          background: 'var(--white)',
+          borderRadius: '20px',
+          boxShadow: 'var(--shadow-xl)',
+          border: '1px solid var(--border-light)',
           overflow: 'hidden'
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Foto arriba */}
-        <div className="relative w-full h-24 overflow-hidden">
+        {/* Foto con overlay degradado */}
+        <div className="relative w-full h-28 overflow-hidden">
           {puesto.foto_url ? (
-            <img
-              src={puesto.foto_url}
-              alt={puesto.nombre}
-              className="w-full h-full object-cover"
-            />
+            <>
+              <img
+                src={puesto.foto_url}
+                alt={puesto.nombre}
+                className="w-full h-full object-cover"
+              />
+              <div
+                className="absolute inset-0"
+                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%)' }}
+              />
+            </>
           ) : (
             <div
-              className="w-full h-full flex items-center justify-center text-3xl"
-              style={{ background: 'linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%)' }}
+              className="w-full h-full flex items-center justify-center text-4xl"
+              style={{ background: 'var(--gray-100)' }}
             >
               {FOOD_EMOJIS[puesto.tipo_comida] || '🌮'}
             </div>
           )}
 
+          {/* Badge tipo de comida */}
+          <div
+            className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-semibold"
+            style={{
+              background: 'rgba(255, 255, 255, 0.95)',
+              color: 'var(--gray-900)',
+              backdropFilter: 'blur(8px)'
+            }}
+          >
+            {FOOD_EMOJIS[puesto.tipo_comida] || '🍽️'} {puesto.tipo_comida || 'Comida'}
+          </div>
+
           {/* Botón cerrar */}
           <button
             onClick={onClose}
-            className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+            className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90"
             style={{
-              background: 'rgba(0, 0, 0, 0.4)',
+              background: 'rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(8px)'
             }}
           >
-            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
-              <path d="M2 2l8 8M10 2l-8 8"/>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12"/>
             </svg>
           </button>
         </div>
 
-        {/* Info abajo */}
-        <div className="p-3">
+        {/* Info */}
+        <div className="p-4">
           {/* Nombre */}
           <h3
-            className="font-semibold text-sm leading-tight truncate mb-1"
-            style={{ color: '#1d1d1f' }}
+            className="font-semibold text-[15px] leading-tight truncate mb-2"
+            style={{ color: 'var(--gray-900)' }}
           >
             {puesto.nombre}
           </h3>
 
-          {/* Estrellas */}
-          <div className="flex items-center gap-1 mb-2">
-            <StarRating rating={promedio} />
-            {promedio > 0 && (
-              <span className="text-xs font-medium" style={{ color: '#666' }}>
-                {promedio.toFixed(1)}
+          {/* Rating y distancia */}
+          <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-1.5">
+              <StarRating rating={promedio} size={12} />
+              {promedio > 0 && (
+                <span className="text-[13px] font-medium" style={{ color: 'var(--gray-600)' }}>
+                  {promedio.toFixed(1)}
+                </span>
+              )}
+            </div>
+            {promedio === 0 && (
+              <span className="text-[12px]" style={{ color: 'var(--gray-400)' }}>
+                Sin reseñas
               </span>
             )}
           </div>
 
-          {/* Botón + */}
+          {/* Botón Ver detalles */}
           <button
             onClick={() => onViewMore(puesto)}
-            className="w-full py-2 rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95"
+            className="w-full py-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
             style={{
-              background: '#D97757',
-              color: 'white'
+              background: 'var(--gray-900)',
+              color: 'var(--white)'
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
+            <span className="text-[14px] font-semibold">Ver detalles</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
-            <span className="text-xs font-medium">Ver más</span>
           </button>
         </div>
       </div>
@@ -261,23 +295,21 @@ function FloatingCard({ puesto, onClose, onViewMore }) {
   )
 }
 
-// Botón de ubicación estilo Apple
+// Botón de ubicación - estilo Uber
 function LocationButton({ onClick, hasLocation }) {
   return (
     <button
       onClick={onClick}
-      className="absolute z-[1000] transition-all duration-200 ease-out hover:scale-105 active:scale-95"
+      className="absolute z-[1000] transition-all duration-200 ease-out active:scale-95"
       style={{
         bottom: '24px',
         right: '16px',
-        width: '44px',
-        height: '44px',
-        borderRadius: '12px',
-        background: 'rgba(255, 255, 255, 0.85)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.08)',
-        border: '1px solid rgba(255, 255, 255, 0.8)',
+        width: '48px',
+        height: '48px',
+        borderRadius: '14px',
+        background: 'var(--white)',
+        boxShadow: 'var(--shadow-md)',
+        border: '1px solid var(--border-light)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
@@ -287,13 +319,15 @@ function LocationButton({ onClick, hasLocation }) {
         width="22"
         height="22"
         viewBox="0 0 24 24"
-        fill="none"
-        stroke={hasLocation ? '#007AFF' : '#86868b'}
+        fill={hasLocation ? COLORS.primary : 'none'}
+        stroke={hasLocation ? COLORS.primary : COLORS.gray400}
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+        <circle cx="12" cy="12" r="8" fill="none" strokeWidth="1.5" />
       </svg>
     </button>
   )
@@ -346,51 +380,38 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
   }
 
   return (
-    <div className="relative w-full h-full overflow-hidden" style={{ background: '#f5f5f7' }}>
-      {/* Aviso de ubicación - estilo Apple */}
+    <div className="relative w-full h-full overflow-hidden" style={{ background: 'var(--gray-100)' }}>
+      {/* Aviso de ubicación - estilo minimalista */}
       {permissionDenied && (
         <div
-          className="absolute top-4 left-4 right-4 z-[1000] animate-fade-in-up"
-          style={{ maxWidth: '360px', margin: '0 auto' }}
+          className="absolute top-4 left-4 right-4 z-[1000] animate-fade-in"
+          style={{ maxWidth: '320px', margin: '0 auto' }}
         >
           <div
             style={{
-              background: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(20px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              borderRadius: '14px',
-              padding: '14px 16px',
-              boxShadow: '0 4px 24px rgba(0, 0, 0, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.8)'
+              background: 'var(--white)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '12px 16px',
+              boxShadow: 'var(--shadow-md)',
+              border: '1px solid var(--border-light)'
             }}
           >
             <div className="flex items-center gap-3">
               <div
-                className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(0, 122, 255, 0.1)' }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'var(--primary-light)' }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#007AFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={COLORS.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
                 </svg>
               </div>
               <div>
-                <p
-                  className="text-sm font-semibold"
-                  style={{
-                    color: '#1d1d1f',
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif'
-                  }}
-                >
+                <p className="text-[14px] font-semibold" style={{ color: 'var(--gray-900)' }}>
                   Ubicación no disponible
                 </p>
-                <p
-                  className="text-xs mt-0.5"
-                  style={{
-                    color: '#86868b',
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif'
-                  }}
-                >
-                  Mostrando CDMX por defecto
+                <p className="text-[12px] mt-0.5" style={{ color: 'var(--gray-400)' }}>
+                  Mostrando Ciudad de México
                 </p>
               </div>
             </div>
@@ -404,7 +425,7 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
         className="w-full h-full"
         zoomControl={false}
         ref={mapRef}
-        style={{ background: '#f5f5f7' }}
+        style={{ background: 'var(--gray-100)' }}
       >
         <MapController
           center={mapCenter}

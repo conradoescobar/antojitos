@@ -1,23 +1,29 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-// Iconos
-const SearchIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="11" cy="11" r="8" />
-    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-  </svg>
-)
+// Colores del sistema de diseño
+const COLORS = {
+  primary: '#FF6F3C',
+  gray900: '#1A1A1A',
+  gray600: '#525253',
+  gray400: '#A1A1A2'
+}
 
-const CloseIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-)
+// Emojis por tipo de comida
+const FOOD_EMOJIS = {
+  'Tacos': '🌮',
+  'Tortas': '🥪',
+  'Quesadillas': '🧀',
+  'Tamales': '🫔',
+  'Antojitos': '🌯',
+  'Bebidas': '🥤',
+  'Postres': '🍮',
+  'default': '🍽️'
+}
 
+// Iconos minimalistas
 const MapPinIcon = () => (
-  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
     <circle cx="12" cy="10" r="3" />
   </svg>
@@ -29,13 +35,26 @@ const ChevronIcon = () => (
   </svg>
 )
 
-const ImageIcon = () => (
-  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-    <circle cx="8.5" cy="8.5" r="1.5" />
-    <polyline points="21 15 16 10 5 21" />
-  </svg>
-)
+// Componente de estrellas compacto
+function StarRating({ rating, size = 12 }) {
+  const fullStars = Math.floor(rating || 0)
+  return (
+    <div className="flex items-center gap-1">
+      <div className="flex gap-0.5">
+        {[...Array(5)].map((_, i) => (
+          <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill={i < fullStars ? COLORS.primary : 'none'} stroke={i < fullStars ? COLORS.primary : '#D4D4D5'} strokeWidth="1.5">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+        ))}
+      </div>
+      {rating > 0 && (
+        <span className="text-[12px] font-medium" style={{ color: COLORS.gray600 }}>
+          {rating.toFixed(1)}
+        </span>
+      )}
+    </div>
+  )
+}
 
 // Función para calcular distancia (Haversine)
 function calcularDistancia(lat1, lon1, lat2, lon2) {
@@ -50,11 +69,17 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
   return R * c
 }
 
-export default function ListaPuestos({ userLocation, onPuestoClick, puestos, setPuestos, filtroTipo, onFiltroChange, busqueda, onBusquedaChange }) {
+// Calcular promedio de reseñas
+function calcularPromedio(puesto) {
+  const campos = ['sabor', 'precio', 'higiene', 'cantidad', 'atencion']
+  const valores = campos.map(c => puesto[c]).filter(v => v != null && v > 0)
+  if (valores.length === 0) return 0
+  return valores.reduce((a, b) => a + b, 0) / valores.length
+}
+
+export default function ListaPuestos({ userLocation, onPuestoClick, puestos, setPuestos, filtroTipo, onFiltroChange, busqueda, onBusquedaChange, filtroEstrellas = 0, ordenarPor = 'distancia' }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-
-  const tiposDisponibles = ['Todos', 'Tacos', 'Tortas', 'Quesadillas', 'Tamales', 'Antojitos', 'Bebidas', 'Postres']
 
   useEffect(() => {
     async function fetchPuestos() {
@@ -94,8 +119,14 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
     )
   }
 
-  // Calcular distancias y ordenar
+  // Filtrar por estrellas
+  if (filtroEstrellas > 0) {
+    puestosFiltrados = puestosFiltrados.filter(p => calcularPromedio(p) >= filtroEstrellas)
+  }
+
+  // Calcular distancias
   const puestosConDistancia = puestosFiltrados.map(puesto => {
+    const promedio = calcularPromedio(puesto)
     if (userLocation && puesto.latitud && puesto.longitud) {
       const distancia = calcularDistancia(
         userLocation[0],
@@ -103,24 +134,31 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
         puesto.latitud,
         puesto.longitud
       )
-      return { ...puesto, distancia }
+      return { ...puesto, distancia, promedio }
     }
-    return { ...puesto, distancia: null }
-  }).sort((a, b) => {
-    if (a.distancia === null) return 1
-    if (b.distancia === null) return -1
-    return a.distancia - b.distancia
+    return { ...puesto, distancia: null, promedio }
+  })
+
+  // Ordenar según criterio
+  puestosConDistancia.sort((a, b) => {
+    if (ordenarPor === 'nota') {
+      return (b.promedio || 0) - (a.promedio || 0)
+    } else if (ordenarPor === 'reciente') {
+      return new Date(b.created_at || 0) - new Date(a.created_at || 0)
+    } else {
+      // Por defecto ordenar por distancia
+      if (a.distancia === null) return 1
+      if (b.distancia === null) return -1
+      return a.distancia - b.distancia
+    }
   })
 
   if (loading) {
     return (
-      <div
-        className="h-full flex items-center justify-center"
-        style={{ background: 'var(--bg-main)' }}
-      >
+      <div className="h-full flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
         <div className="text-center">
-          <div className="spinner mx-auto mb-5" />
-          <p style={{ color: 'var(--text-secondary)' }}>Buscando antojitos...</p>
+          <div className="spinner mx-auto mb-4" />
+          <p className="text-[14px]" style={{ color: 'var(--gray-500)' }}>Cargando lugares...</p>
         </div>
       </div>
     )
@@ -128,25 +166,22 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
 
   if (error) {
     return (
-      <div
-        className="h-full flex items-center justify-center p-6"
-        style={{ background: 'var(--bg-main)' }}
-      >
-        <div className="text-center max-w-sm">
+      <div className="h-full flex items-center justify-center p-6" style={{ background: 'var(--bg-primary)' }}>
+        <div className="text-center max-w-xs">
           <div
-            className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
-            style={{ background: 'rgba(217, 119, 87, 0.1)' }}
+            className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+            style={{ background: 'var(--error-light)' }}
           >
-            <svg className="w-8 h-8" style={{ color: 'var(--primary)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className="w-7 h-7" style={{ color: 'var(--error)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </div>
-          <p className="font-semibold mb-2" style={{ color: 'var(--primary)' }}>
+          <p className="text-[15px] font-semibold mb-1" style={{ color: 'var(--gray-900)' }}>
             Error al cargar
           </p>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-[13px]" style={{ color: 'var(--gray-500)' }}>
             {error}
           </p>
         </div>
@@ -155,67 +190,22 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
   }
 
   return (
-    <div className="h-full overflow-y-auto" style={{ background: 'var(--bg-main)' }}>
-      {/* Barra de búsqueda */}
-      <div
-        className="sticky top-0 z-20 px-4 pt-4 pb-2"
-        style={{ background: 'var(--bg-main)' }}
-      >
-        <div className="relative">
-          <input
-            type="text"
-            value={busqueda || ''}
-            onChange={(e) => onBusquedaChange && onBusquedaChange(e.target.value)}
-            placeholder="Buscar por nombre, tipo..."
-            className="input-field pl-12 pr-12"
-          />
-          <div
-            className="absolute left-4 top-1/2 -translate-y-1/2"
-            style={{ color: 'var(--text-muted)' }}
-          >
-            <SearchIcon />
-          </div>
-          {busqueda && (
-            <button
-              onClick={() => onBusquedaChange && onBusquedaChange('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors hover:bg-[var(--bg-secondary)]"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              <CloseIcon />
-            </button>
-          )}
+    <div className="h-full overflow-y-auto" style={{ background: 'var(--bg-primary)' }}>
+      {/* Header con contador */}
+      <div className="px-4 pt-4 pb-3">
+        <div className="flex items-center justify-between">
+          <p className="text-[13px]" style={{ color: 'var(--gray-500)' }}>
+            <span className="font-semibold" style={{ color: 'var(--gray-900)' }}>
+              {puestosConDistancia.length}
+            </span>
+            {' '}{puestosConDistancia.length === 1 ? 'lugar' : 'lugares'}
+            {filtroTipo !== 'Todos' && (
+              <span className="ml-1 px-2 py-0.5 rounded-full text-[11px] font-medium" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
+                {filtroTipo}
+              </span>
+            )}
+          </p>
         </div>
-      </div>
-
-      {/* Chips de filtro */}
-      <div
-        className="sticky top-[72px] z-10 px-4 pb-3"
-        style={{ background: 'var(--bg-main)' }}
-      >
-        <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
-          {tiposDisponibles.map((tipo) => (
-            <button
-              key={tipo}
-              onClick={() => onFiltroChange && onFiltroChange(tipo)}
-              className={`chip ${filtroTipo === tipo ? 'chip-active' : ''}`}
-            >
-              {tipo}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Contador */}
-      <div className="px-4 pb-3">
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          <span className="font-semibold" style={{ color: 'var(--text-secondary)' }}>
-            {puestosConDistancia.length}
-          </span>
-          {' '}{puestosConDistancia.length === 1 ? 'lugar encontrado' : 'lugares encontrados'}
-          {filtroTipo !== 'Todos' && (
-            <span style={{ color: 'var(--primary)' }}> · {filtroTipo}</span>
-          )}
-        </p>
       </div>
 
       {/* Lista de puestos */}
@@ -225,53 +215,66 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
             <div
               key={puesto.id}
               onClick={() => onPuestoClick(puesto)}
-              className="card cursor-pointer animate-fade-in-up"
-              style={{ animationDelay: `${index * 0.05}s` }}
+              className="cursor-pointer animate-fade-in-up"
+              style={{
+                animationDelay: `${index * 0.03}s`,
+                background: 'var(--white)',
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--border-light)',
+                boxShadow: 'var(--shadow-xs)',
+                overflow: 'hidden',
+                transition: 'all 150ms ease'
+              }}
             >
-              <div className="flex gap-4 p-4">
+              <div className="flex gap-3 p-3">
                 {/* Imagen */}
                 <div className="flex-shrink-0">
                   {puesto.foto_url ? (
                     <img
                       src={puesto.foto_url}
                       alt={puesto.nombre}
-                      className="w-24 h-24 object-cover rounded-xl"
+                      className="w-20 h-20 object-cover rounded-xl"
                     />
                   ) : (
                     <div
-                      className="w-24 h-24 rounded-xl flex items-center justify-center"
-                      style={{
-                        background: 'var(--bg-secondary)',
-                        color: 'var(--text-muted)'
-                      }}
+                      className="w-20 h-20 rounded-xl flex items-center justify-center text-2xl"
+                      style={{ background: 'var(--gray-100)' }}
                     >
-                      <ImageIcon />
+                      {FOOD_EMOJIS[puesto.tipo_comida] || FOOD_EMOJIS.default}
                     </div>
                   )}
                 </div>
 
                 {/* Info */}
-                <div className="flex-1 min-w-0 py-1">
+                <div className="flex-1 min-w-0 py-0.5">
                   <h3
-                    className="font-semibold text-base truncate mb-1.5"
-                    style={{ color: 'var(--text-primary)' }}
+                    className="font-semibold text-[15px] truncate mb-1"
+                    style={{ color: 'var(--gray-900)' }}
                   >
                     {puesto.nombre}
                   </h3>
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
+
+                  {/* Rating */}
+                  <div className="mb-1.5">
+                    {puesto.promedio > 0 ? (
+                      <StarRating rating={puesto.promedio} />
+                    ) : (
+                      <span className="text-[12px]" style={{ color: 'var(--gray-400)' }}>Sin reseñas</span>
+                    )}
+                  </div>
+
+                  {/* Tipo y distancia */}
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span
-                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
-                      style={{
-                        background: 'var(--primary-light)',
-                        color: 'var(--primary)'
-                      }}
+                      className="inline-flex items-center gap-1 text-[12px] font-medium"
+                      style={{ color: 'var(--gray-600)' }}
                     >
-                      {puesto.tipo_comida || 'Comida'}
+                      {FOOD_EMOJIS[puesto.tipo_comida] || '🍽️'} {puesto.tipo_comida || 'Comida'}
                     </span>
                     {puesto.distancia !== null && (
                       <span
-                        className="inline-flex items-center gap-1 text-xs"
-                        style={{ color: 'var(--text-muted)' }}
+                        className="inline-flex items-center gap-1 text-[12px]"
+                        style={{ color: 'var(--gray-400)' }}
                       >
                         <MapPinIcon />
                         {puesto.distancia < 1
@@ -280,20 +283,12 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
                       </span>
                     )}
                   </div>
-                  {puesto.descripcion && (
-                    <p
-                      className="text-sm line-clamp-2"
-                      style={{ color: 'var(--text-secondary)' }}
-                    >
-                      {puesto.descripcion}
-                    </p>
-                  )}
                 </div>
 
                 {/* Flecha */}
                 <div
                   className="flex-shrink-0 flex items-center"
-                  style={{ color: 'var(--text-muted)' }}
+                  style={{ color: 'var(--gray-300)' }}
                 >
                   <ChevronIcon />
                 </div>
@@ -302,21 +297,18 @@ export default function ListaPuestos({ userLocation, onPuestoClick, puestos, set
           ))}
         </div>
       ) : (
-        <div className="px-4 py-16 text-center">
+        <div className="px-4 py-20 text-center">
           <div
-            className="w-20 h-20 rounded-2xl mx-auto mb-5 flex items-center justify-center"
-            style={{ background: 'var(--bg-secondary)' }}
+            className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center text-3xl"
+            style={{ background: 'var(--gray-100)' }}
           >
-            <svg className="w-10 h-10" style={{ color: 'var(--text-muted)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+            🔍
           </div>
-          <p className="font-semibold text-lg mb-2" style={{ color: 'var(--text-primary)' }}>
-            No hay resultados
+          <p className="text-[16px] font-semibold mb-1" style={{ color: 'var(--gray-900)' }}>
+            Sin resultados
           </p>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Intenta con otros filtros o términos de búsqueda
+          <p className="text-[13px]" style={{ color: 'var(--gray-500)' }}>
+            Prueba con otros filtros o términos
           </p>
         </div>
       )}
