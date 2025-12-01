@@ -6,6 +6,7 @@ import Mapa from '../components/Mapa'
 import SearchBar from '../components/SearchBar'
 import FormularioAgregarPuesto from '../components/FormularioAgregarPuesto'
 import LoginScreen from '../components/LoginScreen'
+import FloatingActionButton from '../components/FloatingActionButton'
 
 // Iconos de navegación
 const ExplorarIcon = ({ active }) => (
@@ -23,13 +24,6 @@ const ListaIcon = ({ active }) => (
     <line x1="3" y1="6" x2="3.01" y2="6" />
     <line x1="3" y1="12" x2="3.01" y2="12" />
     <line x1="3" y1="18" x2="3.01" y2="18" />
-  </svg>
-)
-
-const AgregarIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="5" x2="12" y2="19" />
-    <line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 )
 
@@ -317,17 +311,7 @@ export default function Home() {
           </div>
 
           {/* Botón flotante de agregar */}
-          <button
-            onClick={() => setMostrarModalAgregar(true)}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] w-14 h-14 rounded-full flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
-            style={{
-              background: 'var(--primary)',
-              color: 'white',
-              boxShadow: '0 4px 20px rgba(217, 119, 87, 0.4)'
-            }}
-          >
-            <AgregarIcon />
-          </button>
+          <FloatingActionButton onPress={() => setMostrarModalAgregar(true)} />
         </div>
 
         {/* Vista Lista */}
