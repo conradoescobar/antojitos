@@ -7,6 +7,16 @@ import PlacePreviewSheet from './PlacePreviewSheet'
 // Coordenadas por defecto (CDMX)
 const CDMX_COORDS = [19.4326, -99.1332]
 
+// Colores del sistema
+const COLORS = {
+  outline: '#1A1915',
+  selected: '#D97757',
+  white: '#FFFFFF'
+}
+
+// Umbral de zoom para cambiar a mini pins
+const ZOOM_THRESHOLD = 14
+
 // Marcador del usuario - estilo Apple con pulso suave
 const createUserIcon = () => {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
@@ -30,111 +40,145 @@ const createUserIcon = () => {
   })
 }
 
-// Colores por categoría de comida
-const CATEGORY_COLORS = {
-  'Tacos': '#E85D04',
-  'Tortas': '#F48C06',
-  'Quesadillas': '#FAA307',
-  'Tamales': '#DC2F02',
-  'Antojitos': '#D97757',
-  'Bebidas': '#0077B6',
-  'Postres': '#9D4EDD',
-  'Otro': '#6B7280',
-  'default': '#D97757'
-}
-
-// Iconos SVG por categoría (paths minimalistas)
+// Iconos SVG por categoría (paths minimalistas - viewBox 24x24)
 const CATEGORY_ICONS = {
-  'Tacos': `<path d="M4 14c0-4 4-8 8-8s8 4 8 8" stroke-width="2" stroke-linecap="round"/><path d="M6 14h12" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="11" r="1" fill="currentColor"/><circle cx="12" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="11" r="1" fill="currentColor"/>`,
-  'Tortas': `<rect x="5" y="8" width="14" height="8" rx="4" stroke-width="2"/><line x1="5" y1="12" x2="19" y2="12" stroke-width="2"/>`,
-  'Quesadillas': `<path d="M12 6L4 14h16L12 6z" stroke-width="2" stroke-linejoin="round"/><path d="M7 12h10" stroke-width="1.5" stroke-dasharray="2 2"/>`,
-  'Tamales': `<rect x="8" y="4" width="8" height="16" rx="2" stroke-width="2"/><line x1="8" y1="8" x2="16" y2="8" stroke-width="1.5"/><line x1="8" y1="16" x2="16" y2="16" stroke-width="1.5"/>`,
-  'Antojitos': `<circle cx="12" cy="12" r="6" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="currentColor"/>`,
-  'Bebidas': `<path d="M8 4h8l-1 14H9L8 4z" stroke-width="2" stroke-linejoin="round"/><path d="M6 4h12" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="8" x2="12" y2="12" stroke-width="1.5"/>`,
-  'Postres': `<path d="M8 14c0-4 1.5-6 4-6s4 2 4 6" stroke-width="2"/><rect x="7" y="14" width="10" height="4" rx="1" stroke-width="2"/><circle cx="12" cy="8" r="1.5" fill="currentColor"/>`,
-  'Otro': `<circle cx="12" cy="10" r="3" stroke-width="2"/><path d="M12 13v5" stroke-width="2" stroke-linecap="round"/>`,
-  'default': `<circle cx="12" cy="10" r="3" stroke-width="2"/><path d="M12 13v5" stroke-width="2" stroke-linecap="round"/>`
+  'Tacos': `<path d="M4 15c0-5 4-9 8-9s8 4 8 9" stroke-width="2" stroke-linecap="round"/><path d="M5 15h14" stroke-width="2" stroke-linecap="round"/>`,
+  'Tortas': `<rect x="4" y="8" width="16" height="8" rx="4" stroke-width="2"/><line x1="4" y1="12" x2="20" y2="12" stroke-width="2"/>`,
+  'Quesadillas': `<path d="M12 5L3 15h18L12 5z" stroke-width="2" stroke-linejoin="round"/>`,
+  'Tamales': `<rect x="7" y="4" width="10" height="16" rx="2" stroke-width="2"/><line x1="7" y1="8" x2="17" y2="8" stroke-width="2"/><line x1="7" y1="16" x2="17" y2="16" stroke-width="2"/>`,
+  'Antojitos': `<circle cx="12" cy="12" r="7" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/>`,
+  'Bebidas': `<path d="M8 4h8l-1 14H9L8 4z" stroke-width="2" stroke-linejoin="round"/><path d="M6 4h12" stroke-width="2" stroke-linecap="round"/>`,
+  'Postres': `<path d="M7 14c0-4 2-6 5-6s5 2 5 6" stroke-width="2"/><rect x="6" y="14" width="12" height="5" rx="1" stroke-width="2"/>`,
+  'Otro': `<circle cx="12" cy="9" r="3" stroke-width="2"/><path d="M12 12v6" stroke-width="2" stroke-linecap="round"/>`,
+  'default': `<circle cx="12" cy="9" r="3" stroke-width="2"/><path d="M12 12v6" stroke-width="2" stroke-linecap="round"/>`
 }
 
-// Crear pin moderno estilo drop-pin
-const createMapPin = (tipoComida, isSelected = false) => {
-  const color = CATEGORY_COLORS[tipoComida] || CATEGORY_COLORS['default']
+// ============================================
+// ESTADO NORMAL: Outline con icono
+// ============================================
+const createNormalPin = (tipoComida) => {
   const iconPath = CATEGORY_ICONS[tipoComida] || CATEGORY_ICONS['default']
+  const size = 36
+  const iconViewBox = 24
 
-  // Tamaños
-  const width = isSelected ? 36 : 30
-  const height = isSelected ? 44 : 36
-  const iconSize = isSelected ? 18 : 15
-
-  // Pin con forma de gota moderna
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">
-    <defs>
-      <filter id="pinShadow${isSelected ? 'Sel' : ''}" x="-20%" y="-10%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="1" stdDeviation="${isSelected ? '2' : '1.5'}" flood-color="#000" flood-opacity="${isSelected ? '0.25' : '0.15'}"/>
-      </filter>
-    </defs>
-
-    <!-- Pin shape - drop/teardrop moderna -->
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} 44" width="${size}" height="44">
+    <!-- Pin shape outline -->
     <path
-      d="M${width/2} ${height - 4}
-         C${width/2} ${height - 4} ${width - 3} ${height * 0.55} ${width - 3} ${width/2}
-         C${width - 3} ${width/2 - (width/2 - 3)} ${width/2 + (width/2 - 3)} 3 ${width/2} 3
-         C${width/2 - (width/2 - 3)} 3 3 ${width/2 - (width/2 - 3)} 3 ${width/2}
-         C3 ${height * 0.55} ${width/2} ${height - 4} ${width/2} ${height - 4}Z"
-      fill="${color}"
-      filter="url(#pinShadow${isSelected ? 'Sel' : ''})"
-    />
-
-    <!-- Círculo interior para el icono -->
-    <circle
-      cx="${width/2}"
-      cy="${width/2}"
-      r="${iconSize/2 + 4}"
-      fill="white"
-      fill-opacity="0.95"
-    />
-
-    <!-- Icono de categoría -->
-    <g
-      transform="translate(${(width - iconSize)/2}, ${(width - iconSize)/2}) scale(${iconSize/24})"
-      fill="none"
-      stroke="${color}"
+      d="M18 42 C18 42 33 26 33 16 C33 7.7 26.3 2 18 2 C9.7 2 3 7.7 3 16 C3 26 18 42 18 42Z"
+      fill="${COLORS.white}"
+      stroke="${COLORS.outline}"
       stroke-width="2"
-    >
+    />
+    <!-- Icono de categoría -->
+    <g transform="translate(6, 4)" fill="none" stroke="${COLORS.outline}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       ${iconPath}
     </g>
   </svg>`
 
   return new L.Icon({
     iconUrl: 'data:image/svg+xml,' + encodeURIComponent(svg),
-    iconSize: [width, height],
-    iconAnchor: [width/2, height],
-    className: isSelected ? 'map-pin-selected' : 'map-pin-default'
+    iconSize: [size, 44],
+    iconAnchor: [size/2, 44],
+    className: 'map-pin-normal'
+  })
+}
+
+// ============================================
+// ESTADO SELECTED: Relleno terracota con icono blanco
+// ============================================
+const createSelectedPin = (tipoComida) => {
+  const iconPath = CATEGORY_ICONS[tipoComida] || CATEGORY_ICONS['default']
+  const size = 40
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} 48" width="${size}" height="48">
+    <defs>
+      <filter id="selectedShadow" x="-20%" y="-10%" width="140%" height="130%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.2"/>
+      </filter>
+    </defs>
+    <!-- Pin shape filled -->
+    <path
+      d="M20 46 C20 46 37 28 37 17 C37 7.6 29.4 1 20 1 C10.6 1 3 7.6 3 17 C3 28 20 46 20 46Z"
+      fill="${COLORS.selected}"
+      filter="url(#selectedShadow)"
+    />
+    <!-- Icono de categoría en blanco -->
+    <g transform="translate(7, 4) scale(1.08)" fill="none" stroke="${COLORS.white}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      ${iconPath}
+    </g>
+  </svg>`
+
+  return new L.Icon({
+    iconUrl: 'data:image/svg+xml,' + encodeURIComponent(svg),
+    iconSize: [size, 48],
+    iconAnchor: [size/2, 48],
+    className: 'map-pin-selected'
+  })
+}
+
+// ============================================
+// ESTADO MINI: Solo punto para zoom out
+// ============================================
+const createMiniPin = (isSelected = false) => {
+  const size = isSelected ? 16 : 12
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <circle
+      cx="${size/2}"
+      cy="${size/2}"
+      r="${size/2 - 1}"
+      fill="${COLORS.selected}"
+      stroke="${COLORS.white}"
+      stroke-width="2"
+    />
+  </svg>`
+
+  return new L.Icon({
+    iconUrl: 'data:image/svg+xml,' + encodeURIComponent(svg),
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2],
+    className: isSelected ? 'map-pin-mini-selected' : 'map-pin-mini'
   })
 }
 
 // Cache de iconos para mejor rendimiento
 const pinCache = {}
 
-const getMapPin = (tipoComida, isSelected = false) => {
-  const key = `pin-${tipoComida || 'default'}-${isSelected}`
+const getMapPin = (tipoComida, isSelected = false, isMini = false) => {
+  const key = `pin-${tipoComida || 'default'}-${isSelected}-${isMini}`
+
   if (!pinCache[key]) {
-    pinCache[key] = createMapPin(tipoComida, isSelected)
+    if (isMini) {
+      pinCache[key] = createMiniPin(isSelected)
+    } else if (isSelected) {
+      pinCache[key] = createSelectedPin(tipoComida)
+    } else {
+      pinCache[key] = createNormalPin(tipoComida)
+    }
   }
+
   return pinCache[key]
 }
 
 const userIcon = createUserIcon()
 
 // Componente para manejar eventos del mapa
-function MapController({ center, userLocation, selectedPuesto, onMapClick }) {
+function MapController({ center, userLocation, selectedPuesto, onMapClick, onZoomChange }) {
   const map = useMap()
 
   useMapEvents({
     click: () => {
       onMapClick()
+    },
+    zoomend: () => {
+      onZoomChange(map.getZoom())
     }
   })
+
+  // Inicializar zoom
+  useEffect(() => {
+    onZoomChange(map.getZoom())
+  }, [map, onZoomChange])
 
   useEffect(() => {
     if (center) {
@@ -350,7 +394,11 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
   const [initialCenter, setInitialCenter] = useState(CDMX_COORDS)
   const [permissionDenied, setPermissionDenied] = useState(false)
   const [selectedPuesto, setSelectedPuesto] = useState(null)
+  const [zoomLevel, setZoomLevel] = useState(15)
   const mapRef = useRef(null)
+
+  // Determinar si mostrar mini pins basado en el zoom
+  const showMiniPins = zoomLevel < ZOOM_THRESHOLD
 
   useEffect(() => {
     if ('geolocation' in navigator) {
@@ -458,6 +506,7 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
           userLocation={userLocation}
           selectedPuesto={selectedPuesto}
           onMapClick={handleMapClick}
+          onZoomChange={setZoomLevel}
         />
 
         {/* Mapa estilo Apple - Jawg Light */}
@@ -479,7 +528,7 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
               <Marker
                 key={puesto.id}
                 position={[puesto.latitud, puesto.longitud]}
-                icon={getMapPin(puesto.tipo_comida, isSelected)}
+                icon={getMapPin(puesto.tipo_comida, isSelected, showMiniPins && !isSelected)}
                 eventHandlers={{
                   click: (e) => {
                     e.originalEvent.stopPropagation()
