@@ -27,16 +27,16 @@ function StarRating({ rating, size = 14 }) {
   for (let i = 0; i < 5; i++) {
     if (i < fullStars) {
       stars.push(
-        <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill="#D97757" stroke="#D97757" strokeWidth="1">
+        <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill="var(--primary-intense)" stroke="var(--primary-intense)" strokeWidth="1">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       )
     } else if (i === fullStars && hasHalf) {
       stars.push(
-        <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#D97757" strokeWidth="1">
+        <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="var(--primary-intense)" strokeWidth="1">
           <defs>
             <linearGradient id={`half-${i}`}>
-              <stop offset="50%" stopColor="#D97757" />
+              <stop offset="50%" stopColor="var(--primary-intense)" />
               <stop offset="50%" stopColor="transparent" />
             </linearGradient>
           </defs>
@@ -45,7 +45,7 @@ function StarRating({ rating, size = 14 }) {
       )
     } else {
       stars.push(
-        <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="1">
+        <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="var(--border)" strokeWidth="1">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       )
@@ -227,10 +227,10 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
         <div
           className="h-full flex flex-col"
           style={{
-            background: '#FFFFFF',
+            background: 'var(--bg-card)',
             borderTopLeftRadius: '20px',
             borderTopRightRadius: '20px',
-            boxShadow: '0 -4px 32px rgba(0, 0, 0, 0.15)',
+            boxShadow: 'var(--shadow-lg)',
             overflow: 'hidden'
           }}
         >
@@ -247,7 +247,7 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                 width: '36px',
                 height: '5px',
                 borderRadius: '3px',
-                background: '#E5E7EB'
+                background: 'var(--border)'
               }}
             />
           </div>
@@ -276,7 +276,7 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                     ) : (
                       <div
                         className="w-full h-full flex items-center justify-center text-3xl"
-                        style={{ background: 'linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%)' }}
+                        style={{ background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--border) 100%)' }}
                       >
                         {FOOD_EMOJIS[puesto.tipo_comida] || FOOD_EMOJIS.default}
                       </div>
@@ -292,7 +292,7 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                         fontSize: '17px',
                         fontWeight: '600',
                         fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif',
-                        color: '#1F2937'
+                        color: 'var(--text-primary)'
                       }}
                     >
                       {puesto.nombre}
@@ -304,7 +304,7 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                       style={{
                         fontSize: '14px',
                         fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif',
-                        color: '#6B7280'
+                        color: 'var(--text-secondary)'
                       }}
                     >
                       {puesto.tipo_comida || 'Comida'}
@@ -319,7 +319,7 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                             fontSize: '13px',
                             fontWeight: '500',
                             fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif',
-                            color: '#4B5563'
+                            color: 'var(--text-secondary)'
                           }}
                         >
                           {promedio > 0 ? promedio.toFixed(1) : '–'}
@@ -327,7 +327,7 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                       </div>
 
                       {distancia && (
-                        <div className="flex items-center gap-1" style={{ color: '#9CA3AF' }}>
+                        <div className="flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
                           <MapPinIcon />
                           <span
                             style={{
@@ -350,8 +350,8 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                       width: '40px',
                       height: '40px',
                       borderRadius: '12px',
-                      background: '#F3F4F6',
-                      color: '#6B7280',
+                      background: 'var(--bg-secondary)',
+                      color: 'var(--text-secondary)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -416,7 +416,7 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                       backdropFilter: 'blur(10px)',
                       fontSize: '13px',
                       fontWeight: '500',
-                      color: '#4B5563'
+                      color: 'var(--text-secondary)'
                     }}
                   >
                     {puesto.tipo_comida || 'Comida'}
@@ -432,7 +432,7 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                         fontSize: '22px',
                         fontWeight: '700',
                         fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif',
-                        color: '#1F2937',
+                        color: 'var(--text-primary)',
                         lineHeight: '1.2'
                       }}
                     >
@@ -447,12 +447,12 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                       style={{
                         fontSize: '15px',
                         fontWeight: '600',
-                        color: '#1F2937'
+                        color: 'var(--text-primary)'
                       }}
                     >
                       {promedio > 0 ? promedio.toFixed(1) : '–'}
                     </span>
-                    <span style={{ fontSize: '14px', color: '#9CA3AF' }}>
+                    <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
                       • {puesto.total_resenas || 0} reseñas
                     </span>
                   </div>
@@ -464,9 +464,9 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                         className="flex items-center gap-1.5 px-3 py-1.5"
                         style={{
                           borderRadius: '20px',
-                          background: '#F3F4F6',
+                          background: 'var(--bg-secondary)',
                           fontSize: '13px',
-                          color: '#4B5563'
+                          color: 'var(--text-secondary)'
                         }}
                       >
                         <MapPinIcon />
@@ -481,7 +481,7 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                           borderRadius: '20px',
                           background: abierto ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                           fontSize: '13px',
-                          color: abierto ? '#16A34A' : '#DC2626',
+                          color: abierto ? 'var(--state-success)' : 'var(--state-error)',
                           fontWeight: '500'
                         }}
                       >
@@ -495,9 +495,9 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                         className="flex items-center gap-1.5 px-3 py-1.5"
                         style={{
                           borderRadius: '20px',
-                          background: '#F3F4F6',
+                          background: 'var(--bg-secondary)',
                           fontSize: '13px',
-                          color: '#4B5563'
+                          color: 'var(--text-secondary)'
                         }}
                       >
                         <span>{puesto.horario_apertura} - {puesto.horario_cierre}</span>
@@ -513,7 +513,7 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                         style={{
                           fontSize: '14px',
                           fontWeight: '600',
-                          color: '#9CA3AF',
+                          color: 'var(--text-muted)',
                           textTransform: 'uppercase',
                           letterSpacing: '0.5px'
                         }}
@@ -524,7 +524,7 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                         style={{
                           fontSize: '15px',
                           lineHeight: '1.6',
-                          color: '#4B5563',
+                          color: 'var(--text-secondary)',
                           fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
                         }}
                       >
@@ -540,7 +540,7 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                     style={{
                       height: '52px',
                       borderRadius: '14px',
-                      background: 'var(--primary, #D97757)',
+                      background: 'var(--primary)',
                       color: 'white',
                       fontSize: '16px',
                       fontWeight: '600',

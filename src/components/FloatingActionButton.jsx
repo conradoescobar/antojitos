@@ -1,3 +1,8 @@
+/**
+ * FloatingActionButton - Botón de acción flotante
+ * Usa tokens del sistema de theming
+ */
+
 // Icono de "más" minimalista
 const PlusIcon = ({ size = 24 }) => (
   <svg
@@ -29,7 +34,7 @@ export default function FloatingActionButton({
         absolute z-[1000]
         flex items-center justify-center
         rounded-full
-        transition-transform duration-150 ease-out
+        transition-all duration-150 ease-out
         active:scale-95
         ${className}
       `}
@@ -39,12 +44,21 @@ export default function FloatingActionButton({
         bottom: '24px',
         left: '50%',
         transform: 'translateX(-50%)',
-        background: '#1A1915',
-        color: '#FFFFFF',
-        boxShadow: '0 4px 16px rgba(26, 25, 21, 0.25), 0 2px 6px rgba(26, 25, 21, 0.15)',
+        background: 'var(--primary)',
+        color: 'var(--text-inverse)',
+        boxShadow: 'var(--shadow-fab)',
         border: 'none',
         cursor: 'pointer',
         ...style
+      }}
+      onMouseDown={(e) => {
+        e.currentTarget.style.background = 'var(--primary-dark)'
+      }}
+      onMouseUp={(e) => {
+        e.currentTarget.style.background = 'var(--primary)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'var(--primary)'
       }}
     >
       {icon || <PlusIcon size={size * 0.46} />}

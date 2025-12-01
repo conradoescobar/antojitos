@@ -99,10 +99,10 @@ function calcularPromedio(puesto) {
 function StarRatingSmall({ rating }) {
   return (
     <div className="flex items-center gap-1">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="#D97757" stroke="#D97757" strokeWidth="1">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--primary-intense)" stroke="var(--primary-intense)" strokeWidth="1">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
       </svg>
-      <span className="text-xs font-medium" style={{ color: '#666' }}>
+      <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
         {rating > 0 ? rating.toFixed(1) : '-'}
       </span>
     </div>
@@ -241,11 +241,11 @@ export default function Home() {
                 height: '48px',
                 padding: '0 14px',
                 borderRadius: '10px',
-                background: 'rgba(255, 255, 255, 0.95)',
+                background: 'var(--bg-card)',
                 backdropFilter: 'blur(20px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.9)'
+                boxShadow: 'var(--shadow-md)',
+                border: '1px solid var(--border)'
               }}
             >
               {/* Botón perfil (izquierda) */}
@@ -256,8 +256,8 @@ export default function Home() {
                   width: '36px',
                   height: '36px',
                   borderRadius: '10px',
-                  background: '#F3F4F6',
-                  color: '#6B7280'
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-secondary)'
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -272,7 +272,7 @@ export default function Home() {
                   fontSize: '15px',
                   fontWeight: '600',
                   fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif',
-                  color: '#1F2937',
+                  color: 'var(--text-primary)',
                   letterSpacing: '-0.3px'
                 }}
               >
@@ -286,8 +286,8 @@ export default function Home() {
                   width: '36px',
                   height: '36px',
                   borderRadius: '10px',
-                  background: '#F3F4F6',
-                  color: '#6B7280'
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-secondary)'
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -405,7 +405,7 @@ export default function Home() {
                           </span>
 
                           {puesto.abierto ? (
-                            <span className="text-xs font-medium" style={{ color: '#16a34a' }}>
+                            <span className="text-xs font-medium" style={{ color: 'var(--state-success)' }}>
                               Abierto
                             </span>
                           ) : (
