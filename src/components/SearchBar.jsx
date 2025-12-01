@@ -1,3 +1,7 @@
+/**
+ * SearchBar - Barra de búsqueda con filtros
+ * Usa tokens del sistema de theming
+ */
 import { useState } from 'react'
 
 // Iconos
@@ -51,24 +55,24 @@ export default function SearchBar({
 
   return (
     <div className={`${className}`}>
-      {/* Barra de búsqueda estilo Uber */}
+      {/* Barra de búsqueda */}
       <div
         className="relative flex items-center"
         style={{
           height: '50px',
           borderRadius: '18px',
-          background: 'rgba(255, 255, 255, 0.98)',
+          background: 'var(--bg-card)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          boxShadow: '0 4px 24px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08)',
-          border: '1px solid rgba(255, 255, 255, 0.9)',
+          boxShadow: 'var(--shadow-md)',
+          border: '1px solid var(--border)',
           overflow: 'hidden'
         }}
       >
         {/* Icono de búsqueda */}
         <div
           className="absolute left-4 flex items-center justify-center"
-          style={{ color: '#9CA3AF' }}
+          style={{ color: 'var(--text-muted)' }}
         >
           <SearchIcon />
         </div>
@@ -86,7 +90,7 @@ export default function SearchBar({
             fontSize: '15px',
             fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Rubik", sans-serif',
             fontWeight: '400',
-            color: '#1F2937',
+            color: 'var(--text-primary)',
           }}
         />
 
@@ -100,8 +104,8 @@ export default function SearchBar({
               width: '28px',
               height: '28px',
               borderRadius: '50%',
-              background: '#E5E7EB',
-              color: '#6B7280'
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-secondary)'
             }}
           >
             <CloseIcon />
@@ -115,7 +119,7 @@ export default function SearchBar({
             right: '48px',
             height: '24px',
             width: '1px',
-            background: '#E5E7EB'
+            background: 'var(--border)'
           }}
         />
 
@@ -129,7 +133,7 @@ export default function SearchBar({
             height: '38px',
             borderRadius: '12px',
             background: hayFiltrosActivos ? 'var(--primary)' : 'transparent',
-            color: hayFiltrosActivos ? 'white' : '#6B7280'
+            color: hayFiltrosActivos ? 'var(--text-inverse)' : 'var(--text-secondary)'
           }}
         >
           <FilterIcon active={hayFiltrosActivos} />
@@ -140,10 +144,10 @@ export default function SearchBar({
                 width: '16px',
                 height: '16px',
                 borderRadius: '50%',
-                background: '#EF4444',
+                background: 'var(--primary-intense)',
                 fontSize: '10px',
                 fontWeight: '600',
-                color: 'white'
+                color: 'var(--text-inverse)'
               }}
             >
               {(filtroTipo !== 'Todos' ? 1 : 0) + (filtroAbierto ? 1 : 0) + (filtroEstrellas > 0 ? 1 : 0)}
@@ -157,11 +161,11 @@ export default function SearchBar({
         <div
           className="mt-3 p-4 rounded-2xl animate-fade-in"
           style={{
-            background: 'rgba(255, 255, 255, 0.98)',
+            background: 'var(--bg-card)',
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            border: '1px solid rgba(255, 255, 255, 0.9)',
-            boxShadow: '0 4px 24px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08)'
+            border: '1px solid var(--border)',
+            boxShadow: 'var(--shadow-md)'
           }}
         >
           {/* Tipo de comida */}
@@ -169,7 +173,7 @@ export default function SearchBar({
             <p
               className="text-xs font-semibold mb-2 uppercase tracking-wide"
               style={{
-                color: '#9CA3AF',
+                color: 'var(--text-muted)',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
               }}
             >
@@ -182,8 +186,8 @@ export default function SearchBar({
                   onClick={() => onFiltroTipoChange(tipo)}
                   className="px-3.5 py-2 rounded-full text-sm font-medium transition-all active:scale-95"
                   style={{
-                    background: filtroTipo === tipo ? 'var(--primary)' : '#F3F4F6',
-                    color: filtroTipo === tipo ? 'white' : '#4B5563',
+                    background: filtroTipo === tipo ? 'var(--primary)' : 'var(--bg-secondary)',
+                    color: filtroTipo === tipo ? 'var(--text-inverse)' : 'var(--text-secondary)',
                     fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
                   }}
                 >
@@ -199,13 +203,13 @@ export default function SearchBar({
               onClick={() => onFiltroAbiertoChange(!filtroAbierto)}
               className="flex items-center gap-3 w-full p-3.5 rounded-xl transition-all active:scale-[0.99]"
               style={{
-                background: filtroAbierto ? 'rgba(217, 119, 87, 0.1)' : '#F3F4F6'
+                background: filtroAbierto ? 'var(--primary-light)' : 'var(--bg-secondary)'
               }}
             >
               <div
                 className="w-6 h-6 rounded-full flex items-center justify-center transition-all"
                 style={{
-                  background: filtroAbierto ? 'var(--primary)' : '#D1D5DB',
+                  background: filtroAbierto ? 'var(--primary)' : 'var(--border)',
                 }}
               >
                 {filtroAbierto && (
@@ -217,7 +221,7 @@ export default function SearchBar({
               <span
                 className="text-sm font-medium"
                 style={{
-                  color: filtroAbierto ? 'var(--primary)' : '#374151',
+                  color: filtroAbierto ? 'var(--primary)' : 'var(--text-primary)',
                   fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
                 }}
               >
@@ -232,7 +236,7 @@ export default function SearchBar({
             <p
               className="text-xs font-semibold mb-2 uppercase tracking-wide"
               style={{
-                color: '#9CA3AF',
+                color: 'var(--text-muted)',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
               }}
             >
@@ -245,8 +249,8 @@ export default function SearchBar({
                   onClick={() => onFiltroEstrellasChange(opcion.value)}
                   className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-1 active:scale-95"
                   style={{
-                    background: filtroEstrellas === opcion.value ? 'var(--primary)' : '#F3F4F6',
-                    color: filtroEstrellas === opcion.value ? 'white' : '#4B5563',
+                    background: filtroEstrellas === opcion.value ? 'var(--primary)' : 'var(--bg-secondary)',
+                    color: filtroEstrellas === opcion.value ? 'var(--text-inverse)' : 'var(--text-secondary)',
                     fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
                   }}
                 >
@@ -263,7 +267,7 @@ export default function SearchBar({
               <p
                 className="text-xs font-semibold mb-2 uppercase tracking-wide"
                 style={{
-                  color: '#9CA3AF',
+                  color: 'var(--text-muted)',
                   fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
                 }}
               >
@@ -280,8 +284,8 @@ export default function SearchBar({
                     onClick={() => onOrdenarPorChange(opcion.value)}
                     className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-1 active:scale-95"
                     style={{
-                      background: ordenarPor === opcion.value ? 'var(--primary)' : '#F3F4F6',
-                      color: ordenarPor === opcion.value ? 'white' : '#4B5563',
+                      background: ordenarPor === opcion.value ? 'var(--primary)' : 'var(--bg-secondary)',
+                      color: ordenarPor === opcion.value ? 'var(--text-inverse)' : 'var(--text-secondary)',
                       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
                     }}
                   >
@@ -304,7 +308,7 @@ export default function SearchBar({
               className="w-full mt-4 py-3 text-sm font-semibold rounded-xl transition-all active:scale-[0.99]"
               style={{
                 color: 'var(--primary)',
-                background: 'rgba(217, 119, 87, 0.08)',
+                background: 'var(--primary-light)',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
               }}
             >

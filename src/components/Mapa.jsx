@@ -7,11 +7,14 @@ import PlacePreviewSheet from './PlacePreviewSheet'
 // Coordenadas por defecto (CDMX)
 const CDMX_COORDS = [19.4326, -99.1332]
 
-// Colores del sistema
+// Colores del sistema - mapean a tokens del tema
+// Nota: Los SVG de Leaflet no pueden usar CSS variables directamente,
+// así que usamos los valores hex que corresponden a los tokens del tema
 const COLORS = {
-  outline: '#1A1915',
-  selected: '#D97757',
-  white: '#FFFFFF'
+  outline: '#3A3A3A',      // --neutral-900
+  selected: '#D03920',     // --primary-intense
+  white: '#FFFFFF',        // --neutral-white
+  comal: '#D09201'         // --brand-comal (para pins de comida)
 }
 
 // Umbral de zoom para cambiar a mini pins
@@ -214,16 +217,16 @@ function StarRating({ rating }) {
   for (let i = 0; i < 5; i++) {
     if (i < fullStars) {
       stars.push(
-        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="#D97757" stroke="#D97757" strokeWidth="1">
+        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="var(--primary-intense)" stroke="var(--primary-intense)" strokeWidth="1">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       )
     } else if (i === fullStars && hasHalf) {
       stars.push(
-        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97757" strokeWidth="1">
+        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-intense)" strokeWidth="1">
           <defs>
             <linearGradient id="half">
-              <stop offset="50%" stopColor="#D97757" />
+              <stop offset="50%" stopColor="var(--primary-intense)" />
               <stop offset="50%" stopColor="transparent" />
             </linearGradient>
           </defs>
@@ -232,7 +235,7 @@ function StarRating({ rating }) {
       )
     } else {
       stars.push(
-        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1">
+        <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--border)" strokeWidth="1">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       )
@@ -291,7 +294,7 @@ function FloatingCard({ puesto, onClose, onViewMore }) {
           ) : (
             <div
               className="w-full h-full flex items-center justify-center text-3xl"
-              style={{ background: 'linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%)' }}
+              style={{ background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--border) 100%)' }}
             >
               {FOOD_EMOJIS[puesto.tipo_comida] || '🌮'}
             </div>
@@ -316,7 +319,7 @@ function FloatingCard({ puesto, onClose, onViewMore }) {
           {/* Nombre */}
           <h3
             className="font-semibold text-sm leading-tight truncate mb-1"
-            style={{ color: '#1d1d1f' }}
+            style={{ color: 'var(--text-primary)' }}
           >
             {puesto.nombre}
           </h3>
@@ -336,7 +339,7 @@ function FloatingCard({ puesto, onClose, onViewMore }) {
             onClick={() => onViewMore(puesto)}
             className="w-full py-2 rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95"
             style={{
-              background: '#D97757',
+              background: 'var(--primary)',
               color: 'white'
             }}
           >
@@ -472,7 +475,7 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
                 <p
                   className="text-sm font-semibold"
                   style={{
-                    color: '#1d1d1f',
+                    color: 'var(--text-primary)',
                     fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif'
                   }}
                 >
@@ -481,7 +484,7 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
                 <p
                   className="text-xs mt-0.5"
                   style={{
-                    color: '#86868b',
+                    color: 'var(--text-muted)',
                     fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif'
                   }}
                 >
