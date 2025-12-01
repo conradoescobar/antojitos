@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import PlacePreviewSheet from './PlacePreviewSheet'
 
 // Coordenadas por defecto (CDMX)
 const CDMX_COORDS = [19.4326, -99.1332]
@@ -29,52 +30,98 @@ const createUserIcon = () => {
   })
 }
 
-// Emojis por tipo de comida
-const FOOD_EMOJIS = {
-  'Tacos': '🌮',
-  'Tortas': '🥪',
-  'Quesadillas': '🧀',
-  'Tamales': '🫔',
-  'Antojitos': '🍽️',
-  'Bebidas': '🥤',
-  'Postres': '🍰',
-  'Otro': '📍',
-  'default': '🌮'
+// Colores por categoría de comida
+const CATEGORY_COLORS = {
+  'Tacos': '#E85D04',
+  'Tortas': '#F48C06',
+  'Quesadillas': '#FAA307',
+  'Tamales': '#DC2F02',
+  'Antojitos': '#D97757',
+  'Bebidas': '#0077B6',
+  'Postres': '#9D4EDD',
+  'Otro': '#6B7280',
+  'default': '#D97757'
 }
 
-// Crear icono con emoji
-const createFoodIcon = (tipoComida, isSelected = false) => {
-  const emoji = FOOD_EMOJIS[tipoComida] || FOOD_EMOJIS['default']
-  const size = isSelected ? 48 : 40
-  const fontSize = isSelected ? 28 : 24
+// Iconos SVG por categoría (paths minimalistas)
+const CATEGORY_ICONS = {
+  'Tacos': `<path d="M4 14c0-4 4-8 8-8s8 4 8 8" stroke-width="2" stroke-linecap="round"/><path d="M6 14h12" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="11" r="1" fill="currentColor"/><circle cx="12" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="11" r="1" fill="currentColor"/>`,
+  'Tortas': `<rect x="5" y="8" width="14" height="8" rx="4" stroke-width="2"/><line x1="5" y1="12" x2="19" y2="12" stroke-width="2"/>`,
+  'Quesadillas': `<path d="M12 6L4 14h16L12 6z" stroke-width="2" stroke-linejoin="round"/><path d="M7 12h10" stroke-width="1.5" stroke-dasharray="2 2"/>`,
+  'Tamales': `<rect x="8" y="4" width="8" height="16" rx="2" stroke-width="2"/><line x1="8" y1="8" x2="16" y2="8" stroke-width="1.5"/><line x1="8" y1="16" x2="16" y2="16" stroke-width="1.5"/>`,
+  'Antojitos': `<circle cx="12" cy="12" r="6" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="currentColor"/>`,
+  'Bebidas': `<path d="M8 4h8l-1 14H9L8 4z" stroke-width="2" stroke-linejoin="round"/><path d="M6 4h12" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="8" x2="12" y2="12" stroke-width="1.5"/>`,
+  'Postres': `<path d="M8 14c0-4 1.5-6 4-6s4 2 4 6" stroke-width="2"/><rect x="7" y="14" width="10" height="4" rx="1" stroke-width="2"/><circle cx="12" cy="8" r="1.5" fill="currentColor"/>`,
+  'Otro': `<circle cx="12" cy="10" r="3" stroke-width="2"/><path d="M12 13v5" stroke-width="2" stroke-linecap="round"/>`,
+  'default': `<circle cx="12" cy="10" r="3" stroke-width="2"/><path d="M12 13v5" stroke-width="2" stroke-linecap="round"/>`
+}
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+// Crear pin moderno estilo drop-pin
+const createMapPin = (tipoComida, isSelected = false) => {
+  const color = CATEGORY_COLORS[tipoComida] || CATEGORY_COLORS['default']
+  const iconPath = CATEGORY_ICONS[tipoComida] || CATEGORY_ICONS['default']
+
+  // Tamaños
+  const width = isSelected ? 36 : 30
+  const height = isSelected ? 44 : 36
+  const iconSize = isSelected ? 18 : 15
+
+  // Pin con forma de gota moderna
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">
     <defs>
-      <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/>
+      <filter id="pinShadow${isSelected ? 'Sel' : ''}" x="-20%" y="-10%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="1" stdDeviation="${isSelected ? '2' : '1.5'}" flood-color="#000" flood-opacity="${isSelected ? '0.25' : '0.15'}"/>
       </filter>
     </defs>
-    <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 4}" fill="white" filter="url(#shadow)" stroke="${isSelected ? '#D97757' : '#e5e5e5'}" stroke-width="${isSelected ? 3 : 2}"/>
-    <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="${fontSize}">${emoji}</text>
+
+    <!-- Pin shape - drop/teardrop moderna -->
+    <path
+      d="M${width/2} ${height - 4}
+         C${width/2} ${height - 4} ${width - 3} ${height * 0.55} ${width - 3} ${width/2}
+         C${width - 3} ${width/2 - (width/2 - 3)} ${width/2 + (width/2 - 3)} 3 ${width/2} 3
+         C${width/2 - (width/2 - 3)} 3 3 ${width/2 - (width/2 - 3)} 3 ${width/2}
+         C3 ${height * 0.55} ${width/2} ${height - 4} ${width/2} ${height - 4}Z"
+      fill="${color}"
+      filter="url(#pinShadow${isSelected ? 'Sel' : ''})"
+    />
+
+    <!-- Círculo interior para el icono -->
+    <circle
+      cx="${width/2}"
+      cy="${width/2}"
+      r="${iconSize/2 + 4}"
+      fill="white"
+      fill-opacity="0.95"
+    />
+
+    <!-- Icono de categoría -->
+    <g
+      transform="translate(${(width - iconSize)/2}, ${(width - iconSize)/2}) scale(${iconSize/24})"
+      fill="none"
+      stroke="${color}"
+      stroke-width="2"
+    >
+      ${iconPath}
+    </g>
   </svg>`
 
   return new L.Icon({
     iconUrl: 'data:image/svg+xml,' + encodeURIComponent(svg),
-    iconSize: [size, size],
-    iconAnchor: [size/2, size/2],
-    className: isSelected ? 'marker-selected' : 'marker-default'
+    iconSize: [width, height],
+    iconAnchor: [width/2, height],
+    className: isSelected ? 'map-pin-selected' : 'map-pin-default'
   })
 }
 
 // Cache de iconos para mejor rendimiento
-const iconCache = {}
+const pinCache = {}
 
-const getFoodIcon = (tipoComida, isSelected = false) => {
-  const key = `${tipoComida || 'default'}-${isSelected}`
-  if (!iconCache[key]) {
-    iconCache[key] = createFoodIcon(tipoComida, isSelected)
+const getMapPin = (tipoComida, isSelected = false) => {
+  const key = `pin-${tipoComida || 'default'}-${isSelected}`
+  if (!pinCache[key]) {
+    pinCache[key] = createMapPin(tipoComida, isSelected)
   }
-  return iconCache[key]
+  return pinCache[key]
 }
 
 const userIcon = createUserIcon()
@@ -432,7 +479,7 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
               <Marker
                 key={puesto.id}
                 position={[puesto.latitud, puesto.longitud]}
-                icon={getFoodIcon(puesto.tipo_comida, isSelected)}
+                icon={getMapPin(puesto.tipo_comida, isSelected)}
                 eventHandlers={{
                   click: (e) => {
                     e.originalEvent.stopPropagation()
@@ -452,10 +499,11 @@ export default function Mapa({ userLocation, onUserLocationChange, puestos, mapC
         hasLocation={!!userLocation}
       />
 
-      {/* Mini card flotante */}
+      {/* Bottom Sheet de previsualización */}
       {selectedPuesto && (
-        <FloatingCard
+        <PlacePreviewSheet
           puesto={selectedPuesto}
+          userLocation={userLocation}
           onClose={() => setSelectedPuesto(null)}
           onViewMore={(puesto) => {
             setSelectedPuesto(null)

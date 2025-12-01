@@ -238,8 +238,72 @@ export default function Home() {
             onPuestoClick={handlePuestoClick}
           />
 
-          {/* Barra de búsqueda flotante sobre el mapa */}
-          <div className="absolute top-4 left-4 right-4 z-[1000]">
+          {/* Header flotante + Barra de búsqueda sobre el mapa */}
+          <div className="absolute left-4 right-4 z-[1000] safe-area-top" style={{ top: '16px' }}>
+            {/* Header minimalista */}
+            <div
+              className="flex items-center justify-between mb-3"
+              style={{
+                height: '48px',
+                padding: '0 14px',
+                borderRadius: '10px',
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(20px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.9)'
+              }}
+            >
+              {/* Botón perfil (izquierda) */}
+              <button
+                onClick={() => setTabActiva('perfil')}
+                className="flex items-center justify-center transition-all active:scale-95"
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '10px',
+                  background: '#F3F4F6',
+                  color: '#6B7280'
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </button>
+
+              {/* Logo/Título central */}
+              <span
+                style={{
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif',
+                  color: '#1F2937',
+                  letterSpacing: '-0.3px'
+                }}
+              >
+                Antojitos
+              </span>
+
+              {/* Botón ajustes (derecha) */}
+              <button
+                className="flex items-center justify-center transition-all active:scale-95"
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '10px',
+                  background: '#F3F4F6',
+                  color: '#6B7280'
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+              </button>
+            </div>
+
+            {/* SearchBar */}
             <SearchBar
               busqueda={busqueda}
               onBusquedaChange={setBusqueda}

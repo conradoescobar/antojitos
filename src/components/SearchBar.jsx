@@ -2,21 +2,21 @@ import { useState } from 'react'
 
 // Iconos
 const SearchIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8" />
     <line x1="21" y1="21" x2="16.65" y2="16.65" />
   </svg>
 )
 
 const CloseIcon = () => (
-  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <line x1="18" y1="6" x2="6" y2="18" />
     <line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 )
 
-const FilterIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const FilterIcon = ({ active }) => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <line x1="4" y1="6" x2="20" y2="6" />
     <line x1="8" y1="12" x2="16" y2="12" />
     <line x1="11" y1="18" x2="13" y2="18" />
@@ -51,70 +51,128 @@ export default function SearchBar({
 
   return (
     <div className={`${className}`}>
-      {/* Barra de búsqueda principal */}
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <input
-            type="text"
-            value={busqueda || ''}
-            onChange={(e) => onBusquedaChange(e.target.value)}
-            placeholder="Buscar antojitos..."
-            className="w-full py-3 pl-11 pr-10 rounded-xl text-sm"
-            style={{
-              background: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(0, 0, 0, 0.08)',
-              color: 'var(--text-primary)',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
-            }}
-          />
-          <div
-            className="absolute left-3.5 top-1/2 -translate-y-1/2"
-            style={{ color: 'var(--text-muted)' }}
-          >
-            <SearchIcon />
-          </div>
-          {busqueda && (
-            <button
-              onClick={() => onBusquedaChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              <CloseIcon />
-            </button>
-          )}
+      {/* Barra de búsqueda estilo Uber */}
+      <div
+        className="relative flex items-center"
+        style={{
+          height: '50px',
+          borderRadius: '18px',
+          background: 'rgba(255, 255, 255, 0.98)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          boxShadow: '0 4px 24px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08)',
+          border: '1px solid rgba(255, 255, 255, 0.9)',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Icono de búsqueda */}
+        <div
+          className="absolute left-4 flex items-center justify-center"
+          style={{ color: '#9CA3AF' }}
+        >
+          <SearchIcon />
         </div>
 
-        {/* Botón filtros */}
+        {/* Input de búsqueda */}
+        <input
+          type="text"
+          value={busqueda || ''}
+          onChange={(e) => onBusquedaChange(e.target.value)}
+          placeholder="Buscar antojitos cerca…"
+          className="w-full h-full bg-transparent border-none outline-none"
+          style={{
+            paddingLeft: '48px',
+            paddingRight: busqueda ? '88px' : '56px',
+            fontSize: '15px',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Rubik", sans-serif',
+            fontWeight: '400',
+            color: '#1F2937',
+          }}
+        />
+
+        {/* Botón de limpiar búsqueda */}
+        {busqueda && (
+          <button
+            onClick={() => onBusquedaChange('')}
+            className="absolute flex items-center justify-center transition-all active:scale-90"
+            style={{
+              right: '52px',
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              background: '#E5E7EB',
+              color: '#6B7280'
+            }}
+          >
+            <CloseIcon />
+          </button>
+        )}
+
+        {/* Separador vertical */}
+        <div
+          className="absolute"
+          style={{
+            right: '48px',
+            height: '24px',
+            width: '1px',
+            background: '#E5E7EB'
+          }}
+        />
+
+        {/* Botón de filtros integrado */}
         <button
           onClick={() => setMostrarFiltros(!mostrarFiltros)}
-          className="flex items-center justify-center w-12 h-12 rounded-xl transition-all"
+          className="absolute flex items-center justify-center transition-all active:scale-95"
           style={{
-            background: hayFiltrosActivos ? 'var(--primary)' : 'rgba(255, 255, 255, 0.9)',
-            color: hayFiltrosActivos ? 'white' : 'var(--text-secondary)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(0, 0, 0, 0.08)',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+            right: '6px',
+            width: '38px',
+            height: '38px',
+            borderRadius: '12px',
+            background: hayFiltrosActivos ? 'var(--primary)' : 'transparent',
+            color: hayFiltrosActivos ? 'white' : '#6B7280'
           }}
         >
-          <FilterIcon />
+          <FilterIcon active={hayFiltrosActivos} />
+          {hayFiltrosActivos && (
+            <div
+              className="absolute -top-0.5 -right-0.5 flex items-center justify-center"
+              style={{
+                width: '16px',
+                height: '16px',
+                borderRadius: '50%',
+                background: '#EF4444',
+                fontSize: '10px',
+                fontWeight: '600',
+                color: 'white'
+              }}
+            >
+              {(filtroTipo !== 'Todos' ? 1 : 0) + (filtroAbierto ? 1 : 0) + (filtroEstrellas > 0 ? 1 : 0)}
+            </div>
+          )}
         </button>
       </div>
 
       {/* Panel de filtros expandible */}
       {mostrarFiltros && (
         <div
-          className="mt-3 p-4 rounded-xl animate-fade-in"
+          className="mt-3 p-4 rounded-2xl animate-fade-in"
           style={{
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(0, 0, 0, 0.08)',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+            background: 'rgba(255, 255, 255, 0.98)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            border: '1px solid rgba(255, 255, 255, 0.9)',
+            boxShadow: '0 4px 24px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08)'
           }}
         >
           {/* Tipo de comida */}
           <div className="mb-4">
-            <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+            <p
+              className="text-xs font-semibold mb-2 uppercase tracking-wide"
+              style={{
+                color: '#9CA3AF',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
+              }}
+            >
               Tipo de comida
             </p>
             <div className="flex flex-wrap gap-2">
@@ -122,10 +180,11 @@ export default function SearchBar({
                 <button
                   key={tipo}
                   onClick={() => onFiltroTipoChange(tipo)}
-                  className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                  className="px-3.5 py-2 rounded-full text-sm font-medium transition-all active:scale-95"
                   style={{
-                    background: filtroTipo === tipo ? 'var(--primary)' : 'var(--bg-secondary)',
-                    color: filtroTipo === tipo ? 'white' : 'var(--text-secondary)'
+                    background: filtroTipo === tipo ? 'var(--primary)' : '#F3F4F6',
+                    color: filtroTipo === tipo ? 'white' : '#4B5563',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
                   }}
                 >
                   {tipo}
@@ -138,26 +197,29 @@ export default function SearchBar({
           <div className="mb-4">
             <button
               onClick={() => onFiltroAbiertoChange(!filtroAbierto)}
-              className="flex items-center gap-3 w-full p-3 rounded-xl transition-all"
+              className="flex items-center gap-3 w-full p-3.5 rounded-xl transition-all active:scale-[0.99]"
               style={{
-                background: filtroAbierto ? 'var(--primary-light)' : 'var(--bg-secondary)'
+                background: filtroAbierto ? 'rgba(217, 119, 87, 0.1)' : '#F3F4F6'
               }}
             >
               <div
-                className="w-5 h-5 rounded-full flex items-center justify-center"
+                className="w-6 h-6 rounded-full flex items-center justify-center transition-all"
                 style={{
-                  background: filtroAbierto ? 'var(--primary)' : 'var(--border)',
+                  background: filtroAbierto ? 'var(--primary)' : '#D1D5DB',
                 }}
               >
                 {filtroAbierto && (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 )}
               </div>
               <span
                 className="text-sm font-medium"
-                style={{ color: filtroAbierto ? 'var(--primary)' : 'var(--text-primary)' }}
+                style={{
+                  color: filtroAbierto ? 'var(--primary)' : '#374151',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
+                }}
               >
                 Abierto ahora
               </span>
@@ -167,7 +229,13 @@ export default function SearchBar({
 
           {/* Estrellas mínimas */}
           <div className="mb-4">
-            <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+            <p
+              className="text-xs font-semibold mb-2 uppercase tracking-wide"
+              style={{
+                color: '#9CA3AF',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
+              }}
+            >
               Puntuación mínima
             </p>
             <div className="flex gap-2">
@@ -175,10 +243,11 @@ export default function SearchBar({
                 <button
                   key={opcion.value}
                   onClick={() => onFiltroEstrellasChange(opcion.value)}
-                  className="flex-1 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1"
+                  className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-1 active:scale-95"
                   style={{
-                    background: filtroEstrellas === opcion.value ? 'var(--primary)' : 'var(--bg-secondary)',
-                    color: filtroEstrellas === opcion.value ? 'white' : 'var(--text-secondary)'
+                    background: filtroEstrellas === opcion.value ? 'var(--primary)' : '#F3F4F6',
+                    color: filtroEstrellas === opcion.value ? 'white' : '#4B5563',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
                   }}
                 >
                   {opcion.value > 0 && <span>⭐</span>}
@@ -191,7 +260,13 @@ export default function SearchBar({
           {/* Ordenar por (solo si mostrarOrdenar) */}
           {mostrarOrdenar && (
             <div>
-              <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+              <p
+                className="text-xs font-semibold mb-2 uppercase tracking-wide"
+                style={{
+                  color: '#9CA3AF',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
+                }}
+              >
                 Ordenar por
               </p>
               <div className="flex gap-2">
@@ -203,10 +278,11 @@ export default function SearchBar({
                   <button
                     key={opcion.value}
                     onClick={() => onOrdenarPorChange(opcion.value)}
-                    className="flex-1 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1"
+                    className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-1 active:scale-95"
                     style={{
-                      background: ordenarPor === opcion.value ? 'var(--primary)' : 'var(--bg-secondary)',
-                      color: ordenarPor === opcion.value ? 'white' : 'var(--text-secondary)'
+                      background: ordenarPor === opcion.value ? 'var(--primary)' : '#F3F4F6',
+                      color: ordenarPor === opcion.value ? 'white' : '#4B5563',
+                      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
                     }}
                   >
                     <span>{opcion.icon}</span>
@@ -225,8 +301,12 @@ export default function SearchBar({
                 onFiltroAbiertoChange(false)
                 onFiltroEstrellasChange(0)
               }}
-              className="w-full mt-4 py-2 text-sm font-medium rounded-lg transition-colors"
-              style={{ color: 'var(--primary)' }}
+              className="w-full mt-4 py-3 text-sm font-semibold rounded-xl transition-all active:scale-[0.99]"
+              style={{
+                color: 'var(--primary)',
+                background: 'rgba(217, 119, 87, 0.08)',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
+              }}
             >
               Limpiar filtros
             </button>
