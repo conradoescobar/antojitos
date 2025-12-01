@@ -83,7 +83,7 @@ const ArrowRightIcon = () => (
 )
 
 export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLocation }) {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true) // Abre expandido por defecto
   const [isVisible, setIsVisible] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState(0)
