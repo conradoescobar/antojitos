@@ -11,6 +11,8 @@ export const colors = {
     main: '#F9A825',      // Primario - FAB, botones principales, iconos activos
     dark: '#D5901A',      // Primario oscuro - estados pressed/hover
     intense: '#D03920',   // Chili Pepper - atención fuerte, alertas, pin seleccionado
+    terracota: '#D97757', // Terracota - splash, acciones destacadas
+    terracotaDark: '#C46847', // Terracota oscuro - hover states
   },
 
   brand: {
@@ -24,12 +26,15 @@ export const colors = {
   // ============================================
   neutral: {
     900: '#3A3A3A',  // Tesidian Text - texto principal
+    850: '#1A1915',  // Dark text - onboarding
     700: '#555960',  // Asphalt Grey - texto secundario
+    650: '#6B6560',  // Warm grey - texto secundario cálido
     500: '#9090B0',  // 90ble Grey - labels/metadata
     200: '#F5F5F5',  // Fondo gris claro
-    100: '#FAF9F7',  // Fondo crema claro (mantiene el existente)
+    100: '#FAF9F7',  // Fondo crema claro (beige cálido)
     white: '#FFFFFF',
     border: '#CFD8DC', // Bordes / líneas
+    borderWarm: '#E5E1DB', // Bordes cálidos
   },
 
   // ============================================
