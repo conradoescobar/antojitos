@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 
 // Constantes
-const COLLAPSED_HEIGHT = 140
-const EXPANDED_RATIO = 0.65 // 65% de la pantalla
+const COLLAPSED_HEIGHT = 120
+const EXPANDED_RATIO = 0.55 // 55% de la pantalla - más compacto
 const DRAG_THRESHOLD = 50
 
 // Emojis por tipo de comida
@@ -99,6 +99,18 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
   useEffect(() => {
     requestAnimationFrame(() => setIsVisible(true))
   }, [])
+
+  // Bloquear scroll del body cuando el sheet está expandido
+  useEffect(() => {
+    if (isExpanded) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isExpanded])
 
   // Calcular promedio de estrellas
   const calcularPromedio = () => {
@@ -364,11 +376,11 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
               </div>
             ) : (
               /* Vista Expandida */
-              <div className="h-full overflow-y-auto">
-                {/* Imagen grande */}
+              <div className="h-full overflow-y-auto overscroll-contain">
+                {/* Imagen */}
                 <div
                   className="relative w-full overflow-hidden"
-                  style={{ height: '200px' }}
+                  style={{ height: '140px' }}
                 >
                   {puesto.foto_url ? (
                     <img
@@ -424,48 +436,47 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                 </div>
 
                 {/* Contenido expandido */}
-                <div className="px-5 py-4">
-                  {/* Nombre y rating */}
-                  <div className="flex items-start justify-between mb-3">
-                    <h2
-                      style={{
-                        fontSize: '22px',
-                        fontWeight: '700',
-                        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif',
-                        color: 'var(--text-primary)',
-                        lineHeight: '1.2'
-                      }}
-                    >
-                      {puesto.nombre}
-                    </h2>
-                  </div>
+                <div className="px-4 py-3">
+                  {/* Nombre */}
+                  <h2
+                    className="mb-2"
+                    style={{
+                      fontSize: '18px',
+                      fontWeight: '700',
+                      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif',
+                      color: 'var(--text-primary)',
+                      lineHeight: '1.2'
+                    }}
+                  >
+                    {puesto.nombre}
+                  </h2>
 
-                  {/* Rating detallado */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <StarRating rating={promedio} size={18} />
+                  {/* Rating */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <StarRating rating={promedio} size={16} />
                     <span
                       style={{
-                        fontSize: '15px',
+                        fontSize: '14px',
                         fontWeight: '600',
                         color: 'var(--text-primary)'
                       }}
                     >
                       {promedio > 0 ? promedio.toFixed(1) : '–'}
                     </span>
-                    <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
-                      • {puesto.total_resenas || 0} reseñas
+                    <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                      • {puesto.total_resenas || 0} resenas
                     </span>
                   </div>
 
                   {/* Info pills */}
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-1.5 mb-3">
                     {distancia && (
                       <div
-                        className="flex items-center gap-1.5 px-3 py-1.5"
+                        className="flex items-center gap-1 px-2 py-1"
                         style={{
-                          borderRadius: '20px',
+                          borderRadius: '16px',
                           background: 'var(--bg-secondary)',
-                          fontSize: '13px',
+                          fontSize: '12px',
                           color: 'var(--text-secondary)'
                         }}
                       >
@@ -476,11 +487,11 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
 
                     {abierto !== null && (
                       <div
-                        className="flex items-center gap-1.5 px-3 py-1.5"
+                        className="flex items-center gap-1 px-2 py-1"
                         style={{
-                          borderRadius: '20px',
+                          borderRadius: '16px',
                           background: abierto ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                          fontSize: '13px',
+                          fontSize: '12px',
                           color: abierto ? 'var(--state-success)' : 'var(--state-error)',
                           fontWeight: '500'
                         }}
@@ -492,11 +503,11 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
 
                     {puesto.horario_apertura && puesto.horario_cierre && (
                       <div
-                        className="flex items-center gap-1.5 px-3 py-1.5"
+                        className="flex items-center gap-1 px-2 py-1"
                         style={{
-                          borderRadius: '20px',
+                          borderRadius: '16px',
                           background: 'var(--bg-secondary)',
-                          fontSize: '13px',
+                          fontSize: '12px',
                           color: 'var(--text-secondary)'
                         }}
                       >
@@ -507,30 +518,16 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
 
                   {/* Descripción */}
                   {puesto.descripcion && (
-                    <div className="mb-5">
-                      <h4
-                        className="mb-2"
-                        style={{
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: 'var(--text-muted)',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px'
-                        }}
-                      >
-                        Descripción
-                      </h4>
-                      <p
-                        style={{
-                          fontSize: '15px',
-                          lineHeight: '1.6',
-                          color: 'var(--text-secondary)',
-                          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
-                        }}
-                      >
-                        {puesto.descripcion}
-                      </p>
-                    </div>
+                    <p
+                      className="mb-3 line-clamp-2"
+                      style={{
+                        fontSize: '13px',
+                        lineHeight: '1.5',
+                        color: 'var(--text-secondary)'
+                      }}
+                    >
+                      {puesto.descripcion}
+                    </p>
                   )}
 
                   {/* Botón de acción */}
@@ -538,21 +535,21 @@ export default function PlacePreviewSheet({ puesto, onClose, onViewMore, userLoc
                     onClick={() => onViewMore(puesto)}
                     className="w-full flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                     style={{
-                      height: '52px',
-                      borderRadius: '14px',
+                      height: '44px',
+                      borderRadius: '12px',
                       background: 'var(--primary)',
                       color: 'white',
-                      fontSize: '16px',
+                      fontSize: '15px',
                       fontWeight: '600',
                       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif'
                     }}
                   >
-                    <span>Ver detalles completos</span>
+                    <span>Ver detalles</span>
                     <ArrowRightIcon />
                   </button>
 
                   {/* Espacio para safe area */}
-                  <div className="h-6" />
+                  <div className="h-4" />
                 </div>
               </div>
             )}
