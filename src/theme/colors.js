@@ -8,11 +8,11 @@ export const colors = {
   // PRIMARIOS / BRAND
   // ============================================
   primary: {
-    main: '#F9A825',      // Primario - FAB, botones principales, iconos activos
-    dark: '#D5901A',      // Primario oscuro - estados pressed/hover
-    intense: '#D03920',   // Chili Pepper - atención fuerte, alertas, pin seleccionado
-    terracota: '#D97757', // Terracota - splash, acciones destacadas
-    terracotaDark: '#C46847', // Terracota oscuro - hover states
+    main: '#D97757',      // Terracota - color principal de la app
+    dark: '#C46847',      // Terracota oscuro - estados pressed/hover
+    intense: '#B85A3D',   // Terracota intenso - alertas, pin seleccionado
+    terracota: '#D97757', // Alias para compatibilidad
+    terracotaDark: '#C46847', // Alias para compatibilidad
   },
 
   brand: {

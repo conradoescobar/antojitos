@@ -9,11 +9,11 @@
      SISTEMA DE COLORES - ANTOJITOS
      ============================================ */
 
-  /* Primarios / Brand */
-  --primary: #F9A825;
-  --primary-dark: #D5901A;
-  --primary-intense: #D03920;
-  --primary-light: rgba(249, 168, 37, 0.1);
+  /* Primarios / Brand - Terracota como color principal */
+  --primary: #D97757;
+  --primary-dark: #C46847;
+  --primary-intense: #B85A3D;
+  --primary-light: rgba(217, 119, 87, 0.1);
   --primary-terracota: #D97757;
   --primary-terracota-dark: #C46847;
 
@@ -63,7 +63,7 @@
   --shadow-sm: 0 1px 2px rgba(58, 58, 58, 0.04);
   --shadow-md: 0 4px 12px rgba(58, 58, 58, 0.08);
   --shadow-lg: 0 12px 32px rgba(58, 58, 58, 0.12);
-  --shadow-fab: 0 4px 16px rgba(249, 168, 37, 0.3);
+  --shadow-fab: 0 4px 16px rgba(217, 119, 87, 0.35);
 
   /* Radios */
   --radius-sm: 8px;

@@ -1,39 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import AuthButton, { GoogleIcon, PhoneIcon } from './AuthButton'
-
-// Ilustracion placeholder de comida callejera mexicana
-const FoodIllustration = () => (
-  <div
-    className="w-full h-64 rounded-3xl flex items-center justify-center overflow-hidden"
-    style={{
-      background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
-    }}
-  >
-    <div className="relative">
-      {/* Taco grande */}
-      <svg width="120" height="100" viewBox="0 0 120 100" fill="none" className="transform -rotate-12">
-        <path
-          d="M10 60C10 60 20 15 60 15C100 15 110 60 110 60C110 68 95 85 60 85C25 85 10 68 10 60Z"
-          fill="#FEF3C7"
-          stroke="#D97757"
-          strokeWidth="3"
-        />
-        <ellipse cx="60" cy="45" rx="35" ry="18" fill="#92400E" />
-        <path d="M30 42C30 42 42 35 60 35C78 35 90 42 90 42C90 42 78 50 60 50C42 50 30 42 30 42Z" fill="#22C55E" />
-        <circle cx="45" cy="40" r="6" fill="#EF4444" />
-        <circle cx="75" cy="40" r="6" fill="#EF4444" />
-        <path d="M35 55L42 45L49 55L56 45L63 55L70 45L77 55L84 45" stroke="#FCD34D" strokeWidth="4" strokeLinecap="round" fill="none" />
-      </svg>
-
-      {/* Decoraciones flotantes */}
-      <div className="absolute -top-4 -left-8 text-3xl animate-bounce" style={{ animationDelay: '0.2s' }}>🌶️</div>
-      <div className="absolute -top-2 -right-6 text-2xl animate-bounce" style={{ animationDelay: '0.4s' }}>🍋</div>
-      <div className="absolute -bottom-2 -left-4 text-2xl animate-bounce" style={{ animationDelay: '0.6s' }}>🥑</div>
-      <div className="absolute -bottom-4 -right-8 text-3xl animate-bounce" style={{ animationDelay: '0.3s' }}>🌽</div>
-    </div>
-  </div>
-)
+import TacoLogo from './TacoLogo'
 
 export default function LoginOnboarding({ onSkip }) {
   const { signInWithGoogle } = useAuth()
@@ -64,9 +32,21 @@ export default function LoginOnboarding({ onSkip }) {
       className="min-h-screen flex flex-col animate-slide-fade-in"
       style={{ background: 'var(--neutral-100)' }}
     >
-      {/* Ilustracion superior */}
-      <div className="px-6 pt-12 pb-6">
-        <FoodIllustration />
+      {/* Logo superior */}
+      <div className="flex flex-col items-center pt-16 pb-8">
+        <div className="animate-bounce-in">
+          <TacoLogo size={100} variant="header" />
+        </div>
+        <h2
+          className="mt-4 text-lg font-semibold animate-text-reveal"
+          style={{
+            color: 'var(--primary-terracota)',
+            opacity: 0,
+            animationFillMode: 'forwards'
+          }}
+        >
+          Antojitos Cerca
+        </h2>
       </div>
 
       {/* Contenido principal */}
