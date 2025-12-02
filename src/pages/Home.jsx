@@ -7,6 +7,7 @@ import SearchBar from '../components/SearchBar'
 import FormularioAgregarPuesto from '../components/FormularioAgregarPuesto'
 import LoginScreen from '../components/LoginScreen'
 import FloatingActionButton from '../components/FloatingActionButton'
+import TacoLogo from '../components/TacoLogo'
 
 // Iconos de navegación
 const ExplorarIcon = ({ active }) => (
@@ -282,17 +283,20 @@ export default function Home() {
               </button>
 
               {/* Logo/Título central */}
-              <span
-                style={{
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif',
-                  color: 'var(--text-primary)',
-                  letterSpacing: '-0.3px'
-                }}
-              >
-                Antojitos
-              </span>
+              <div className="flex items-center gap-2">
+                <TacoLogo size={28} variant="header" />
+                <span
+                  style={{
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif',
+                    color: 'var(--text-primary)',
+                    letterSpacing: '-0.3px'
+                  }}
+                >
+                  Antojitos
+                </span>
+              </div>
 
               {/* Botón ajustes (derecha) */}
               <button
