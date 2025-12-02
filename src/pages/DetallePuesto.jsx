@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker } from 'react-leaflet'
 import L from 'leaflet'
 import { supabase } from '../lib/supabase'
 import FormularioResena from '../components/FormularioResena'
+import FormularioAgregarPuesto from '../components/FormularioAgregarPuesto'
 import ModalReporte from '../components/ModalReporte'
 import 'leaflet/dist/leaflet.css'
 
@@ -57,6 +58,20 @@ const TrashIcon = () => (
   </svg>
 )
 
+const EditIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+  </svg>
+)
+
+const CloseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+)
+
 const StarIcon = ({ filled, size = 24 }) => (
   <svg
     width={size}
@@ -105,8 +120,21 @@ export default function DetallePuesto() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [mostrarModalReporte, setMostrarModalReporte] = useState(false)
+  const [mostrarModalEditar, setMostrarModalEditar] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(null) // { type: 'puesto' | 'resena', id?: string }
   const [deleting, setDeleting] = useState(false)
+
+  // Bloquear scroll del body cuando algún modal está abierto
+  useEffect(() => {
+    if (mostrarModalReporte || mostrarModalEditar || confirmDelete) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mostrarModalReporte, mostrarModalEditar, confirmDelete])
 
   const fetchResenas = async () => {
     try {
@@ -274,6 +302,13 @@ export default function DetallePuesto() {
           >
             {puesto.nombre}
           </h1>
+          <button
+            onClick={() => setMostrarModalEditar(true)}
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors hover:bg-[var(--bg-secondary)]"
+            style={{ color: 'var(--primary)' }}
+          >
+            <EditIcon />
+          </button>
           <button
             onClick={() => setConfirmDelete({ type: 'puesto' })}
             className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors hover:bg-red-50"
@@ -618,6 +653,54 @@ export default function DetallePuesto() {
                   'Eliminar'
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de edición */}
+      {mostrarModalEditar && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center animate-fade-in"
+          style={{ background: 'rgba(26, 25, 21, 0.5)' }}
+          onClick={(e) => e.target === e.currentTarget && setMostrarModalEditar(false)}
+        >
+          <div
+            className="w-full max-w-lg max-h-[90vh] overflow-hidden animate-slide-up rounded-t-2xl sm:rounded-2xl"
+            style={{ background: 'var(--bg-card)' }}
+          >
+            {/* Header */}
+            <div
+              className="sticky top-0 z-10 px-5 py-4 flex items-center justify-between"
+              style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border-light)' }}
+            >
+              <div>
+                <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  Editar puesto
+                </h2>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  Modifica la informacion del puesto
+                </p>
+              </div>
+              <button
+                onClick={() => setMostrarModalEditar(false)}
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--bg-secondary)]"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                <CloseIcon />
+              </button>
+            </div>
+
+            {/* Contenido */}
+            <div className="overflow-y-auto overscroll-contain p-5" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+              <FormularioAgregarPuesto
+                puestoEditar={puesto}
+                onPuestoAgregado={(puestoActualizado) => {
+                  setPuesto(puestoActualizado)
+                  setMostrarModalEditar(false)
+                }}
+                onCancelar={() => setMostrarModalEditar(false)}
+              />
             </div>
           </div>
         </div>

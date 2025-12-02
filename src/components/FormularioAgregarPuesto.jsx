@@ -75,34 +75,46 @@ function MapCenterer({ center }) {
 // Coordenadas por defecto (CDMX)
 const CDMX_COORDS = [19.4326, -99.1332]
 
-export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, userLocation }) {
+export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, userLocation, puestoEditar = null }) {
   const { user } = useAuth()
-  const [nombre, setNombre] = useState('')
-  const [tipoComida, setTipoComida] = useState('')
-  const [descripcion, setDescripcion] = useState('')
-  const [horarioApertura, setHorarioApertura] = useState('')
-  const [horarioCierre, setHorarioCierre] = useState('')
+  const esEdicion = !!puestoEditar
+  const [nombre, setNombre] = useState(puestoEditar?.nombre || '')
+  const [tipoComida, setTipoComida] = useState(puestoEditar?.tipo_comida || '')
+  const [descripcion, setDescripcion] = useState(puestoEditar?.descripcion || '')
+  const [horarioApertura, setHorarioApertura] = useState(puestoEditar?.horario_apertura || '')
+  const [horarioCierre, setHorarioCierre] = useState(puestoEditar?.horario_cierre || '')
   const [foto, setFoto] = useState(null)
-  const [previsualizacion, setPrevisualizacion] = useState(null)
+  const [previsualizacion, setPrevisualizacion] = useState(puestoEditar?.foto_url || null)
   const [fotoCarta, setFotoCarta] = useState(null)
-  const [previsualizacionCarta, setPrevisualizacionCarta] = useState(null)
+  const [previsualizacionCarta, setPrevisualizacionCarta] = useState(puestoEditar?.foto_carta_url || null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [ubicacionSeleccionada, setUbicacionSeleccionada] = useState(null)
+  const [ubicacionSeleccionada, setUbicacionSeleccionada] = useState(
+    puestoEditar?.latitud && puestoEditar?.longitud
+      ? [puestoEditar.latitud, puestoEditar.longitud]
+      : null
+  )
   const [mostrarMapa, setMostrarMapa] = useState(false)
-  const [mapCenter, setMapCenter] = useState(CDMX_COORDS)
+  const [mapCenter, setMapCenter] = useState(
+    puestoEditar?.latitud && puestoEditar?.longitud
+      ? [puestoEditar.latitud, puestoEditar.longitud]
+      : CDMX_COORDS
+  )
+  // Para mantener las fotos originales si no se cambian
+  const [fotoOriginal] = useState(puestoEditar?.foto_url || null)
+  const [fotoCartaOriginal] = useState(puestoEditar?.foto_carta_url || null)
 
   const tipos = ['Tacos', 'Tortas', 'Quesadillas', 'Tamales', 'Antojitos', 'Bebidas', 'Postres', 'Otro']
 
   // Inicializar ubicación con la del usuario o usar CDMX por defecto
   useEffect(() => {
-    if (userLocation) {
+    if (userLocation && !puestoEditar) {
       setMapCenter(userLocation)
       if (!ubicacionSeleccionada) {
         setUbicacionSeleccionada(userLocation)
       }
     }
-  }, [userLocation])
+  }, [userLocation, puestoEditar])
 
   const handleFotoChange = (e, tipo) => {
     const file = e.target.files[0]
@@ -181,54 +193,98 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, 
         user_id: user?.id || null
       }
 
-      const { data: nuevoPuesto, error: insertError } = await supabase
-        .from('puestos')
-        .insert([puestoData])
-        .select()
-        .single()
+      let puestoResultado
 
-      if (insertError) throw insertError
-
-      let fotoUrl = null
-      let fotoCartaUrl = null
-
-      if (foto) {
-        fotoUrl = await subirFoto(nuevoPuesto.id, foto)
-      }
-      if (fotoCarta) {
-        fotoCartaUrl = await subirFoto(nuevoPuesto.id, fotoCarta, '-carta')
-      }
-
-      if (fotoUrl || fotoCartaUrl) {
-        const updateData = {}
-        if (fotoUrl) updateData.foto_url = fotoUrl
-        if (fotoCartaUrl) updateData.foto_carta_url = fotoCartaUrl
-
-        const { error: updateError } = await supabase
+      if (esEdicion) {
+        // MODO EDICIÓN
+        const { data: puestoActualizado, error: updateError } = await supabase
           .from('puestos')
-          .update(updateData)
-          .eq('id', nuevoPuesto.id)
+          .update(puestoData)
+          .eq('id', puestoEditar.id)
+          .select()
+          .single()
 
         if (updateError) throw updateError
-      }
+        puestoResultado = puestoActualizado
 
-      // Limpiar formulario
-      setNombre('')
-      setTipoComida('')
-      setDescripcion('')
-      setHorarioApertura('')
-      setHorarioCierre('')
-      setFoto(null)
-      setPrevisualizacion(null)
-      setFotoCarta(null)
-      setPrevisualizacionCarta(null)
-      setUbicacionSeleccionada(null)
+        // Subir nuevas fotos si se cambiaron
+        let fotoUrl = fotoOriginal
+        let fotoCartaUrl = fotoCartaOriginal
 
-      if (onPuestoAgregado) {
-        onPuestoAgregado({ ...nuevoPuesto, foto_url: fotoUrl, foto_carta_url: fotoCartaUrl })
+        if (foto) {
+          fotoUrl = await subirFoto(puestoEditar.id, foto)
+        }
+        if (fotoCarta) {
+          fotoCartaUrl = await subirFoto(puestoEditar.id, fotoCarta, '-carta')
+        }
+
+        // Actualizar URLs de fotos si hay cambios
+        if (foto || fotoCarta) {
+          const updateFotos = {}
+          if (foto) updateFotos.foto_url = fotoUrl
+          if (fotoCarta) updateFotos.foto_carta_url = fotoCartaUrl
+
+          await supabase
+            .from('puestos')
+            .update(updateFotos)
+            .eq('id', puestoEditar.id)
+        }
+
+        if (onPuestoAgregado) {
+          onPuestoAgregado({ ...puestoResultado, foto_url: fotoUrl, foto_carta_url: fotoCartaUrl })
+        }
+      } else {
+        // MODO CREACIÓN
+        const { data: nuevoPuesto, error: insertError } = await supabase
+          .from('puestos')
+          .insert([puestoData])
+          .select()
+          .single()
+
+        if (insertError) throw insertError
+        puestoResultado = nuevoPuesto
+
+        let fotoUrl = null
+        let fotoCartaUrl = null
+
+        if (foto) {
+          fotoUrl = await subirFoto(nuevoPuesto.id, foto)
+        }
+        if (fotoCarta) {
+          fotoCartaUrl = await subirFoto(nuevoPuesto.id, fotoCarta, '-carta')
+        }
+
+        if (fotoUrl || fotoCartaUrl) {
+          const updateData = {}
+          if (fotoUrl) updateData.foto_url = fotoUrl
+          if (fotoCartaUrl) updateData.foto_carta_url = fotoCartaUrl
+
+          const { error: updateError } = await supabase
+            .from('puestos')
+            .update(updateData)
+            .eq('id', nuevoPuesto.id)
+
+          if (updateError) throw updateError
+        }
+
+        // Limpiar formulario solo en modo creación
+        setNombre('')
+        setTipoComida('')
+        setDescripcion('')
+        setHorarioApertura('')
+        setHorarioCierre('')
+        setFoto(null)
+        setPrevisualizacion(null)
+        setFotoCarta(null)
+        setPrevisualizacionCarta(null)
+        setUbicacionSeleccionada(null)
+
+        if (onPuestoAgregado) {
+          onPuestoAgregado({ ...nuevoPuesto, foto_url: fotoUrl, foto_carta_url: fotoCartaUrl })
+        }
       }
     } catch (err) {
-      console.error('Error agregando puesto:', err)
+      console.error('Error guardando puesto:', err)
       if (err.message) {
         let errorMessage = err.message
         if (err.message.includes('permission denied') || err.message.includes('row-level security')) {
@@ -236,7 +292,7 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, 
         }
         setError(`Error: ${errorMessage}`)
       } else {
-        setError('Error al agregar el puesto. Intenta de nuevo.')
+        setError(esEdicion ? 'Error al actualizar el puesto. Intenta de nuevo.' : 'Error al agregar el puesto. Intenta de nuevo.')
       }
     } finally {
       setLoading(false)
@@ -311,33 +367,78 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, 
 
       {/* Horario */}
       <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-          Horario
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            Horario
+          </label>
+          {(horarioApertura || horarioCierre) && (
+            <button
+              type="button"
+              onClick={() => {
+                setHorarioApertura('')
+                setHorarioCierre('')
+              }}
+              className="text-xs font-medium px-2 py-1 rounded-lg transition-colors hover:bg-[var(--bg-secondary)]"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              Limpiar horario
+            </button>
+          )}
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label htmlFor="horarioApertura" className="block text-xs mb-1.5" style={{ color: 'var(--text-secondary)' }}>
               Apertura
             </label>
-            <input
-              type="time"
-              id="horarioApertura"
-              value={horarioApertura}
-              onChange={(e) => setHorarioApertura(e.target.value)}
-              className="input-field"
-            />
+            <div className="relative">
+              <input
+                type="time"
+                id="horarioApertura"
+                value={horarioApertura}
+                onChange={(e) => setHorarioApertura(e.target.value)}
+                className="input-field pr-8"
+              />
+              {horarioApertura && (
+                <button
+                  type="button"
+                  onClick={() => setHorarioApertura('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center"
+                  style={{ background: 'var(--bg-secondary)', color: 'var(--text-muted)' }}
+                >
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
           <div>
             <label htmlFor="horarioCierre" className="block text-xs mb-1.5" style={{ color: 'var(--text-secondary)' }}>
               Cierre
             </label>
-            <input
-              type="time"
-              id="horarioCierre"
-              value={horarioCierre}
-              onChange={(e) => setHorarioCierre(e.target.value)}
-              className="input-field"
-            />
+            <div className="relative">
+              <input
+                type="time"
+                id="horarioCierre"
+                value={horarioCierre}
+                onChange={(e) => setHorarioCierre(e.target.value)}
+                className="input-field pr-8"
+              />
+              {horarioCierre && (
+                <button
+                  type="button"
+                  onClick={() => setHorarioCierre('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center"
+                  style={{ background: 'var(--bg-secondary)', color: 'var(--text-muted)' }}
+                >
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -519,10 +620,10 @@ export default function FormularioAgregarPuesto({ onPuestoAgregado, onCancelar, 
           {loading ? (
             <>
               <div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }} />
-              Guardando...
+              {esEdicion ? 'Guardando...' : 'Agregando...'}
             </>
           ) : (
-            'Agregar Puesto'
+            esEdicion ? 'Guardar cambios' : 'Agregar Puesto'
           )}
         </button>
         {onCancelar && (

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useCallback } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import Mapa from '../components/Mapa'
@@ -111,6 +111,7 @@ function StarRatingSmall({ rating }) {
 
 export default function Home() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, signOut } = useAuth()
 
   // Estados de datos
@@ -130,26 +131,40 @@ export default function Home() {
   const [filtroEstrellas, setFiltroEstrellas] = useState(0)
   const [ordenarPor, setOrdenarPor] = useState('distancia')
 
-  // Cargar puestos
-  useEffect(() => {
-    async function fetchPuestos() {
-      try {
-        setLoading(true)
-        const { data, error } = await supabase
-          .from('puestos')
-          .select('*')
-          .eq('activo', true)
+  // Función para cargar puestos
+  const fetchPuestos = useCallback(async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('puestos')
+        .select('*')
+        .eq('activo', true)
 
-        if (error) throw error
-        setPuestos(data || [])
-      } catch (err) {
-        console.error('Error cargando puestos:', err)
-      } finally {
-        setLoading(false)
-      }
+      if (error) throw error
+      setPuestos(data || [])
+    } catch (err) {
+      console.error('Error cargando puestos:', err)
+    } finally {
+      setLoading(false)
     }
-    fetchPuestos()
   }, [])
+
+  // Cargar/refrescar puestos cada vez que navegamos a Home
+  useEffect(() => {
+    fetchPuestos()
+  }, [location.key, fetchPuestos])
+
+  // Bloquear scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (mostrarModalAgregar) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mostrarModalAgregar])
 
   const handleSignOut = async () => {
     try {
@@ -628,7 +643,7 @@ export default function Home() {
             </div>
 
             {/* Contenido */}
-            <div className="overflow-y-auto p-5" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+            <div className="overflow-y-auto overscroll-contain p-5" style={{ maxHeight: 'calc(90vh - 80px)' }}>
               <FormularioAgregarPuesto
                 onPuestoAgregado={handlePuestoAgregado}
                 onCancelar={() => setMostrarModalAgregar(false)}

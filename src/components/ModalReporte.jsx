@@ -105,7 +105,7 @@ export default function ModalReporte({ puestoId, nombrePuesto, onCerrar }) {
       }}
     >
       <div
-        className="max-w-md w-full max-h-[90vh] overflow-y-auto animate-scale-in rounded-2xl"
+        className="max-w-md w-full max-h-[90vh] overflow-y-auto overscroll-contain animate-scale-in rounded-2xl"
         style={{ background: 'var(--bg-card)' }}
       >
         {/* Header */}
