@@ -1,13 +1,19 @@
 {
-  "name": "Antojitos",
+  "name": "Antojitos Cerca",
   "short_name": "Antojitos",
-  "description": "Descubre puestos de comida cerca de ti",
+  "description": "Descubre los mejores antojitos cerca de ti",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FAF9F7",
-  "theme_color": "#FAF9F7",
+  "background_color": "#D97757",
+  "theme_color": "#D97757",
   "orientation": "portrait",
   "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",

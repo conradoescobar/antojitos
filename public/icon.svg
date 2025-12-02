@@ -1,0 +1,39 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo terracota -->
+  <rect width="512" height="512" rx="96" fill="#D97757"/>
+
+  <!-- Logo del taco centrado -->
+  <g transform="translate(96, 116)">
+    <!-- Circulo de fondo sutil -->
+    <circle cx="160" cy="140" r="130" fill="rgba(255,255,255,0.15)"/>
+
+    <!-- Taco -->
+    <g transform="translate(60, 60)">
+      <!-- Tortilla base -->
+      <path
+        d="M10 120C10 120 25 25 100 25C175 25 190 120 190 120C190 135 160 165 100 165C40 165 10 135 10 120Z"
+        fill="#FEF3C7"
+        stroke="white"
+        stroke-width="6"
+      />
+      <!-- Relleno - carne -->
+      <ellipse cx="100" cy="85" rx="65" ry="35" fill="#92400E"/>
+      <!-- Lechuga -->
+      <path
+        d="M40 80C40 80 60 65 100 65C140 65 160 80 160 80C160 80 140 95 100 95C60 95 40 80 40 80Z"
+        fill="#22C55E"
+      />
+      <!-- Tomate -->
+      <circle cx="70" cy="72" r="14" fill="#EF4444"/>
+      <circle cx="130" cy="72" r="14" fill="#EF4444"/>
+      <!-- Queso -->
+      <path
+        d="M55 105L70 80L85 105L100 80L115 105L130 80L145 105"
+        stroke="#FCD34D"
+        stroke-width="10"
+        stroke-linecap="round"
+        fill="none"
+      />
+    </g>
+  </g>
+</svg>
